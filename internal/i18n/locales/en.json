@@ -695,5 +695,6 @@
   "settings.prefs.timezone_hint": "IANA name (e.g. Europe/Paris, America/Montreal). Empty: %s, the server setting.",
   "folders.err.not_empty": "This folder holds messages: move them or empty the folder before deleting it.",
   "folders.err.has_children": "This folder has subfolders: delete them first.",
-  "folders.err.system_delete": "This folder has a system role (trash, sent, drafts, junk or archive): it cannot be deleted."
+  "folders.err.system_delete": "This folder has a system role (trash, sent, drafts, junk or archive): it cannot be deleted.",
+  "mail.move_copy_hint": "Ctrl + click: copy"
 }

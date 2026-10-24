@@ -15,6 +15,30 @@
     if (sel.form) sel.form.querySelectorAll(".js-hide").forEach(function (b) { b.hidden = true; });
   });
 
+  // Menu « déplacer vers » : Ctrl (ou Cmd) pendant le clic copie au lieu de déplacer, comme RainLoop.
+  (function () {
+    var menus = document.querySelectorAll("details.movemenu");
+    if (!menus.length) return;
+    function setCopy(on) {
+      menus.forEach(function (m) {
+        m.classList.toggle("copying", on);
+        var lbl = m.querySelector("[data-move-label]");
+        if (lbl) {
+          if (!lbl.dataset.moveText) lbl.dataset.moveText = lbl.textContent;
+          lbl.textContent = on ? m.getAttribute("data-copy-label") : lbl.dataset.moveText;
+        }
+      });
+    }
+    document.addEventListener("keydown", function (e) { if (e.key === "Control" || e.key === "Meta") setCopy(true); });
+    document.addEventListener("keyup", function (e) { if (e.key === "Control" || e.key === "Meta") setCopy(false); });
+    window.addEventListener("blur", function () { setCopy(false); });
+    document.addEventListener("click", function (e) {
+      var b = e.target && e.target.closest ? e.target.closest("details.movemenu button[name]") : null;
+      if (!b) return;
+      b.name = e.ctrlKey || e.metaKey ? "copy_to" : "move_to";
+    }, true);
+  })();
+
   // Boutons à confirmer (suppression définitive dans la corbeille ou les indésirables).
   document.addEventListener("click", function (e) {
     var b = e.target && e.target.closest ? e.target.closest("button[data-confirm]") : null;

@@ -103,14 +103,10 @@
 <div class="mb-mid">
 <a class="tbtn" data-refresh href="{{.List.Back}}" title="{{.T "mail.refresh"}}" aria-label="{{.T "mail.refresh"}}">{{template "icon" "refresh"}}</a>
 <span class="tgroup">
-<details class="dropdown" data-dropdown><summary class="tbtn" title="{{.T "mail.move_to"}}" aria-label="{{.T "mail.move_to"}}">{{template "icon" "folder"}}{{template "icon" "caret"}}</summary>
+<details class="dropdown movemenu" data-dropdown data-copy-label="{{.T "mail.copy_to"}}"><summary class="tbtn" title="{{.T "mail.move_to"}}" aria-label="{{.T "mail.move_to"}}">{{template "icon" "folder"}}{{template "icon" "copy"}}{{template "icon" "caret"}}</summary>
 <div class="menu scroll">
+<span class="menu-title"><span data-move-label>{{.T "mail.move_to"}}</span><small>{{.T "mail.move_copy_hint"}}</small></span>
 {{range .MoveRows}}{{if .SepBefore}}<hr>{{end}}<button type="submit" form="bulk" name="move_to" value="{{.Name}}" class="depth-{{.DepthClass}}"{{if .Active}} disabled{{end}}>{{$.FolderName .}}</button>{{else}}<span class="muted pad">{{$.T "mailbox.no_folders"}}</span>{{end}}
-</div></details>
-<details class="dropdown" data-dropdown><summary class="tbtn" title="{{.T "mail.copy_to"}}" aria-label="{{.T "mail.copy_to"}}">{{template "icon" "copy"}}{{template "icon" "caret"}}</summary>
-<div class="menu scroll">
-<span class="menu-title">{{.T "mail.copy_to"}}</span>
-{{range .MoveRows}}{{if .SepBefore}}<hr>{{end}}<button type="submit" form="bulk" name="copy_to" value="{{.Name}}" class="depth-{{.DepthClass}}">{{$.FolderName .}}</button>{{end}}
 </div></details>
 {{if not .List.HideArchive}}<button class="tbtn" type="submit" form="bulk" name="action" value="archive" title="{{.T "mail.act.archive"}}" aria-label="{{.T "mail.act.archive"}}" data-needs-selection>{{template "icon" "archive"}}</button>{{end}}
 {{if .List.NotSpam}}<button class="tbtn" type="submit" form="bulk" name="action" value="notspam" title="{{.T "mail.act.notspam"}}" aria-label="{{.T "mail.act.notspam"}}" data-needs-selection>{{template "icon" "notspam"}}</button>{{end}}

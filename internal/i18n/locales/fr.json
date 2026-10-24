@@ -695,5 +695,6 @@
   "settings.prefs.timezone_hint": "Nom IANA (ex. Europe/Paris, America/Montreal). Vide : %s, le réglage du serveur.",
   "folders.err.not_empty": "Ce dossier contient des messages : déplacez-les ou videz le dossier avant de le supprimer.",
   "folders.err.has_children": "Ce dossier contient des sous-dossiers : supprimez-les d'abord.",
-  "folders.err.system_delete": "Ce dossier joue un rôle système (corbeille, envoyés, brouillons, indésirables ou archive) : il n'est pas supprimable."
+  "folders.err.system_delete": "Ce dossier joue un rôle système (corbeille, envoyés, brouillons, indésirables ou archive) : il n'est pas supprimable.",
+  "mail.move_copy_hint": "Ctrl + clic : copier"
 }

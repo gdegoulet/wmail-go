@@ -1410,7 +1410,7 @@ func TestMarkAllReadAndCopy(t *testing.T) {
 	if subs, _ := rows(list); len(subs) == 0 {
 		t.Fatal("aucun message non lu au départ")
 	}
-	if !strings.Contains(list, `name="action" value="readall"`) || !strings.Contains(list, `name="copy_to"`) {
+	if !strings.Contains(list, `name="action" value="readall"`) || !strings.Contains(list, `data-copy-label=`) {
 		t.Error("boutons « tout marquer lu » et « copier vers » absents")
 	}
 	resp, _ := e.do(c, "POST", "/mail/action", url.Values{"csrf": {tok}, "action": {"readall"}, "folder": {"INBOX"}, "back": {"/"}}, nil)

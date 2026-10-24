@@ -514,3 +514,7 @@ form.search { position: relative; }
 .menu form { margin: 0; } .menu form button { display: block; width: 100%; text-align: left; }
 .thumb .ext svg { width: 2.2rem; height: 2.2rem; color: #999; fill: none; }
 .avatar svg { color: #b5b5b5; fill: currentColor; stroke: none; }
+.movemenu summary svg.i:nth-of-type(2) { display: none; }
+.movemenu.copying summary svg.i:nth-of-type(1) { display: none; }
+.movemenu.copying summary svg.i:nth-of-type(2) { display: inline-block; }
+.menu-title small { display: block; font-weight: normal; color: #999; }
