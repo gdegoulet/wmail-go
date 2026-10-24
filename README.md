@@ -1,11 +1,32 @@
 # wmail-go
 
-Webmail en Go (IMAP/SMTP, Sieve) qui reprend l'apparence et les fonctions de RainLoop 1.17 (thème DarkShine). Licence AGPLv3.
+[![CI](https://github.com/gdegoulet/wmail-go/actions/workflows/ci.yml/badge.svg)](https://github.com/gdegoulet/wmail-go/actions/workflows/ci.yml)
+[![Licence AGPL v3](https://img.shields.io/badge/licence-AGPL--3.0-blue.svg)](LICENSE)
+[![Go](https://img.shields.io/badge/Go-1.26-00ADD8.svg)](go.mod)
 
-- **Cahier des charges et décisions** : [`CAHIER_DES_CHARGES.md`](CAHIER_DES_CHARGES.md) (sections 6 et 11 à 15 pour le détail des fonctions).
-- **État d'avancement** : [`AVANCEMENT.md`](AVANCEMENT.md).
-- **Trame de validation à remplir** : [`MATRICE_DE_TEST.md`](MATRICE_DE_TEST.md) (165 points, un par fonctionnalité).
-- **Développement et tests uniquement dans des conteneurs** (Podman ou Docker, jamais `go` sur le poste) : `make help`.
+Webmail en Go (IMAP, SMTP, ManageSieve) qui reprend l'ergonomie et les fonctions de **RainLoop 1.17**, dont son
+thème DarkShine. Écrit parce que RainLoop n'est plus maintenu et qu'aucun successeur ne proposait la même
+interface.
+
+**Ce qui le caractérise**
+
+- **Un binaire statique de ~18 Mo**, sans base de données : vos messages restent sur votre serveur IMAP.
+- **Aucun mot de passe stocké** : un fichier chiffré par utilisateur (argon2id + XChaCha20-Poly1305), ouvert par le
+  mot de passe ou la clé de récupération. Voir [`SECURITY.md`](SECURITY.md).
+- **Interface sans cadriciel JavaScript**, utilisable sans JavaScript, servie par des gabarits côté serveur.
+- **Développement et tests entièrement en conteneurs** : rien à installer sur votre poste à part Docker ou Podman.
+- Français et anglais, thèmes, trois dispositions, raccourcis clavier, filtres Sieve, carnet d'adresses CardDAV.
+
+État : **utilisable au quotidien**, en validation ; voir [`AVANCEMENT.md`](AVANCEMENT.md) et la trame de test.
+
+| Document | Contenu |
+|---|---|
+| [`SECURITY.md`](SECURITY.md) | modèle de menace, chiffrement, sessions, affichage des messages, signalement |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | construire, tester, structure du dépôt, règles de code |
+| [`CAHIER_DES_CHARGES.md`](CAHIER_DES_CHARGES.md) | décisions de conception, inventaire fonctionnel de RainLoop |
+| [`MATRICE_DE_TEST.md`](MATRICE_DE_TEST.md) | 165 points de validation, un par fonctionnalité |
+| [`CHANGELOG.md`](CHANGELOG.md) | journal des changements |
+| [`docs/audit-rainloop/`](docs/audit-rainloop/) | analyse fonction par fonction de RainLoop 1.17 (PHP, JS, gabarits, CSS) |
 
 ## Démarrer sur le poste de travail
 
@@ -112,3 +133,12 @@ Carnet d'adresses chiffré (vCard, CSV, CardDAV), authentification en deux étap
 conversations, recherche à la RainLoop, notifications, glisser-déposer, champs d'adresses en pastilles, visionneuse
 d'images et de PDF, images distantes bloquées ou mandatées, filtres Sieve, impression, fond d'écran du thème,
 réglages enregistrés à la volée, réordonnancement des comptes, identités et modèles.
+
+## Licence et filiation
+
+Code sous **AGPL-3.0** (voir [`LICENSE`](LICENSE)) : si vous le modifiez et le proposez en service réseau, vous devez
+publier vos modifications.
+
+wmail-go **n'est pas** RainLoop et n'a aucun lien avec ses auteurs. Aucun code de RainLoop n'a été copié : seules
+ses fonctions et son ergonomie ont été étudiées pour être réimplémentées en Go. Les glyphes d'icônes sont repris de
+la police libre livrée avec RainLoop. « RainLoop » appartient à ses auteurs respectifs.
