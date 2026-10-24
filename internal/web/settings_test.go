@@ -613,3 +613,49 @@ func TestFolderDeleteGuards(t *testing.T) {
 		t.Errorf("dossier vide : %d %s", code, body[:min(len(body), 200)])
 	}
 }
+
+func TestMainIdentityReplyToAndBcc(t *testing.T) {
+	e, c, tok, smtp := composeEnv(t, nil)
+	_, page := e.do(c, "GET", "/accounts", nil, nil)
+	id := regexp.MustCompile(`/accounts/([0-9a-f]{24})/edit`).FindStringSubmatch(page)[1]
+	_, edit := e.do(c, "GET", "/accounts/"+id+"/edit", nil, nil)
+	if !strings.Contains(edit, `name="reply_to"`) || !strings.Contains(edit, `name="bcc"`) {
+		t.Fatal("champs « Répondre à » et « Cci » absents du formulaire de boîte")
+	}
+	form := accountForm(tok, mailPorts{}, "save")
+	form.Set("id", id)
+	for _, k := range []string{"imap_host", "imap_port", "imap_security", "imap_login", "smtp_host", "smtp_port", "smtp_security"} {
+		form.Set(k, fieldValue(edit, k))
+	}
+	form.Set("imap_security", "none")
+	form.Set("smtp_security", "none")
+	form.Set("reply_to", "pas une adresse")
+	if resp, _ := e.do(c, "POST", "/accounts/save", form, nil); resp.StatusCode != 400 {
+		t.Errorf("adresse de réponse invalide : %d", resp.StatusCode)
+	}
+	form.Set("reply_to", "Retour <retour@x.fr>")
+	form.Set("bcc", "archive@x.fr")
+	e.expect1(e.do(c, "POST", "/accounts/save", form, nil))
+	// un message envoyé avec l'identité principale porte Reply-To et la copie cachée
+	_, page = e.do(c, "GET", "/compose", nil, nil)
+	f := sendForm(tok, composeID(t, page), url.Values{"identity": {identityID(t, page)}, "to": {"dest@example.org"}})
+	e.expect1(e.do(c, "POST", "/compose/send", f, nil))
+	msgs := smtp.Messages()
+	last := msgs[len(msgs)-1]
+	if !strings.Contains(string(last.Data), "Reply-To: \"Retour\" <retour@x.fr>") && !strings.Contains(string(last.Data), "Reply-To: Retour <retour@x.fr>") {
+		t.Errorf("en-tête Reply-To absent :\n%s", headOf(string(last.Data)))
+	}
+	if !slicesContains(last.Rcpt, "archive@x.fr") {
+		t.Errorf("copie cachée absente de l'enveloppe : %v", last.Rcpt)
+	}
+	if strings.Contains(headOf(string(last.Data)), "archive@x.fr") {
+		t.Error("la copie cachée ne doit pas figurer dans les en-têtes envoyés")
+	}
+}
+
+func headOf(raw string) string {
+	if i := strings.Index(raw, "\r\n\r\n"); i >= 0 {
+		return raw[:i]
+	}
+	return raw
+}

@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"wmail-go/internal/compose"
 	"wmail-go/internal/mailconn"
 	"wmail-go/internal/session"
 	"wmail-go/internal/store"
@@ -107,6 +108,7 @@ type AccountForm struct {
 	TrashFolder                                               string
 	ArchiveFolder, JunkFolder                                 string
 	SentFolder, DraftsFolder, Signature                       string
+	ReplyTo, Bcc                                              string
 	SieveDisabled, SieveVerify, SieveLegacy                   bool
 	SieveHost, SievePort, SieveSecurity, SieveLogin           string
 	SievePassword                                             string
@@ -127,7 +129,7 @@ func formFromAccount(a userdata.MailAccount) *AccountForm {
 		ID: a.ID, Name: a.Name, Email: a.Email, DisplayName: a.DisplayName,
 		IMAPHost: a.IMAP.Host, IMAPPort: strconv.Itoa(a.IMAP.Port), IMAPSecurity: a.IMAP.Security, IMAPLogin: a.IMAP.Login, IMAPVerify: a.IMAP.VerifyCert, IMAPLegacy: a.IMAP.LegacyTLS,
 		SMTPHost: a.SMTP.Host, SMTPPort: strconv.Itoa(a.SMTP.Port), SMTPSecurity: a.SMTP.Security, SMTPLogin: a.SMTP.Login, SMTPVerify: a.SMTP.VerifyCert, SMTPLegacy: a.SMTP.LegacyTLS,
-		BlockRemote: a.Options.BlockRemoteContent, ProxyImages: a.Options.ProxyRemoteImages, TrashFolder: a.Options.Folders.Trash, SentFolder: a.Options.Folders.Sent, DraftsFolder: a.Options.Folders.Drafts, Signature: a.Signature, SignatureBefore: a.SignatureBefore,
+		BlockRemote: a.Options.BlockRemoteContent, ProxyImages: a.Options.ProxyRemoteImages, TrashFolder: a.Options.Folders.Trash, SentFolder: a.Options.Folders.Sent, DraftsFolder: a.Options.Folders.Drafts, Signature: a.Signature, SignatureBefore: a.SignatureBefore, ReplyTo: a.ReplyTo, Bcc: a.Bcc,
 		ArchiveFolder: a.Options.Folders.Archive, JunkFolder: a.Options.Folders.Junk,
 		HasIMAPPassword: a.IMAP.Password != "", HasSMTPPassword: a.SMTP.Password != "",
 		SieveDisabled: a.Sieve.Disabled, SieveHost: a.Sieve.Host, SievePort: itoaOrEmpty(a.Sieve.Port), SieveSecurity: a.Sieve.Security, SieveLogin: a.Sieve.Login,
@@ -155,6 +157,7 @@ func formFromRequest(r *http.Request) *AccountForm {
 		SieveLogin: v("sieve_login"), SievePassword: r.PostFormValue("sieve_password"), SieveVerify: r.PostFormValue("sieve_verify") != "", SieveLegacy: r.PostFormValue("sieve_legacy") != "",
 		ArchiveFolder: v("archive_folder"), JunkFolder: v("junk_folder"), SentFolder: v("sent_folder"), DraftsFolder: v("drafts_folder"),
 		Signature: strings.ReplaceAll(r.PostFormValue("signature"), "\r\n", "\n"), SignatureBefore: r.PostFormValue("signature_before") != "",
+		ReplyTo: strings.TrimSpace(r.PostFormValue("reply_to")), Bcc: strings.TrimSpace(r.PostFormValue("bcc")),
 	}
 }
 
@@ -174,6 +177,15 @@ func buildAccount(f *AccountForm, existing *userdata.MailAccount) (userdata.Mail
 	acc.Email = f.Email
 	if acc.Name == "" {
 		acc.Name = f.Email
+	}
+	for _, v := range []string{f.ReplyTo, f.Bcc} {
+		if v == "" {
+			continue
+		}
+		if _, err := compose.ParseList(v); err != nil || len(v) > 500 {
+			errs = append(errs, "accounts.err.email")
+			break
+		}
 	}
 	if len([]rune(acc.Name)) > 100 || len([]rune(acc.DisplayName)) > 100 || len(f.TrashFolder) > 200 || len(f.ArchiveFolder) > 200 || len(f.JunkFolder) > 200 || len(f.SentFolder) > 200 || len(f.DraftsFolder) > 200 || len(f.Signature) > 5000 {
 		errs = append(errs, "accounts.err.too_long")
@@ -244,6 +256,7 @@ func buildAccount(f *AccountForm, existing *userdata.MailAccount) (userdata.Mail
 		acc.Sieve.Password = existing.Sieve.Password
 	}
 	acc.Signature, acc.SignatureBefore = f.Signature, f.SignatureBefore
+	acc.ReplyTo, acc.Bcc = f.ReplyTo, f.Bcc
 	if existing != nil {
 		acc.Options.ImageProxy = existing.Options.ImageProxy
 		acc.Identities = existing.Identities

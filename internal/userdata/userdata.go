@@ -155,6 +155,8 @@ type MailAccount struct {
 	Sieve       SieveConfig `json:"sieve"`
 	Options     MailOptions `json:"options"`
 	// Signature et réglages de l'identité principale (celle de Email et DisplayName).
+	ReplyTo         string     `json:"reply_to"` // identité principale : adresse de réponse et copie cachée systématique
+	Bcc             string     `json:"bcc"`
 	Signature       string     `json:"signature"`
 	SignatureBefore bool       `json:"signature_before"`
 	Identities      []Identity `json:"identities"`    // identités supplémentaires
@@ -167,7 +169,7 @@ const MaxCheckFolders = 5
 // AllIdentities renvoie l'identité principale puis les identités supplémentaires. L'identifiant de la principale
 // est celui de la boîte.
 func (a MailAccount) AllIdentities() []Identity {
-	out := []Identity{{ID: a.ID, Email: a.Email, Name: a.DisplayName, Signature: a.Signature, SignatureBefore: a.SignatureBefore}}
+	out := []Identity{{ID: a.ID, Email: a.Email, Name: a.DisplayName, ReplyTo: a.ReplyTo, Bcc: a.Bcc, Signature: a.Signature, SignatureBefore: a.SignatureBefore}}
 	return append(out, a.Identities...)
 }
 

@@ -108,6 +108,10 @@
 </select></label>
 {{end}}{{if not .Names}}<small>{{$.T "folders.new_account_hint"}}</small>{{end}}
 <small>{{$.T "accounts.form.trash_hint"}}</small>{{end}}
+<label>{{.T "compose.reply_to"}}
+<input name="reply_to" type="text" maxlength="500" value="{{.Form.ReplyTo}}"></label>
+<label>{{.T "identities.bcc"}}
+<input name="bcc" type="text" maxlength="500" value="{{.Form.Bcc}}"></label>
 <label>{{.T "accounts.form.signature"}}
 <textarea name="signature" rows="4" maxlength="5000">{{.Form.Signature}}</textarea></label>
 <small>{{.T "accounts.form.signature_hint"}}</small>
