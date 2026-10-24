@@ -97,7 +97,7 @@
 </li>{{end}}
 </ul>
 {{else}}
-<p class="muted pad">{{if .Query}}{{$.T "mail.no_results"}}{{else if eq .Filter "unread"}}{{$.T "mail.no_unread"}}{{else}}{{$.T "mail.empty"}}{{end}}</p>
+<p class="msglist-empty">{{if .Query}}{{$.T "mail.no_results"}}{{else if eq .Filter "unread"}}{{$.T "mail.no_unread"}}{{else}}{{$.T "mail.empty"}}{{end}}</p>
 {{end}}
 </form>
 <footer class="lp-foot">

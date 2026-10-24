@@ -530,3 +530,33 @@ form.search { position: relative; }
 .rt-bar .rt-toggle { margin-left: auto; font-size: .8rem; }
 .rt-editor { min-height: 7rem; max-height: 22rem; overflow: auto; padding: .5rem .6rem; outline: 0; color: var(--fg, #222); }
 .rt textarea { border: 0; border-radius: 0 0 .3rem .3rem; margin: 0; }
+
+/* Barres de défilement fines, comme RainLoop (nanoScroller) */
+.msglist-form, .folders, .readpane, .menu.scroll, .setcontent, .rt-editor, .cp-editor, .picker-list {
+  scrollbar-width: thin; scrollbar-color: rgba(0,0,0,.3) transparent;
+}
+.msglist-form::-webkit-scrollbar, .folders::-webkit-scrollbar, .readpane::-webkit-scrollbar, .menu.scroll::-webkit-scrollbar,
+.setcontent::-webkit-scrollbar, .rt-editor::-webkit-scrollbar, .cp-editor::-webkit-scrollbar, .picker-list::-webkit-scrollbar { width: 5px; height: 5px; }
+.msglist-form::-webkit-scrollbar-thumb, .folders::-webkit-scrollbar-thumb, .readpane::-webkit-scrollbar-thumb, .menu.scroll::-webkit-scrollbar-thumb,
+.setcontent::-webkit-scrollbar-thumb, .rt-editor::-webkit-scrollbar-thumb, .cp-editor::-webkit-scrollbar-thumb, .picker-list::-webkit-scrollbar-thumb { background: rgba(0,0,0,.3); border-radius: 3px; }
+.msglist-form::-webkit-scrollbar-thumb:hover, .folders::-webkit-scrollbar-thumb:hover, .readpane::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,.45); }
+.msglist-form::-webkit-scrollbar-track, .folders::-webkit-scrollbar-track, .readpane::-webkit-scrollbar-track { background: transparent; }
+
+/* Boutons de la barre d'outils : relief, état enfoncé et menu ouvert (valeurs de RainLoop) */
+.tbtn { box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05); transition: background-color .1s linear; }
+.tbtn:active:not(:disabled), details.dropdown[open] > summary.tbtn {
+  background-image: none; background-color: #d9d9d9; box-shadow: inset 0 2px 4px rgba(0,0,0,.15), 0 1px 2px rgba(0,0,0,.05);
+}
+.tbtn:disabled, .tbtn.disabled { box-shadow: none; }
+
+/* Champs : mise en évidence du champ actif comme RainLoop */
+input[type=text]:focus, input[type=password]:focus, input[type=number]:focus, input[type=email]:focus,
+input[type=search]:focus, input[type=url]:focus, input[type=date]:focus, select:focus, textarea:focus,
+.chips-box:focus-within, .rt-editor:focus {
+  border-color: rgba(82,168,236,.8); outline: 0;
+  box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6);
+}
+
+/* Liste vide et erreur, centrées comme RainLoop */
+.msglist-empty { padding: 3.5rem .7rem; text-align: center; font-size: 1.714rem; line-height: 2.143rem; color: #999; }
+.msglist-empty.error { color: #da4f49; }
