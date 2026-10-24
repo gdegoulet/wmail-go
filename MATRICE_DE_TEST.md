@@ -1,225 +1,699 @@
-# Matrice de test de wmail-go (à compléter)
+# wmail-go — trame de test et de validation
 
-Remplissez la colonne **Résultat** avec `OK`, `KO` ou `NA`, et notez dans **Remarques** tout écart avec RainLoop
-(capture d'écran bienvenue : chemin du fichier suffit).
+Document à remplir par l'utilisateur, point par point. Il sert aussi de journal : j'y reporte les corrections.
 
-- Version testée : `git rev-parse --short HEAD` = ................ Date : ................
-- Navigateur : ................ Taille de fenêtre : ................ Thème : `DarkShine (comme RainLoop)`
-- **Règle de sécurité** : aucun test destructif sur vos vraies boîtes. Pour les cas marqués ⚠, utilisez un compte de
-  test ou un dossier de test, ou laissez `NA`.
+## Mode d'emploi
 
-Légende des colonnes : **Cas** = identifiant, **Comment tester** = marche à suivre, **Attendu** = comportement visé
-(celui de RainLoop quand il existe).
+Chaque point a un **identifiant stable** (`C-12`, `D-09`…). Répondez sur la ligne `réponse :`.
 
----
+```
+[C-12] Ctrl+clic coche la ligne sans ouvrir le message
+  tester  : Ctrl (ou Cmd) + clic sur une ligne de la liste
+  attendu : la case se coche, le message ne s'ouvre pas
+  réponse : OK
+```
 
-## 1. Connexion, compte webmail, session
+- `OK` : conforme, rien à faire.
+- `KO : <description>` : décrivez ce que vous voyez (et, si possible, le chemin d'une capture d'écran).
+- `NA` : non testé ou sans objet.
+- Vous pouvez répondre en vrac dans le chat (« C-12 KO : la case ne se coche pas ») : je reporte dans ce fichier.
 
-| Cas | Comment tester | Attendu | Résultat | Remarques |
-|---|---|---|---|---|
-| A-01 | Ouvrir `/login` | Carte centrée verticalement, fond DarkShine, icônes enveloppe et clé dans les champs | | |
-| A-02 | Se connecter avec un mauvais mot de passe 6 fois | Message d'erreur, puis blocage temporaire (limitation de débit) | | |
-| A-03 | Se connecter normalement | Arrivée sur la boîte de réception | | |
-| A-04 | Activer la double authentification (Réglages > Sécurité), se déconnecter, se reconnecter | Demande du code TOTP, code de votre application accepté | | |
-| A-05 | Cocher « appareil de confiance » au second facteur, se reconnecter | Plus de code demandé sur ce navigateur | | |
-| A-06 | Utiliser un code de secours | Accepté une seule fois | | |
-| A-07 | Afficher la clé de récupération puis la télécharger | Fichier `wmail-go-recovery-key.txt` correct | | |
-| A-08 | Ouvrir `/settings/folders`, attendre l'expiration de session, recharger | Retour à la connexion **puis** retour automatique sur `/settings/folders` après connexion | | |
-| A-09 | Changer le mot de passe du compte webmail | Les autres sessions sont fermées | | |
-| A-10 | Changer la langue (fr/en) | Toute l'interface suit, y compris les menus | | |
+**Règle de sécurité** : les points marqués ⚠ détruisent ou déplacent des messages. Ne les passez que sur un compte
+ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 
-## 2. Boîtes mail (IMAP/SMTP)
-
-| Cas | Comment tester | Attendu | Résultat | Remarques |
-|---|---|---|---|---|
-| B-01 | Ajouter une boîte avec l'adresse seule | Serveurs proposés automatiquement | | |
-| B-02 | Bouton « Test » IMAP et SMTP | Diagnostic clair (certificat, authentification, TLS hérité) | | |
-| B-03 | Ajouter une deuxième boîte et basculer de l'une à l'autre | Liste, dossiers et compteurs changent ; aucun mélange | | |
-| B-04 | Réglages de la boîte : dossiers système | Sélecteurs de dossiers existants, pas de saisie libre | | |
-| B-05 | Identités : ajouter une identité secondaire avec signature | Choix de l'expéditeur à la composition, signature liée | | |
-| B-06 | Options par boîte : « Répondre à », Cci systématique | Appliqués aux messages envoyés (vérifier les en-têtes reçus) | | |
-| B-07 | Quota (si le serveur l'annonce) | Occupation affichée en bas du panneau des dossiers | | |
-
-## 3. Liste des messages
-
-| Cas | Comment tester | Attendu | Résultat | Remarques |
-|---|---|---|---|---|
-| C-01 | Comparer la liste à celle de RainLoop (même dossier) | Mêmes colonnes, mêmes couleurs, même densité | | |
-| C-02 | Message non lu | Fond jaune pâle, barre orange, texte gras | | |
-| C-03 | Conversation dont seul un ancien message est non lu | Fond atténué, texte **non** gras (`.subunread`) | | |
-| C-04 | Trier par date, expéditeur, objet, taille | Ordre correct, flèche de tri visible | | |
-| C-05 | Changer la taille de page (10 à 500) | Pagination correcte, choix mémorisé | | |
-| C-06 | Recherche `from:`, `to:`, `is:unseen`, `date:`, `size:` | Mêmes résultats que RainLoop, **vitesse comparable** | | |
-| C-07 | Recherche texte libre sur une grosse boîte | Résultats et temps comparables à RainLoop | | |
-| C-08 | Bandeau « Résultats de recherche » et croix de remise à zéro | Présents et fonctionnels | | |
-| C-09 | Filtre « non lus » | Liste filtrée, compteur cohérent | | |
-| C-10 | Mode conversations | Regroupement identique à RainLoop, pastille du nombre | | |
-| C-11 | Clic simple sur une ligne | Ouvre le message dans le volet de lecture | | |
-| C-12 | **Ctrl+clic** sur une ligne | Coche la ligne sans ouvrir le message | | |
-| C-13 | **Maj+clic** sur une autre ligne | Étend la sélection de la dernière ligne cochée jusqu'à celle-ci | | |
-| C-14 | **Maj+↓** plusieurs fois puis **Maj+↑** | La plage se réduit : les lignes quittées sont décochées | | |
-| C-15 | Alt+clic ou clic du milieu | Ouvre le message dans un nouvel onglet | | |
-| C-16 | Flèches ↑ ↓, Début, Fin, Page préc./suiv. | Curseur et ouverture conformes ; passage de page aux extrémités | | |
-| C-17 | Flèches ← → | Passage du focus entre la liste et le volet de lecture | | |
-| C-18 | Touche `?` | Aide des raccourcis à jour (Maj+Suppr, ← →) | | |
-| C-19 | Glisser-déposer d'un message vers un dossier | Déplacement, surbrillance du dossier cible | | |
-| C-20 | Menu « Déplacer vers » ; Ctrl enfoncé | Déplacement ; avec Ctrl, copie (libellé qui change) | | |
-| C-21 | Actions de masse : lu, non lu, favori, archiver, spam, corbeille | Appliquées à toute la sélection, retour à la liste | | |
-| C-22 | **Maj+Suppr** sur une sélection ⚠ | Confirmation puis suppression définitive (sans passer par la corbeille) | | |
-| C-23 | « Marquer tout le dossier comme lu » / « comme non lu » | Compteurs à jour | | |
-| C-24 | « Transférer en pièces jointes » sur 3 messages cochés | Nouveau message avec 3 `.eml`, objet « Fwd : 3 messages » | | |
-| C-25 | Sélection par critère (tous, aucun, lus, non lus, suivis, inverser) | Conforme | | |
-| C-26 | Arrivée d'un nouveau message (s'envoyer un message) | La liste se met à jour seule, sans recharger la page | | |
-| C-27 | Lire un message depuis un autre client | Au sondage suivant, la ligne passe en « lu » sans rechargement | | |
-| C-28 | Vider la corbeille / les indésirables ⚠ | Confirmation explicite, compteur remis à zéro | | |
-| C-29 | Supprimer 500 messages d'un coup ⚠ | L'interface rend la main, journal lisible dans `make logs` | | |
-
-## 4. Lecture d'un message
-
-| Cas | Comment tester | Attendu | Résultat | Remarques |
-|---|---|---|---|---|
-| D-01 | Ouvrir un message HTML complexe (newsletter) | Rendu identique à RainLoop, pas de débordement | | |
-| D-02 | Même message dans RainLoop et wmail-go, comparer | Espacement, polices, couleurs, liens | | |
-| D-03 | Images distantes bloquées | Bandeau « afficher les images », option « toujours pour cet expéditeur » | | |
-| D-04 | Message texte brut avec citations | Police à chasse fixe, citations colorées et repliées | | |
-| D-05 | Message `format=flowed` | Pas de coupures de ligne parasites | | |
-| D-06 | Message avec charset exotique (ISO-8859-1, Windows-1252, UTF-7) | Texte lisible, pas de perte | | |
-| D-07 | Message signé S/MIME ou PGP | La signature n'apparaît **pas** comme pièce jointe | | |
-| D-08 | Signature HTML de l'expéditeur | Affichée dans le corps, pas en pièce jointe | | |
-| D-09 | Pièce jointe image | Vignette avec œil en surimpression, aperçu plein écran sans téléchargement | | |
-| D-10 | Pièces jointes PDF, ZIP, XLSX, MP3 | Icône différente selon le type | | |
-| D-11 | Noms des pièces jointes | Identiques à RainLoop (y compris `calendar1.3.ics`) | | |
-| D-12 | « Télécharger toutes les pièces jointes » | ZIP correct | | |
-| D-13 | Invitation `.ics` (plug-in) | Carte d'événement : titre, date, De, Invités, boutons Google et Outlook | | |
-| D-14 | Photo du correspondant | Carnet d'adresses d'abord, Gravatar si l'option est active | | |
-| D-15 | Flèches ↑ ↓ en haut à droite du message | Message précédent et suivant de la liste ; grisées aux extrémités | | |
-| D-16 | Boutons répondre / répondre à tous / transférer | Trois icônes RainLoop visibles dans l'en-tête | | |
-| D-17 | Menu « … » : voir la source, les en-têtes, imprimer, filtrer, ajouter aux contacts | Tout fonctionne | | |
-| D-18 | Message demandant un accusé de lecture | Bandeau, envoi de l'accusé seulement sur action | | |
-| D-19 | Message marqué important | Icône ou couleur distincte dans la liste et en lecture | | |
-| D-20 | Plein écran du message (bouton et Échap) | Bascule correcte | | |
-
-## 5. Composition
-
-| Cas | Comment tester | Attendu | Résultat | Remarques |
-|---|---|---|---|---|
-| E-01 | Nouveau message, barre de composition | Barre sombre 40 px, en-tête gris, comme RainLoop | | |
-| E-02 | Saisir des adresses | Pastilles grises carrées, autocomplétion (20 suggestions) | | |
-| E-03 | Sélecteur de contacts | Les adresses vont dans le **dernier champ utilisé** (À, Cc ou Cci) | | |
-| E-04 | Éditeur de texte mis en forme | Gras, listes, couleurs, liens ; bascule texte/HTML | | |
-| E-05 | Signature de l'identité | Insérée au bon endroit (avant/après la citation) | | |
-| E-06 | Répondre / Répondre à tous | Destinataires et citation corrects, curseur au-dessus | | |
-| E-07 | Transférer | Pièces jointes d'origine conservées | | |
-| E-08 | Joindre un fichier (glisser-déposer et bouton) | Progression, taille limite respectée | | |
-| E-09 | Envoyer sans objet | Avertissement avant envoi | | |
-| E-10 | Écrire « ci-joint » sans pièce jointe | Avertissement avant envoi | | |
-| E-11 | Brouillon automatique | Enregistré toutes les minutes, repris à l'ouverture | | |
-| E-12 | Brouillon écrit dans RainLoop puis ouvert dans wmail-go | Réponse/transfert reconnus (`X-Draft-Info`) | | |
-| E-13 | Modèles de message | Création, insertion, mise en forme conservée | | |
-| E-14 | Demander un accusé de lecture | En-tête `Disposition-Notification-To` présent | | |
-| E-15 | Envoyer à une adresse à domaine accentué (é, ü) | Envoi accepté (punycode) | | |
-| E-16 | Envoi vers une adresse inexistante | Message d'erreur lisible, brouillon conservé | | |
-| E-17 | Copie dans « Envoyés » | Présente, Cci visible seulement dans la copie | | |
-| E-18 | Ctrl+Entrée / Ctrl+S | Envoi / enregistrement | | |
-
-## 6. Contacts
-
-| Cas | Comment tester | Attendu | Résultat | Remarques |
-|---|---|---|---|---|
-| F-01 | Ouvrir `/contacts` | Deux volets : liste à gauche, fiche à droite | | |
-| F-02 | Créer, modifier, supprimer un contact ⚠ | Conforme | | |
-| F-03 | Photo de contact | Envoi, affichage, suppression | | |
-| F-04 | Recherche par nom, par étiquette | Conforme | | |
-| F-05 | Recherche par numéro (« 0612 » pour `+33 6 12 34 56 78`) | Contact trouvé | | |
-| F-06 | Import vCard et CSV (export d'Outlook ou de Google) | Champs typés repris (Home/Business/Other, Fax, Mobile) | | |
-| F-07 | Export vCard puis réimport | Aucune perte, propriétés inconnues conservées | | |
-| F-08 | Synchronisation CardDAV avec votre serveur | Ajouts et modifications dans les deux sens | | |
-| F-09 | « Écrire à la sélection » | Nouveau message avec toutes les adresses cochées | | |
-| F-10 | Ajouter l'expéditeur d'un message aux contacts | Fiche créée avec nom et adresse | | |
-
-## 7. Dossiers
-
-| Cas | Comment tester | Attendu | Résultat | Remarques |
-|---|---|---|---|---|
-| G-01 | Arborescence | Même ordre que RainLoop, INBOX en tête, dossiers système ensuite | | |
-| G-02 | Dossiers nommés « Projet 2 » et « Projet 10 » | Tri naturel : 2 avant 10 | | |
-| G-03 | Replier / déplier un niveau | État mémorisé | | |
-| G-04 | Créer un dossier (bouton en bas à gauche) | Nom + dossier parent, création immédiate | | |
-| G-05 | Renommer un dossier ⚠ | Sous-dossiers suivis | | |
-| G-06 | Supprimer un dossier non vide ou avec sous-dossiers ⚠ | Refus explicite | | |
-| G-07 | Masquer le panneau des dossiers (bouton flèches) | Le panneau se replie, la liste s'élargit | | |
-| G-08 | Pastilles de compteurs | Brouillons = total ; corbeille, archive, envoyés = rien ; autres = non lus | | |
-| G-09 | Dossiers surveillés (Réglages > Dossiers) | Compteurs rafraîchis toutes les 2 minutes | | |
-| G-10 | Abonnement IMAP | Dossiers non abonnés masqués | | |
-
-## 8. Filtres (Sieve) ⚠
-
-| Cas | Comment tester | Attendu | Résultat | Remarques |
-|---|---|---|---|---|
-| H-01 | Ouvrir `/settings/filters` | Liste des règles, script actif | | |
-| H-02 | Créer une règle « de X vers dossier Y » | Script valide, appliqué par le serveur | | |
-| H-03 | Modifier l'ordre des règles | Conforme | | |
-| H-04 | Édition du script brut | Vérification de syntaxe avant enregistrement | | |
-| H-05 | Serveur sans ManageSieve | Message clair, pas de plantage | | |
-
-## 9. Réglages et apparence
-
-| Cas | Comment tester | Attendu | Résultat | Remarques |
-|---|---|---|---|---|
-| I-01 | Thème « DarkShine (comme RainLoop) » | Image de fond visible sur la barre du haut et le panneau des dossiers | | |
-| I-02 | Thèmes clair et sombre | Lisibles, pas de texte invisible | | |
-| I-03 | Fuseau horaire par utilisateur | Dates affichées dans ce fuseau | | |
-| I-04 | Disposition « 3 volets » | Conforme à RainLoop | | |
-| I-05 | Disposition « aperçu en bas » | Liste en haut, lecture dessous | | |
-| I-06 | Disposition « liste seule » | Le message s'ouvre sur une page entière | | |
-| I-07 | Taille de police | Prise en compte partout | | |
-| I-08 | Notifications bureau et son | Autorisation demandée, notification à l'arrivée d'un message | | |
-| I-09 | Barre « Retour » des réglages | Au-dessus de la carte blanche, sur le fond d'écran | | |
-| I-10 | Image de fond personnalisée | `make theme-background FILE=...` prise en compte | | |
-
-## 10. Sécurité et robustesse
-
-| Cas | Comment tester | Attendu | Résultat | Remarques |
-|---|---|---|---|---|
-| J-01 | Message contenant `<script>` | Aucun script exécuté (CSP), texte visible tel quel | | |
-| J-02 | Pixel espion | Signalé ou bloqué avec les images distantes | | |
-| J-03 | Formulaire soumis depuis un autre site | Refus CSRF | | |
-| J-04 | Serveur IMAP sur une adresse privée (192.168.x) | Refus, sauf si `allowed_private_hosts` l'autorise | | |
-| J-05 | Derrière votre proxy HTTPS | En-tête `Strict-Transport-Security` présent | | |
-| J-06 | Rechargement d'une page | Fichiers statiques servis en 304 (cache) | | |
-| J-07 | Arrêt du serveur IMAP pendant l'usage | Message d'erreur clair, reconnexion automatique ensuite | | |
-| J-08 | `make logs` pendant une action longue | Journal IMAP/SMTP lisible, durées indiquées | | |
-| J-09 | Redémarrage du conteneur | Comptes et données chiffrées conservés | | |
-
-## 11. Comparaison directe avec RainLoop
-
-Pour chaque écran, mettre les deux côte à côte et noter l'écart le plus visible.
-
-| Cas | Écran | Écart constaté | Résultat | Remarques |
-|---|---|---|---|---|
-| K-01 | Connexion | | | |
-| K-02 | Liste + volet de lecture | | | |
-| K-03 | Message avec pièces jointes | | | |
-| K-04 | Composition | | | |
-| K-05 | Contacts | | | |
-| K-06 | Réglages | | | |
-| K-07 | Filtres | | | |
+- Version testée : `git rev-parse --short HEAD` = ............ — date : ............
+- Navigateur : ............ — taille de fenêtre : ............ — thème : `DarkShine (comme RainLoop)`
+- Avant de tester une nouvelle version : `make up` (le conteneur redémarre, la session est perdue).
 
 ---
 
-## Suivi
+## A. Connexion, compte webmail, session
 
-| Bloc | Cas | OK | KO | NA |
-|---|---|---|---|---|
-| 1. Connexion | 10 | | | |
-| 2. Boîtes mail | 7 | | | |
-| 3. Liste | 29 | | | |
-| 4. Lecture | 20 | | | |
-| 5. Composition | 18 | | | |
-| 6. Contacts | 10 | | | |
-| 7. Dossiers | 10 | | | |
-| 8. Filtres | 5 | | | |
-| 9. Réglages | 10 | | | |
-| 10. Sécurité | 9 | | | |
-| 11. Comparaison | 7 | | | |
-| **Total** | **135** | | | |
+```
+[A-01] Écran de connexion fidèle à RainLoop
+  tester  : ouvrir /login
+  attendu : carte centrée verticalement, fond DarkShine, icônes enveloppe et clé dans les champs
+  réponse :
+
+[A-02] Limitation des tentatives
+  tester  : 6 connexions avec un mauvais mot de passe
+  attendu : erreur à chaque fois, puis blocage temporaire annoncé
+  réponse :
+
+[A-03] Connexion normale
+  tester  : se connecter avec le bon mot de passe
+  attendu : arrivée sur la boîte de réception, dernier compte mail actif
+  réponse :
+
+[A-04] Double authentification (TOTP)
+  tester  : Réglages > Sécurité, activer, se déconnecter, se reconnecter
+  attendu : code demandé, code de votre application accepté
+  réponse :
+
+[A-05] Appareil de confiance
+  tester  : cocher la case au second facteur, se reconnecter
+  attendu : plus de code demandé sur ce navigateur
+  réponse :
+
+[A-06] Code de secours
+  tester  : utiliser un code de secours au lieu du code TOTP
+  attendu : accepté une seule fois, puis refusé
+  réponse :
+
+[A-07] Clé de récupération
+  tester  : afficher puis télécharger la clé
+  attendu : fichier wmail-go-recovery-key.txt correct ; la clé permet de récupérer le compte
+  réponse :
+
+[A-08] Retour à la page demandée après reconnexion
+  tester  : ouvrir /settings/folders, attendre l'expiration de session, recharger, se reconnecter
+  attendu : retour automatique sur /settings/folders (et non sur l'accueil)
+  réponse :
+
+[A-09] Changement de mot de passe
+  tester  : Réglages > Sécurité, changer le mot de passe
+  attendu : les autres sessions sont fermées, la nouvelle session reste valide
+  réponse :
+
+[A-10] Langue de l'interface
+  tester  : basculer fr / en
+  attendu : toute l'interface suit, menus compris ; choix mémorisé
+  réponse :
+```
+
+## B. Boîtes mail (IMAP / SMTP)
+
+```
+[B-01] Suggestion automatique des serveurs
+  tester  : ajouter une boîte en saisissant seulement l'adresse
+  attendu : serveurs, ports et sécurité proposés
+  réponse :
+
+[B-02] Bouton « Test »
+  tester  : tester IMAP puis SMTP, y compris avec un mauvais mot de passe
+  attendu : diagnostic clair (authentification, certificat, TLS hérité)
+  réponse :
+
+[B-03] Plusieurs boîtes
+  tester  : ajouter une deuxième boîte, basculer de l'une à l'autre
+  attendu : liste, dossiers, compteurs et signature changent ; aucun mélange
+  réponse :
+
+[B-04] Dossiers système d'une boîte
+  tester  : Réglages > Dossiers, section « dossiers système »
+  attendu : sélecteurs de dossiers existants (pas de saisie libre), choix « Automatique » par défaut
+  réponse :
+
+[B-05] Identités
+  tester  : ajouter une identité secondaire avec sa signature
+  attendu : choix de l'expéditeur à la composition, signature liée à l'identité
+  réponse :
+
+[B-06] Répondre à / Cci systématique
+  tester  : renseigner ces champs dans les options de la boîte, envoyer un message
+  attendu : en-têtes Reply-To et Bcc présents dans le message reçu
+  réponse :
+
+[B-07] Quota
+  tester  : boîte dont le serveur annonce QUOTA
+  attendu : occupation et pourcentage en bas du panneau des dossiers
+  réponse :
+```
+
+## C. Liste des messages
+
+```
+[C-01] Aspect général
+  tester  : comparer le même dossier dans RainLoop et dans wmail-go
+  attendu : mêmes colonnes, mêmes couleurs, même densité
+  réponse :
+
+[C-02] Message non lu
+  attendu : fond jaune pâle, barre orange à gauche, expéditeur et objet en gras
+  réponse :
+
+[C-03] Conversation partiellement non lue
+  tester  : fil dont seul un message ancien est non lu
+  attendu : fond atténué, texte non gras (différent d'un vrai non lu)
+  réponse :
+
+[C-04] Tri
+  tester  : trier par date, expéditeur, objet, taille, dans les deux sens
+  attendu : ordre correct, repère de tri visible, choix conservé en changeant de page
+  réponse :
+
+[C-05] Taille de page
+  tester  : 10, 50, 100, 500 messages par page
+  attendu : pagination correcte, choix mémorisé
+  réponse :
+
+[C-06] Recherche par opérateurs
+  tester  : from:, to:, is:unseen, is:flagged, date:2026.10.05, size:2MB
+  attendu : mêmes résultats que RainLoop
+  réponse :
+
+[C-07] Recherche texte libre sur une grosse boîte
+  attendu : résultats et temps comparables à RainLoop (pas de recherche dans le corps)
+  réponse :
+
+[C-08] Bandeau et croix de recherche
+  attendu : bandeau « Résultats de recherche pour … » et croix qui vide le champ
+  réponse :
+
+[C-09] Filtre « non lus »
+  attendu : liste filtrée, compteur cohérent, retour à « tous » possible
+  réponse :
+
+[C-10] Mode conversations
+  attendu : regroupement identique à RainLoop, pastille du nombre de messages
+  réponse :
+
+[C-11] Clic simple sur une ligne
+  attendu : ouvre le message dans le volet de lecture, sans recharger la page
+  réponse :
+
+[C-12] Ctrl+clic coche la ligne sans ouvrir le message
+  tester  : Ctrl (ou Cmd) + clic sur une ligne
+  attendu : la case se coche ou se décoche, le message ne s'ouvre pas
+  réponse :
+
+[C-13] Maj+clic étend la sélection
+  tester  : cocher une ligne, puis Maj+clic sur une ligne plus bas
+  attendu : toutes les lignes intermédiaires sont cochées
+  réponse :
+
+[C-14] Maj+flèches avec changement de sens
+  tester  : Maj+↓ trois fois, puis Maj+↑
+  attendu : la plage se réduit, la ligne quittée est décochée
+  réponse :
+
+[C-15] Ouverture dans un nouvel onglet
+  tester  : Alt+clic, puis clic du bouton du milieu
+  attendu : le message s'ouvre dans un nouvel onglet (pas de sélection)
+  réponse :
+
+[C-16] Navigation au clavier
+  tester  : ↑ ↓ Début Fin PagePréc PageSuiv
+  attendu : curseur et ouverture conformes ; au bout de la page, passage à la page suivante
+  réponse :
+
+[C-17] Bascule entre volets
+  tester  : → puis ←
+  attendu : le focus passe au volet de lecture puis revient à la liste
+  réponse :
+
+[C-18] Aide des raccourcis
+  tester  : touche ?
+  attendu : fenêtre large, voile sombre derrière, liste à jour (Maj+Suppr, ← →)
+  réponse :
+
+[C-19] Glisser-déposer vers un dossier ⚠
+  attendu : déplacement effectif, dossier cible en surbrillance pendant le glisser
+  réponse :
+
+[C-20] Menu « Déplacer vers » ⚠
+  tester  : menu seul, puis avec Ctrl enfoncé
+  attendu : déplacement ; avec Ctrl, copie (le libellé du menu change)
+  réponse :
+
+[C-21] Actions de masse ⚠
+  tester  : lu, non lu, favori, archiver, indésirable, corbeille sur une sélection
+  attendu : appliquées à toute la sélection, retour à la liste au bon endroit
+  réponse :
+
+[C-22] Suppression définitive (Maj+Suppr) ⚠
+  attendu : confirmation, puis suppression sans passer par la corbeille
+  réponse :
+
+[C-23] Tout marquer lu / non lu
+  tester  : menu « … » de la barre d'outils
+  attendu : tout le dossier change d'état, compteurs à jour
+  réponse :
+
+[C-24] Transférer en pièces jointes
+  tester  : cocher 3 messages, menu « … » > « Transférer en pièces jointes »
+  attendu : nouveau message avec 3 fichiers .eml nommés d'après leur objet, objet « Fwd : 3 messages »
+  réponse :
+
+[C-25] Sélection par critère
+  tester  : tous, aucun, lus, non lus, suivis, non suivis, inverser
+  attendu : conforme
+  réponse :
+
+[C-26] Actualisation automatique
+  tester  : s'envoyer un message depuis un autre client
+  attendu : la liste se met à jour seule, sans recharger, sans perdre la sélection ni le défilement
+  réponse :
+
+[C-27] Drapeaux changés ailleurs
+  tester  : lire un message depuis un autre client
+  attendu : au sondage suivant (2 min), la ligne passe en « lu » sans rechargement
+  réponse :
+
+[C-28] Vider la corbeille / les indésirables ⚠
+  attendu : confirmation explicite, dossier vidé, compteur à zéro
+  réponse :
+
+[C-29] Action de masse sur 500 messages ⚠
+  attendu : l'interface rend la main, journal lisible (make logs), pas de blocage
+  réponse :
+
+[C-30] Liste d'une ligne (disposition « liste seule »)
+  tester  : Réglages > Général > disposition « Liste seule »
+  attendu : lignes de 35 px, expéditeur à gauche, objet extensible, date à droite
+  réponse :
+```
+
+## D. Lecture d'un message
+
+```
+[D-01] Message HTML complexe (newsletter)
+  attendu : rendu identique à RainLoop, pas de débordement horizontal
+  réponse :
+
+[D-02] Comparaison directe d'un même message
+  tester  : ouvrir le même message dans les deux webmails
+  attendu : espacement, polices, couleurs et liens identiques
+  réponse :
+
+[D-03] Images distantes
+  attendu : bloquées, bandeau pour les afficher, option « toujours pour cet expéditeur »
+  réponse :
+
+[D-04] Texte brut et citations
+  attendu : police à chasse fixe, citations colorées et repliables
+  réponse :
+
+[D-05] format=flowed
+  attendu : pas de coupures de ligne parasites
+  réponse :
+
+[D-06] Charsets exotiques
+  tester  : messages ISO-8859-1, Windows-1252, UTF-7, charset absent
+  attendu : texte lisible, aucun message vide
+  réponse :
+
+[D-07] Signature S/MIME ou PGP
+  attendu : la signature n'apparaît pas comme pièce jointe
+  réponse :
+
+[D-08] Signature HTML de l'expéditeur
+  attendu : affichée dans le corps, pas en pièce jointe
+  réponse :
+
+[D-09] Aperçu d'une image jointe
+  attendu : vignette avec œil en surimpression, aperçu plein écran sans téléchargement
+  réponse :
+
+[D-10] Icônes par type de pièce jointe
+  tester  : PDF, ZIP, XLSX, PPTX, MP3, MP4, TXT, ICS
+  attendu : icône différente selon le type
+  réponse :
+
+[D-11] Noms des pièces jointes
+  attendu : identiques à RainLoop, y compris les noms engendrés (calendar1.3.ics)
+  réponse :
+
+[D-12] Télécharger toutes les pièces jointes
+  attendu : archive ZIP correcte
+  réponse :
+
+[D-13] Invitation .ics (votre plug-in)
+  attendu : carte d'événement — titre, date, De, Invités, boutons Google et Outlook — sans bloc superflu
+  réponse :
+
+[D-14] Photo du correspondant
+  attendu : photo du carnet d'abord, Gravatar si l'option est active, icône générique sinon
+  réponse :
+
+[D-15] Flèches message précédent / suivant
+  attendu : en haut à droite, suivent l'ordre de la liste, grisées aux extrémités
+  réponse :
+
+[D-16] Boutons de réponse
+  attendu : trois icônes RainLoop (répondre, répondre à tous, transférer) dans l'en-tête
+  réponse :
+
+[D-17] Menu « … » du message
+  tester  : source, en-têtes, imprimer, filtrer les messages semblables, ajouter aux contacts, voir en texte brut
+  attendu : toutes les entrées fonctionnent
+  réponse :
+
+[D-18] Accusé de lecture demandé
+  attendu : bandeau ; l'accusé n'est envoyé que si vous cliquez
+  réponse :
+
+[D-19] Message important
+  attendu : repère visible dans la liste et en lecture
+  réponse :
+
+[D-20] Plein écran du message
+  tester  : bouton, puis Échap
+  attendu : bascule correcte, la liste réapparaît
+  réponse :
+
+[D-21] Bouton « haut de page »
+  tester  : ouvrir un long message et faire défiler
+  attendu : bouton rond en bas à droite, retour en haut au clic
+  réponse :
+```
+
+## E. Composition
+
+```
+[E-01] Barre de composition
+  attendu : barre sombre de 40 px, en-tête gris, comme RainLoop
+  réponse :
+
+[E-02] Saisie des adresses
+  attendu : pastilles grises carrées, autocomplétion (20 suggestions), adresses invalides signalées
+  réponse :
+
+[E-03] Sélecteur de contacts
+  tester  : cliquer dans Cc, puis ouvrir le sélecteur et choisir un contact
+  attendu : l'adresse va dans Cc (dernier champ utilisé), pas dans À
+  réponse :
+
+[E-04] Éditeur mis en forme
+  tester  : gras, italique, listes, couleurs, alignement, lien ; bascule texte / mise en forme
+  attendu : conforme, conversion sans perte
+  réponse :
+
+[E-05] Signature
+  attendu : insérée au bon endroit selon l'option (avant ou après la citation)
+  réponse :
+
+[E-06] Répondre / Répondre à tous
+  attendu : destinataires corrects, citation correcte, curseur au-dessus de la citation
+  réponse :
+
+[E-07] Transférer
+  attendu : pièces jointes d'origine conservées, en-tête de transfert comme RainLoop
+  réponse :
+
+[E-08] Joindre un fichier
+  tester  : bouton et glisser-déposer, fichier volumineux
+  attendu : progression, limite de taille annoncée clairement
+  réponse :
+
+[E-09] Envoi sans objet
+  attendu : avertissement avant envoi
+  réponse :
+
+[E-10] « ci-joint » sans pièce jointe
+  attendu : avertissement avant envoi
+  réponse :
+
+[E-11] Brouillon automatique
+  attendu : enregistré environ chaque minute, repris à l'ouverture, pas de doublon
+  réponse :
+
+[E-12] Brouillon écrit dans RainLoop
+  tester  : créer un brouillon de réponse dans RainLoop, l'ouvrir dans wmail-go
+  attendu : reconnu comme réponse (en-tête X-Draft-Info)
+  réponse :
+
+[E-13] Modèles de message
+  attendu : création, insertion, mise en forme conservée
+  réponse :
+
+[E-14] Demander un accusé de lecture
+  attendu : en-tête Disposition-Notification-To dans le message reçu
+  réponse :
+
+[E-15] Domaine accentué
+  tester  : envoyer à une adresse dont le domaine contient é ou ü
+  attendu : envoi accepté (punycode), adresse lisible dans « Envoyés »
+  réponse :
+
+[E-16] Destinataire inexistant
+  attendu : erreur lisible, brouillon conservé
+  réponse :
+
+[E-17] Copie dans « Envoyés »
+  attendu : message présent ; Cci visible seulement dans la copie, jamais chez les destinataires
+  réponse :
+
+[E-18] Raccourcis
+  tester  : Ctrl+Entrée, Ctrl+S
+  attendu : envoi, enregistrement
+  réponse :
+```
+
+## F. Contacts
+
+```
+[F-01] Vue en deux volets
+  attendu : liste étroite à gauche, fiche à droite, contact courant mis en évidence
+  réponse :
+
+[F-02] Créer, modifier, supprimer ⚠
+  attendu : conforme, confirmation avant suppression
+  réponse :
+
+[F-03] Photo de contact
+  attendu : envoi, affichage dans la fiche et dans les messages, suppression
+  réponse :
+
+[F-04] Recherche par nom et par étiquette
+  attendu : conforme
+  réponse :
+
+[F-05] Recherche par numéro
+  tester  : chercher « 0612 » pour un contact enregistré « +33 6 12 34 56 78 »
+  attendu : contact trouvé
+  réponse :
+
+[F-06] Import vCard et CSV
+  tester  : export d'Outlook, de Google, de RainLoop
+  attendu : champs typés repris (Home / Business / Other, Fax, Mobile), pas de doublon
+  réponse :
+
+[F-07] Export puis réimport
+  attendu : aucune perte, propriétés inconnues conservées
+  réponse :
+
+[F-08] Synchronisation CardDAV
+  attendu : ajouts et modifications dans les deux sens, erreurs lisibles
+  réponse :
+
+[F-09] Écrire à la sélection
+  attendu : nouveau message avec toutes les adresses cochées
+  réponse :
+
+[F-10] Ajouter l'expéditeur aux contacts
+  attendu : fiche créée avec nom et adresse, ouverte pour complément
+  réponse :
+```
+
+## G. Dossiers
+
+```
+[G-01] Arborescence
+  attendu : même ordre que RainLoop — INBOX, dossiers système, puis les autres
+  réponse :
+
+[G-02] Tri naturel
+  tester  : dossiers « Projet 2 » et « Projet 10 »
+  attendu : 2 avant 10
+  réponse :
+
+[G-03] Replier / déplier
+  attendu : état mémorisé entre deux visites
+  réponse :
+
+[G-04] Créer un dossier
+  tester  : bouton en bas à gauche
+  attendu : nom et dossier parent, création immédiate, dossier visible
+  réponse :
+
+[G-05] Renommer ⚠
+  attendu : sous-dossiers suivis, compteurs corrects
+  réponse :
+
+[G-06] Garde-fous de suppression ⚠
+  tester  : supprimer un dossier système, un dossier non vide, un dossier avec sous-dossiers
+  attendu : refus explicite dans les trois cas
+  réponse :
+
+[G-07] Vider un dossier ⚠
+  tester  : Réglages > Dossiers, lien « Vider le dossier »
+  attendu : confirmation, puis dossier vide
+  réponse :
+
+[G-08] Masquer le panneau des dossiers
+  tester  : bouton flèches en bas à gauche
+  attendu : panneau replié, liste élargie, état mémorisé
+  réponse :
+
+[G-09] Pastilles de compteurs
+  attendu : brouillons = total ; corbeille, archive, envoyés = rien ; autres = non lus
+  réponse :
+
+[G-10] Dossiers surveillés
+  tester  : Réglages > Dossiers, cocher jusqu'à 5 dossiers
+  attendu : compteurs rafraîchis toutes les 2 minutes
+  réponse :
+
+[G-11] Abonnement IMAP
+  attendu : dossiers non abonnés masqués, abonnement modifiable
+  réponse :
+```
+
+## H. Filtres (Sieve) ⚠
+
+```
+[H-01] Page des filtres
+  attendu : règles listées, script actif indiqué
+  réponse :
+
+[H-02] Créer une règle
+  tester  : « si De contient X, déplacer vers Y »
+  attendu : script valide, règle appliquée par le serveur
+  réponse :
+
+[H-03] Ordre des règles
+  attendu : modifiable, ordre respecté
+  réponse :
+
+[H-04] Édition du script brut
+  attendu : vérification de syntaxe avant enregistrement
+  réponse :
+
+[H-05] Serveur sans ManageSieve
+  attendu : message clair, pas de plantage
+  réponse :
+```
+
+## I. Réglages et apparence
+
+```
+[I-01] Thème DarkShine
+  attendu : image de fond visible sur la barre du haut et le panneau des dossiers, ancrée en haut à gauche
+  réponse :
+
+[I-02] Thèmes clair et sombre
+  attendu : lisibles, aucun texte invisible
+  réponse :
+
+[I-03] Fuseau horaire par utilisateur
+  attendu : dates affichées dans le fuseau choisi, valeur par défaut depuis config.json
+  réponse :
+
+[I-04] Disposition 3 volets
+  attendu : conforme à RainLoop, largeurs ajustables et mémorisées
+  réponse :
+
+[I-05] Disposition « aperçu en bas »
+  attendu : liste en haut, lecture dessous
+  réponse :
+
+[I-06] Disposition « liste seule »
+  attendu : le message s'ouvre sur une page entière
+  réponse :
+
+[I-07] Taille de police
+  attendu : prise en compte partout
+  réponse :
+
+[I-08] Notifications bureau et son
+  attendu : autorisation demandée, notification à l'arrivée d'un message, clic qui ouvre le message
+  réponse :
+
+[I-09] Barre « Retour » des réglages
+  attendu : au-dessus de la carte blanche, sur le fond d'écran
+  réponse :
+
+[I-10] Image de fond personnalisée
+  tester  : make theme-background FILE=chemin/image.jpg
+  attendu : prise en compte après rechargement
+  réponse :
+
+[I-11] Boutons des réglages
+  attendu : relief léger, bord foncé, comme RainLoop
+  réponse :
+```
+
+## J. Sécurité et robustesse
+
+```
+[J-01] Script dans un message
+  attendu : aucun script exécuté, contenu affiché tel quel
+  réponse :
+
+[J-02] Pixel espion
+  attendu : signalé, bloqué avec les images distantes
+  réponse :
+
+[J-03] CSRF
+  tester  : soumettre un formulaire depuis un autre site
+  attendu : refus explicite
+  réponse :
+
+[J-04] Serveur sur une adresse privée
+  attendu : refus, sauf si allowed_private_hosts l'autorise
+  réponse :
+
+[J-05] HTTPS derrière votre proxy
+  attendu : en-tête Strict-Transport-Security présent
+  réponse :
+
+[J-06] Cache des fichiers statiques
+  attendu : 304 au rechargement (ETag)
+  réponse :
+
+[J-07] Coupure du serveur IMAP
+  attendu : message d'erreur clair, reconnexion automatique ensuite
+  réponse :
+
+[J-08] Journal
+  tester  : make logs pendant une action longue
+  attendu : opérations IMAP et SMTP lisibles, avec durées
+  réponse :
+
+[J-09] Redémarrage du conteneur
+  attendu : comptes et données chiffrées conservés
+  réponse :
+```
+
+## K. Comparaison écran par écran avec RainLoop
+
+Mettre les deux côte à côte et noter l'écart le plus visible.
+
+```
+[K-01] Écran de connexion
+  réponse :
+
+[K-02] Liste et volet de lecture
+  réponse :
+
+[K-03] Message avec pièces jointes
+  réponse :
+
+[K-04] Composition
+  réponse :
+
+[K-05] Contacts
+  réponse :
+
+[K-06] Réglages
+  réponse :
+
+[K-07] Filtres
+  réponse :
+```
+
+---
+
+## Journal des retours
+
+Je remplis ce tableau à partir de vos réponses : un retour `KO` y reste jusqu'à correction et nouvelle validation.
+
+| Identifiant | Date | Votre retour | Correction | Commit | État |
+|---|---|---|---|---|---|
+| — | — | — | — | — | — |
+
+## Points livrés depuis la dernière session de test
+
+Ajoutés aux points ci-dessus, à valider en priorité : `C-12`, `C-13`, `C-14`, `C-15`, `C-30`, `D-10`, `D-15`, `D-16`,
+`D-21`, `E-03`, `F-01`, `F-05`, `G-02`, `G-07`, `I-01`, `I-05`, `I-09`, `I-11`, `A-08`, `C-24`.

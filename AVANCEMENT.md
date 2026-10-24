@@ -55,6 +55,12 @@ volets, **matrice de test à produire**.
 6. Signatures et modèles mis en forme, envoi avec « Répondre à » et Cci.
 7. 2FA avec votre application, CardDAV avec votre serveur, filtres Sieve (avec votre accord).
 
+## 3 bis. Trame de validation
+
+`MATRICE_DE_TEST.md` : un point par fonctionnalité, identifiant stable (`C-12`…), ligne `réponse :` à remplir
+(`OK`, `KO : description`, `NA`). **À tenir à jour à chaque fonctionnalité ajoutée** : nouveau point en fin de bloc,
+report des retours dans le « Journal des retours ».
+
 ## 4. Reprise du travail
 
 Lire : `CAHIER_DES_CHARGES.md` (chapitres 11, 14, 15), ce fichier, `docs/audit-rainloop/` (sections « À AJOUTER »).
