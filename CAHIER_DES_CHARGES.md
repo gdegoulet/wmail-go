@@ -993,3 +993,28 @@ conversations non lues), contacts en deux volets et « écrire à la sélection 
 signatures et modèles, Reply-To/Cci de l'identité principale, disposition « aperçu en bas », lecture par partie IMAP pour les
 gros messages, IDN/punycode, assainissement HTML plus fidèle, `HTMLToText` plus fidèle, liens `mailto:` du corps vers la
 composition, dates de liste « à la RainLoop », réponse (accepter/refuser) aux invitations, et les P3 listés dans les rapports.
+
+## 16. Déploiement HTTPS et délais (2026-10-24, soir)
+
+**Décision 162 — terminaison TLS par un proxy.** wmail-go ne sert que du HTTP ; le chiffrement est assuré par un
+proxy devant lui. Un déploiement complet est fourni dans `deploy/` : `deploy/docker-compose.yaml` (wmail-go sans
+port publié + nginx non privilégié en lecture seule, fichiers temporaires en tmpfs), `deploy/nginx.conf`
+(TLS 1.2/1.3, HTTP/2, `client_max_body_size 64m`, `proxy_buffering off`, délais de 300 s) et
+`config/config.https.json` (`trusted_proxy: true`). Cibles : `make tls-cert` (certificat auto-signé de 825 jours,
+`TLS_HOST=` pour le nom), `make tls-up`, `make tls-down`, `make tls-logs`, `make tls-ps`. Le volume de données du
+déploiement est distinct de celui du développement. nginx n'ajoute aucun en-tête de sécurité : CSP, HSTS,
+`X-Frame-Options` et `Referrer-Policy` viennent de l'application, qui n'envoie HSTS que si elle voit
+`X-Forwarded-Proto: https` **et** `trusted_proxy`.
+
+**Décision 163 — délais réglables.** `config.json` reçoit une section `timeouts` : `mail_seconds` (30 par défaut,
+toute opération IMAP : liste, lecture, recherche, déplacement, suppression), `send_seconds` (90, envoi SMTP) et
+`dial_seconds` (20, établissement TCP et TLS), bornées à la validation (5–600, 10–900, 2–120). Les délais du serveur
+HTTP passent de 30 s à 5 minutes en lecture et en écriture : ils coupaient le téléversement d'une grosse pièce
+jointe et l'envoi SMTP, alors que les délais métier ci-dessus sont la vraie borne. Restent fixes : 20 s pour le
+bouton « Test » d'une boîte, 3 s par commande ManageSieve, 5 min d'inactivité avant fermeture d'une connexion IMAP
+du pool, 2 min entre deux sondages.
+
+**Décision 164 — vérification visuelle obligatoire.** Toute correction d'interface est contrôlée par une capture
+d'écran (Chromium sans tête) avant d'être annoncée : c'est ainsi qu'ont été trouvés la barre de quota grise
+(collision de la classe `.bar`), le nom de dossier tronqué (`flex: 1` sur l'étoile) et la bannière d'images
+distantes sortie de sa barre (`<form>` dans un `<p>`).

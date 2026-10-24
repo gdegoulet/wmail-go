@@ -1,25 +1,83 @@
 # wmail-go
 
-Webmail en Go (IMAP/SMTP, Sieve) qui reprend l'apparence et les fonctions de RainLoop. Licence AGPLv3.
+Webmail en Go (IMAP/SMTP, Sieve) qui reprend l'apparence et les fonctions de RainLoop 1.17 (thème DarkShine). Licence AGPLv3.
 
-- **Cahier des charges, décisions et état d'avancement** : [`CAHIER_DES_CHARGES.md`](CAHIER_DES_CHARGES.md) (sections 6 et 11 à 13 pour le détail des fonctions).
+- **Cahier des charges et décisions** : [`CAHIER_DES_CHARGES.md`](CAHIER_DES_CHARGES.md) (sections 6 et 11 à 15 pour le détail des fonctions).
+- **État d'avancement** : [`AVANCEMENT.md`](AVANCEMENT.md).
+- **Trame de validation à remplir** : [`MATRICE_DE_TEST.md`](MATRICE_DE_TEST.md) (165 points, un par fonctionnalité).
 - **Développement et tests uniquement dans des conteneurs** (Podman ou Docker, jamais `go` sur le poste) : `make help`.
+
+## Démarrer sur le poste de travail
 
 ```
 make up                  # http://127.0.0.1:8080
 make mail-up mail-seed   # GreenMail (IMAP/SMTP de test) et messages de démonstration
-make test-race           # tests Go
-make sieve-up            # Dovecot de test : active les tests d'intégration IMAP et ManageSieve
-make test-sieve test-js  # Pigeonhole réel, jsdom
-make test-e2e            # parcours dans Chromium
+make user-add LOGIN=alice   # crée un compte webmail (mot de passe demandé)
+make logs                # journaux du serveur
 ```
 
-Les données d'un utilisateur sont chiffrées (un fichier par utilisateur, sans mot de passe stocké) ; la configuration se trouve dans
-`config/config.json`. Aucun test n'accède à une vraie boîte : uniquement GreenMail et le Dovecot de test.
+Les données d'un utilisateur sont chiffrées (un fichier par utilisateur, aucun mot de passe stocké) ; la configuration
+se trouve dans `config/config.json`. Aucun test n'accède à une vraie boîte : uniquement GreenMail et le Dovecot de test.
 
-## Fonctions récentes (voir CAHIER_DES_CHARGES.md, chapitre 14)
+## Mettre en service derrière HTTPS
 
-Carnet d'adresses chiffré (vCard, CSV, CardDAV), authentification en deux étapes (TOTP), modèles de message, conversations,
-recherche avancée, notifications, glisser-déposer, champs d'adresses en pastilles, visionneuse de pièces jointes, images
-distantes bloquées ou mandatées, fond d'écran personnel. Tests : `make test-race`, `make test-js`, `make test-e2e`
-(composition, filtres, dossiers, contacts), `make sieve-up` puis `make test` pour les tests contre un vrai Dovecot.
+wmail-go ne sert que du HTTP : la terminaison TLS revient à un proxy. Un déploiement prêt à l'emploi avec nginx et un
+certificat auto-signé est fourni dans `deploy/`.
+
+```
+make tls-cert                      # certificat auto-signé (825 jours) dans deploy/certs/
+make tls-cert TLS_HOST=webmail.example.fr   # ou pour votre domaine
+make tls-up                        # nginx + wmail-go  →  https://localhost:8443
+make tls-logs / make tls-ps / make tls-down
+```
+
+- wmail-go n'expose aucun port en clair : seul nginx est publié.
+- `deploy/nginx.conf` ajoute `X-Forwarded-Proto: https` et `X-Forwarded-For` ; `config/config.https.json` pose
+  `trusted_proxy: true`. Sans ces deux éléments, les cookies ne seraient pas marqués `Secure` et l'en-tête
+  `Strict-Transport-Security` ne serait pas envoyé.
+- nginx n'ajoute aucun en-tête de sécurité : c'est l'application qui pose CSP, HSTS, `X-Frame-Options` et
+  `Referrer-Policy`.
+- Pour un vrai certificat, remplacez `deploy/certs/wmail-go.crt` et `.key` (le fichier de clé doit être lisible par
+  l'utilisateur 101 du conteneur nginx).
+
+## Réglages utiles de `config/config.json`
+
+| Clé | Effet |
+|---|---|
+| `allow_registration` | ouverture de l'inscription |
+| `trusted_proxy` | fait confiance à `X-Forwarded-For` et `X-Forwarded-Proto` (à n'activer que derrière votre proxy) |
+| `block_private_networks`, `allowed_private_hosts` | garde anti-SSRF sur les serveurs IMAP/SMTP configurés |
+| `session.idle_minutes_*`, `session.absolute_hours_*` | durées de session |
+| `rate_limit.*` | limitation des tentatives (connexion, récupération, envoi, filtres) |
+| `compose.max_attachment_mb`, `max_message_mb` | taille des pièces jointes |
+| `timeouts.mail_seconds` (30), `send_seconds` (90), `dial_seconds` (20) | délais des opérations IMAP, de l'envoi SMTP et de la connexion |
+| `timezone`, `default_language`, `default_theme` | valeurs par défaut, modifiables par utilisateur |
+
+## Sauvegarde
+
+Toutes les données tiennent dans le volume `wmail-go-data` (`/data` dans le conteneur) : comptes chiffrés, carnets
+d'adresses, thèmes personnels. Exemple de sauvegarde :
+
+```
+podman run --rm -v wmail-go_wmail-go-data:/data:ro -v "$PWD":/sauvegarde docker.io/library/alpine:3 \
+  tar czf /sauvegarde/wmail-go-$(date +%F).tar.gz -C /data .
+```
+
+Restauration : le même conteneur avec `tar xzf` dans `/data`, serveur arrêté.
+
+## Tests
+
+```
+make test-race           # tests Go avec détecteur de concurrence
+make test-js             # 209 contrôles jsdom sur le JavaScript de l'interface
+make test-e2e            # parcours dans Chromium (composition, filtres, dossiers, contacts)
+make sieve-up            # Dovecot de test : active les tests d'intégration IMAP et ManageSieve
+make test                # tous les tests Go, Dovecot compris
+```
+
+## Fonctions
+
+Carnet d'adresses chiffré (vCard, CSV, CardDAV), authentification en deux étapes (TOTP), modèles de message,
+conversations, recherche à la RainLoop, notifications, glisser-déposer, champs d'adresses en pastilles, visionneuse
+d'images et de PDF, images distantes bloquées ou mandatées, filtres Sieve, impression, fond d'écran du thème,
+réglages enregistrés à la volée, réordonnancement des comptes, identités et modèles.
