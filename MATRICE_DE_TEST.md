@@ -216,75 +216,75 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 [C-12] Ctrl+clic coche la ligne sans ouvrir le message
   tester  : Ctrl (ou Cmd) + clic sur une ligne
   attendu : la case se coche ou se décoche, le message ne s'ouvre pas
-  réponse :
+  réponse : OK
 
 [C-13] Maj+clic étend la sélection
   tester  : cocher une ligne, puis Maj+clic sur une ligne plus bas
   attendu : toutes les lignes intermédiaires sont cochées
-  réponse :
+  réponse : OK
 
 [C-14] Maj+flèches avec changement de sens
   tester  : Maj+↓ trois fois, puis Maj+↑
   attendu : la plage se réduit, la ligne quittée est décochée
-  réponse :
+  réponse : OK
 
 [C-15] Ouverture dans un nouvel onglet
   tester  : Alt+clic, puis clic du bouton du milieu
   attendu : le message s'ouvre dans un nouvel onglet (pas de sélection)
-  réponse :
+  réponse : ERROR : ça download la page au lieu de l'afficher
 
 [C-16] Navigation au clavier
   tester  : ↑ ↓ Début Fin PagePréc PageSuiv
   attendu : curseur et ouverture conformes ; au bout de la page, passage à la page suivante
-  réponse :
+  réponse : BUG: on ne voit pas de changement visuel du message selectionné
 
 [C-17] Bascule entre volets
   tester  : → puis ←
   attendu : le focus passe au volet de lecture puis revient à la liste
-  réponse :
+  réponse : OK
 
 [C-18] Aide des raccourcis
   tester  : touche ?
   attendu : fenêtre large, voile sombre derrière, liste à jour (Maj+Suppr, ← →)
-  réponse :
+  réponse : OK
 
 [C-19] Glisser-déposer vers un dossier ⚠
   attendu : déplacement effectif, dossier cible en surbrillance pendant le glisser
-  réponse :
+  réponse : OK
 
 [C-34] Repères pendant le glisser
   tester  : glisser deux messages cochés vers un dossier
   attendu : pastille indiquant « 2 » près du curseur, ligne inclinée et rayée, dossier cible mis en évidence
-  réponse :
+  réponse : OK
 
 [C-20] Menu « Déplacer vers » ⚠
   tester  : menu seul, puis avec Ctrl enfoncé
   attendu : déplacement ; avec Ctrl, copie (le libellé du menu change)
-  réponse :
+  réponse : OK
 
 [C-21] Actions de masse ⚠
   tester  : lu, non lu, favori, archiver, indésirable, corbeille sur une sélection
   attendu : appliquées à toute la sélection, retour à la liste au bon endroit
-  réponse :
+  réponse : OK
 
 [C-22] Suppression définitive (Maj+Suppr) ⚠
   attendu : confirmation, puis suppression sans passer par la corbeille
-  réponse :
+  réponse : OK
 
 [C-23] Tout marquer lu / non lu
   tester  : menu « … » de la barre d'outils
   attendu : tout le dossier change d'état, compteurs à jour
-  réponse :
+  réponse : OK
 
 [C-24] Transférer en pièces jointes
   tester  : cocher 3 messages, menu « … » > « Transférer en pièces jointes »
   attendu : nouveau message avec 3 fichiers .eml nommés d'après leur objet, objet « Fwd : 3 messages »
-  réponse :
+  réponse : OK
 
 [C-25] Sélection par critère
   tester  : tous, aucun, lus, non lus, suivis, non suivis, inverser
   attendu : conforme
-  réponse :
+  réponse : OK
 
 [C-26] Actualisation automatique
   tester  : s'envoyer un message depuis un autre client
@@ -298,11 +298,11 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 
 [C-28] Vider la corbeille / les indésirables ⚠
   attendu : confirmation explicite, dossier vidé, compteur à zéro
-  réponse :
+  réponse : OK
 
 [C-29] Action de masse sur 500 messages ⚠
   attendu : l'interface rend la main, journal lisible (make logs), pas de blocage
-  réponse :
+  réponse : OK
 
 [C-31] Voisin ouvert après suppression du message ouvert ⚠
   tester  : ouvrir le 2e message d'une liste, le supprimer
@@ -317,7 +317,7 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 [C-30] Liste d'une ligne (disposition « liste seule »)
   tester  : Réglages > Général > disposition « Liste seule »
   attendu : lignes de 35 px, expéditeur à gauche, objet extensible, date à droite
-  réponse :
+  réponse : OK
 ```
 
 ## D. Lecture d'un message
@@ -325,12 +325,12 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 ```
 [D-01] Message HTML complexe (newsletter)
   attendu : rendu identique à RainLoop, pas de débordement horizontal
-  réponse :
+  réponse : OK
 
 [D-02] Comparaison directe d'un même message
   tester  : ouvrir le même message dans les deux webmails
   attendu : espacement, polices, couleurs et liens identiques
-  réponse :
+  réponse : OK
 
 [D-27] Domaine international lisible
   tester  : message venant d'une adresse à domaine accentué (punycode xn--…)
@@ -344,11 +344,11 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 
 [D-03] Images distantes
   attendu : bloquées, bandeau pour les afficher, option « toujours pour cet expéditeur »
-  réponse :
+  réponse : OK
 
 [D-04] Texte brut et citations
   attendu : police à chasse fixe, citations colorées et repliables
-  réponse :
+  réponse : OK
 
 [D-05] format=flowed
   attendu : pas de coupures de ligne parasites
@@ -365,11 +365,11 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 
 [D-08] Signature HTML de l'expéditeur
   attendu : affichée dans le corps, pas en pièce jointe
-  réponse :
+  réponse : OK
 
 [D-09] Aperçu d'une image jointe
   attendu : vignette avec œil en surimpression, aperçu plein écran sans téléchargement
-  réponse :
+  réponse : OK mais l'aperçu plein ecran affiche l'image precedente pendant le chargement de l'image courante
 
 [D-25] Photo verticale en pièce jointe
   tester  : joindre une photo prise à la verticale (orientation EXIF 6 ou 8)
@@ -379,70 +379,70 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 [D-10] Icônes par type de pièce jointe
   tester  : PDF, ZIP, XLSX, PPTX, MP3, MP4, TXT, ICS
   attendu : icône différente selon le type
-  réponse :
+  réponse : OK
 
 [D-11] Noms des pièces jointes
   attendu : identiques à RainLoop, y compris les noms engendrés (calendar1.3.ics)
-  réponse :
+  réponse : OK
 
 [D-24] Source d'une pièce jointe
   tester  : cliquer le petit « i » en bas à droite d'une vignette
   attendu : contenu décodé de la partie, en texte brut, dans un nouvel onglet
-  réponse :
+  réponse : OK
 
 [D-23] ZIP des pièces jointes sélectionnées
   tester  : cocher la case en haut à gauche de deux vignettes, menu de l'engrenage > « Télécharger la sélection »
   attendu : archive contenant seulement ces deux fichiers
-  réponse :
+  réponse : ERROR : je ne vois pas les cases a cocher ?
 
 [D-12] Télécharger toutes les pièces jointes
   attendu : archive ZIP correcte
-  réponse :
+  réponse : OK
 
 [D-13] Invitation .ics (votre plug-in)
   attendu : carte d'événement — titre, date, De, Invités, boutons Google et Outlook — sans bloc superflu
-  réponse :
+  réponse : OK
 
 [D-14] Photo du correspondant
   attendu : photo du carnet d'abord, Gravatar si l'option est active, icône générique sinon
-  réponse :
+  réponse : OK
 
 [D-15] Flèches message précédent / suivant
   attendu : en haut à droite, suivent l'ordre de la liste, grisées aux extrémités
-  réponse :
+  réponse : ERROR : fleches inoperantes et toujours grisées
 
 [D-16] Boutons de réponse
   attendu : trois icônes RainLoop (répondre, répondre à tous, transférer) dans l'en-tête
-  réponse :
+  réponse : OK
 
 [D-17] Menu « … » du message
   tester  : source, en-têtes, imprimer, filtrer les messages semblables, ajouter aux contacts, voir en texte brut
   attendu : toutes les entrées fonctionnent
-  réponse :
+  réponse : OK
 
 [D-18] Accusé de lecture demandé
   attendu : bandeau ; l'accusé n'est envoyé que si vous cliquez
-  réponse :
+  réponse : OK
 
 [D-19] Message important
   attendu : repère visible dans la liste et en lecture
-  réponse :
+  réponse : OK
 
 [D-28] Impression d'un message
   tester  : menu « … » > Imprimer, puis aperçu avant impression
   attendu : objet, De, À, Cc, Cci, Répondre à, Date, pièces jointes en liste ; corps lisible ; URL des liens entre
             parenthèses ; aucune barre d'outils ; pas d'aplat de couleur
-  réponse :
+  réponse : OK
 
 [D-20] Plein écran du message
   tester  : bouton, puis Échap
   attendu : bascule correcte, la liste réapparaît
-  réponse :
+  réponse : ?? Quel bouton ? comment faire ?
 
 [D-22] Aperçu PDF intégré
   tester  : cliquer sur l'œil d'une pièce jointe PDF
   attendu : le PDF s'affiche dans la visionneuse (pas de téléchargement, pas de nouvel onglet)
-  réponse :
+  réponse : ERROR : Refused to display '￼http://localhost:8080/' in a frame because it set 'X-Frame-Options' to 'deny'.
 
 [D-21] Bouton « haut de page »
   tester  : ouvrir un long message et faire défiler
@@ -455,21 +455,21 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 ```
 [E-01] Barre de composition
   attendu : barre sombre de 40 px, en-tête gris, comme RainLoop
-  réponse :
+  réponse : OK
 
 [E-02] Saisie des adresses
   attendu : pastilles grises carrées, autocomplétion (20 suggestions), adresses invalides signalées
-  réponse :
+  réponse : OK
 
 [E-03] Sélecteur de contacts
   tester  : cliquer dans Cc, puis ouvrir le sélecteur et choisir un contact
   attendu : l'adresse va dans Cc (dernier champ utilisé), pas dans À
-  réponse :
+  réponse : OK
 
 [E-04] Éditeur mis en forme
   tester  : gras, italique, listes, couleurs, alignement, lien ; bascule texte / mise en forme
   attendu : conforme, conversion sans perte
-  réponse :
+  réponse : OK
 
 [E-05] Signature
   attendu : insérée au bon endroit selon l'option (avant ou après la citation)
@@ -477,20 +477,20 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 
 [E-06] Répondre / Répondre à tous
   attendu : destinataires corrects, citation correcte, curseur au-dessus de la citation
-  réponse :
+  réponse : ERROR : erreur de parsing/encodage des emails =?utf-8?q?St=C3=...
 
 [E-07] Transférer
   attendu : pièces jointes d'origine conservées, en-tête de transfert comme RainLoop
-  réponse :
+  réponse : OK
 
 [E-08] Joindre un fichier
   tester  : bouton et glisser-déposer, fichier volumineux
   attendu : progression, limite de taille annoncée clairement
-  réponse :
+  réponse : OK
 
 [E-09] Envoi sans objet
   attendu : avertissement avant envoi
-  réponse :
+  réponse : OK
 
 [E-10] « ci-joint » sans pièce jointe
   attendu : avertissement avant envoi
@@ -511,7 +511,7 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 
 [E-14] Demander un accusé de lecture
   attendu : en-tête Disposition-Notification-To dans le message reçu
-  réponse :
+  réponse : OK
 
 [E-15] Domaine accentué
   tester  : envoyer à une adresse dont le domaine contient é ou ü
@@ -524,12 +524,12 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 
 [E-17] Copie dans « Envoyés »
   attendu : message présent ; Cci visible seulement dans la copie, jamais chez les destinataires
-  réponse :
+  réponse : OK
 
 [E-18] Raccourcis
   tester  : Ctrl+Entrée, Ctrl+S
   attendu : envoi, enregistrement
-  réponse :
+  réponse : OK
 ```
 
 ## F. Contacts
@@ -583,16 +583,16 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 ```
 [G-01] Arborescence
   attendu : même ordre que RainLoop — INBOX, dossiers système, puis les autres
-  réponse :
+  réponse : OK
 
 [G-02] Tri naturel
   tester  : dossiers « Projet 2 » et « Projet 10 »
   attendu : 2 avant 10
-  réponse :
+  réponse : OK
 
 [G-03] Replier / déplier
   attendu : état mémorisé entre deux visites
-  réponse :
+  réponse : OK
 
 [G-04] Créer un dossier
   tester  : bouton en bas à gauche
@@ -611,25 +611,25 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 [G-07] Vider un dossier ⚠
   tester  : Réglages > Dossiers, lien « Vider le dossier »
   attendu : confirmation, puis dossier vide
-  réponse :
+  réponse : OK
 
 [G-08] Masquer le panneau des dossiers
   tester  : bouton flèches en bas à gauche
   attendu : panneau replié, liste élargie, état mémorisé
-  réponse :
+  réponse : OK
 
 [G-09] Pastilles de compteurs
   attendu : brouillons = total ; corbeille, archive, envoyés = rien ; autres = non lus
-  réponse :
+  réponse : OK
 
 [G-10] Dossiers surveillés
   tester  : Réglages > Dossiers, cocher jusqu'à 5 dossiers
   attendu : compteurs rafraîchis toutes les 2 minutes
-  réponse :
+  réponse : OK mais pourquoi limiter a seulement 5 dossiers ???
 
 [G-11] Abonnement IMAP
   attendu : dossiers non abonnés masqués, abonnement modifiable
-  réponse :
+  réponse : OK
 ```
 
 ## H. Filtres (Sieve) ⚠
@@ -662,27 +662,27 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 ```
 [I-01] Thème DarkShine
   attendu : image de fond visible sur la barre du haut et le panneau des dossiers, ancrée en haut à gauche
-  réponse :
+  réponse : OK
 
 [I-02] Thèmes clair et sombre
   attendu : lisibles, aucun texte invisible
-  réponse :
+  réponse : OK
 
 [I-03] Fuseau horaire par utilisateur
   attendu : dates affichées dans le fuseau choisi, valeur par défaut depuis config.json
-  réponse :
+  réponse : OK
 
 [I-04] Disposition 3 volets
   attendu : conforme à RainLoop, largeurs ajustables et mémorisées
-  réponse :
+  réponse : OK
 
 [I-05] Disposition « aperçu en bas »
   attendu : liste en haut, lecture dessous
-  réponse :
+  réponse : OK
 
 [I-06] Disposition « liste seule »
   attendu : le message s'ouvre sur une page entière
-  réponse :
+  réponse : OK
 
 [I-07] Taille de police
   attendu : prise en compte partout
@@ -709,7 +709,7 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 [I-13] Non lus des autres boîtes
   tester  : deux boîtes avec des non lus, ouvrir le menu du compte en haut à droite
   attendu : un compteur par boîte, rafraîchi au sondage (2 min)
-  réponse :
+  réponse : OK mais la zone d'affichage n'est pas asser large et la pastille peut se retrouver en dessous
 
 [I-14] Réglages enregistrés à la volée
   tester  : changer la taille de police, la langue, une case à cocher dans Réglages > Général
@@ -723,7 +723,7 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 
 [I-11] Boutons des réglages
   attendu : relief léger, bord foncé, comme RainLoop
-  réponse :
+  réponse : OK
 ```
 
 ## I bis. Téléphone et mode sans JavaScript
@@ -750,20 +750,20 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 ```
 [J-01] Script dans un message
   attendu : aucun script exécuté, contenu affiché tel quel
-  réponse :
+  réponse : A TOI DE TESTER CECI // PROCEDURE DE TEST/VALIDATION AUTOMATIQUE A METTRE EN PLACE
 
 [J-02] Pixel espion
   attendu : signalé, bloqué avec les images distantes
-  réponse :
+  réponse : A TOI DE TESTER CECI // PROCEDURE DE TEST/VALIDATION AUTOMATIQUE A METTRE EN PLACE
 
 [J-03] CSRF
   tester  : soumettre un formulaire depuis un autre site
   attendu : refus explicite
-  réponse :
+  réponse : A TOI DE TESTER CECI // PROCEDURE DE TEST/VALIDATION AUTOMATIQUE A METTRE EN PLACE
 
 [J-04] Serveur sur une adresse privée
   attendu : refus, sauf si allowed_private_hosts l'autorise
-  réponse :
+  réponse : A TOI DE TESTER CECI // PROCEDURE DE TEST/VALIDATION AUTOMATIQUE A METTRE EN PLACE
 
 [J-05] HTTPS derrière votre proxy
   attendu : en-tête Strict-Transport-Security présent
