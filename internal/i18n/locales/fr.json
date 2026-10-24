@@ -68,6 +68,7 @@
   "mailbox.fix_account": "Corriger ce compte mail",
   "mailbox.no_folders": "Aucun dossier.",
   "mailbox.placeholder": "Sélectionnez un message pour le lire.",
+  "mailbox.selected": "%d message(s) sélectionné(s)",
   "folder.inbox": "Boîte de réception",
   "folder.drafts": "Brouillons",
   "folder.sent": "Envoyés",

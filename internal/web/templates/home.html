@@ -81,7 +81,7 @@
 <input type="hidden" name="current_uid" id="current-uid" value="{{if $.Msg}}{{$.Msg.UID}}{{end}}">
 {{if .Rows}}
 <ul class="msgrows">
-{{range .Rows}}<li id="m{{.UID}}" draggable="true" class="msgrow{{if not .Seen}} unread{{end}}{{if .Selected}} selected{{end}}{{if .Answered}} answered{{end}}">
+{{range .Rows}}<li id="m{{.UID}}" draggable="true" class="msgrow{{if not .Seen}} unread{{end}}{{if .SubUnread}} subunread{{end}}{{if .Selected}} selected{{end}}{{if .Answered}} answered{{end}}">
 <span class="sidebar"></span>
 <div class="delimiter"></div>
 <div class="wrapper">
@@ -114,7 +114,8 @@
 <section class="readpane" aria-label="{{.T "mail.reading"}}">
 {{if .Msg}}{{template "msgview" .}}
 {{else if .List.PaneError}}<p class="msg error pad" role="alert">{{.T .List.PaneError}}</p>
-{{else}}<p class="muted pane-empty">{{.T "mailbox.placeholder"}}</p>{{end}}
+{{else}}<p class="pane-sel" id="pane-sel" data-template="{{.T "mailbox.selected"}}" hidden><span class="pane-num"></span><span class="pane-txt"></span></p>
+<p class="muted pane-empty">{{.T "mailbox.placeholder"}}</p>{{end}}
 </section>
 {{end}}
 </div>

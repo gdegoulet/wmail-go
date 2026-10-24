@@ -85,6 +85,7 @@ type Summary struct {
 	Answered      bool
 	Important     bool     // priorité haute
 	ThreadUIDs    []uint32 // tous les messages de la conversation (représentant compris), s'il y en a plusieurs
+	ThreadUnseen  bool     // le représentant est lu, mais un autre message de la conversation ne l'est pas
 	Forwarded     bool     // mot-clé $Forwarded
 	HasAttachment bool
 	AttachKind    string // type commun à toutes les pièces jointes (image, pdf, archive, audio, video, texte, tableur, presentation) ; vide : variés
@@ -489,6 +490,7 @@ func (c *Conn) ListMessages(q ListQuery) (_ *ListResult, err error) {
 			sum := summaryOf(m)
 			if mem := threads[u]; len(mem) > 1 {
 				sum.ThreadUIDs = mem
+				repSeen := sum.Seen
 				for _, mu := range mem {
 					if fl, ok := flags[mu]; ok {
 						if !slices.Contains(fl, imap.FlagSeen) {
@@ -499,6 +501,9 @@ func (c *Conn) ListMessages(q ListQuery) (_ *ListResult, err error) {
 						}
 					}
 				}
+				// Le représentant est lu mais un message plus ancien du fil ne l'est pas :
+				// RainLoop grise la ligne autrement que les vrais non lus.
+				sum.ThreadUnseen = repSeen && !sum.Seen
 			}
 			res.Messages = append(res.Messages, sum)
 		}

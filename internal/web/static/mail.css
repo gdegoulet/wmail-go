@@ -126,6 +126,8 @@ form.search details.adv { position: absolute; right: 0; top: 0; bottom: 0; }
 .msgrow.unread { background: var(--unread-bg); }
 .msgrow.unread .sidebar { background: var(--unread-bar); }
 .msgrow.unread .from, .msgrow.unread .subj { font-weight: 700; }
+.msgrow.subunread { background: var(--subunread-bg, #ffffd9); }
+.msgrow.subunread .sidebar { background: var(--subunread-bar, #ffdb99); }
 .msgrow.checked .sidebar { background: #69a8f5; }
 .msgrow.selected { background: var(--sel-bg); z-index: 1; }
 .msgrow.selected .sidebar { background: var(--sel-bar); }
@@ -154,6 +156,10 @@ form.search details.adv { position: absolute; right: 0; top: 0; bottom: 0; }
 .readpane { display: flex; flex-direction: column; min-height: 0; overflow: auto; margin: .571rem 0 .571rem 0; background: var(--read-bg); color: var(--read-fg);
   border: 1px solid #aaa; border-radius: .214rem; }
 .pane-empty { margin: 4rem auto; color: #999; font-size: 1.714rem; text-align: center; }
+.pane-sel { padding-top: 7.143rem; margin: 0; color: #999; text-align: center; }
+.pane-sel .pane-num { display: block; font-size: 5rem; line-height: 1; }
+.pane-sel .pane-txt { display: block; font-size: 1.714rem; }
+.pane-sel:not([hidden]) + .pane-empty { display: none; }
 .msgview { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .mh { flex: none; position: relative; padding: .714rem; background: #f8f8f8; border-bottom: 1px solid #ddd; border-top-left-radius: .357rem; border-top-right-radius: .357rem; }
 .mh-top { display: flex; align-items: center; gap: .357rem; margin-bottom: .571rem; min-height: 1.571rem; }
@@ -430,7 +436,9 @@ dialog.picker input[type=search] { width: 100%; box-sizing: border-box; }
 .contacts-search { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: .8rem; }
 .adv-fields { border: 0; padding: .4rem 0 0; margin: .4rem 0 0; border-top: 1px solid #ddd; display: grid; gap: .3rem; }
 .adv-fields legend { font-weight: bold; padding: 0 .3rem 0 0; }
-.msgrow.focused { outline: 1px dotted #888; outline-offset: -2px; }
+.msgrow.focused { background: var(--row-hover); }
+.msgrow.focused .sidebar { background: #ccc; }
+.msgrow.focused.unread .sidebar { background: #cc8400; }
 .folder-list li.drop-over { background: rgba(80, 130, 200, .35); }
 body.dnd .msgrow { cursor: grabbing; }
 .dkim { font-size: .85em; }

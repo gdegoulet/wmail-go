@@ -68,6 +68,7 @@
   "mailbox.fix_account": "Fix this mail account",
   "mailbox.no_folders": "No folders.",
   "mailbox.placeholder": "Select a message to read it.",
+  "mailbox.selected": "%d message(s) selected",
   "folder.inbox": "Inbox",
   "folder.drafts": "Drafts",
   "folder.sent": "Sent",

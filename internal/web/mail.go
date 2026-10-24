@@ -48,6 +48,7 @@ type MessageRow struct {
 	AttachKind                   string // genre commun des pièces jointes (voir mailconn.Summary)
 	Important                    bool   // priorité haute (en-têtes Importance, X-Priority)
 	SubjectPrefix, SubjectRest   string // « Re: » / « Fwd: » séparés du reste de l'objet
+	SubUnread                    bool   // conversation dont seul un message plus ancien est non lu
 	ThreadCount                  int    // messages de la conversation (0 ou 1 : message isolé)
 	ThreadUIDs, ThreadURL        string // membres (séparés par des virgules) et lien vers la conversation
 	Selected                     bool
@@ -650,6 +651,10 @@ func (s *Server) home(w http.ResponseWriter, r *http.Request, sess *session.Sess
 		row := MessageRow{
 			UID: m.UID, Subject: m.Subject, From: from, Date: listDate(firstTime(m.Arrival, m.Date), now, lang, loc), Size: humanSize(m.Size, lang),
 			AttachKind: m.AttachKind, Important: m.Important, Seen: m.Seen, Flagged: m.Flagged, Answered: m.Answered, Forwarded: m.Forwarded, HasAttachment: m.HasAttachment, Selected: m.UID == selUID, ReadURL: readURL,
+		}
+		if m.ThreadUnseen {
+			// le message en tête du fil est lu : ligne non grasse, fond atténué
+			row.Seen, row.SubUnread = true, true
 		}
 		row.SubjectPrefix, row.SubjectRest = splitSubject(m.Subject)
 		if len(m.ThreadUIDs) > 1 {

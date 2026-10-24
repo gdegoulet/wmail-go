@@ -65,6 +65,7 @@
   var counter = document.getElementById("select-count");
   var actions = document.querySelectorAll("[data-needs-selection]");
   var current = document.getElementById("current-uid");
+  var paneSel = document.getElementById("pane-sel");
   var lastIndex = -1;
 
   function boxes() {
@@ -81,6 +82,13 @@
     }
     if (counter) counter.textContent = n > 0 ? (counter.getAttribute("data-template") || "%d").replace("%d", String(n)) : "";
     actions.forEach(function (b) { b.disabled = n === 0 && !open; });
+    if (paneSel) { // volet de lecture : « N messages sélectionnés » tant qu'aucun message n'est ouvert
+      paneSel.hidden = n === 0;
+      if (n > 0) {
+        paneSel.querySelector(".pane-num").textContent = String(n);
+        paneSel.querySelector(".pane-txt").textContent = (paneSel.getAttribute("data-template") || "").replace("%d", "").trim();
+      }
+    }
     all.forEach(function (c) {
       var row = c.closest(".msgrow");
       if (row) row.classList.toggle("checked", c.checked);
