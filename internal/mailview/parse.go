@@ -89,9 +89,21 @@ func addresses(h mail.Header, key string) []Address {
 	}
 	out := make([]Address, 0, len(list))
 	for _, a := range list {
-		out = append(out, Address{Name: a.Name, Email: a.Address})
+		out = append(out, Address{Name: DecodeWords(a.Name), Email: a.Address})
 	}
 	return out
+}
+
+// DecodeWords décode les mots encodés RFC 2047 qui restent dans un nom. L'analyseur strict ne les décode pas
+// à l'intérieur d'une chaîne entre guillemets (« "=?utf-8?q?Pinterest?=" <…> »), alors que les clients le font.
+func DecodeWords(s string) string {
+	if !strings.Contains(s, "=?") {
+		return s
+	}
+	if dec, err := (&mime.WordDecoder{CharsetReader: charsetReader}).DecodeHeader(s); err == nil && dec != "" {
+		return dec
+	}
+	return s
 }
 
 var rawMailRe = regexp.MustCompile(`[^\s<>,;:"]+@[^\s<>,;:"]+\.[^\s<>,;:"]+`)

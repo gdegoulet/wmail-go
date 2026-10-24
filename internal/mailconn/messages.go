@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"mime"
 	"slices"
 	"sort"
 	"strings"
@@ -12,6 +13,8 @@ import (
 
 	"github.com/emersion/go-imap/v2"
 	"github.com/emersion/go-imap/v2/imapclient"
+	"github.com/emersion/go-message"
+	_ "wmail-go/internal/mailview" // installe le décodeur de charsets de repli (message.CharsetReader)
 )
 
 var (
@@ -380,6 +383,22 @@ func attachmentKind(mime, name string) string {
 
 // fixUTF8 relit en ISO-8859-1 un en-tête qui n'est pas de l'UTF-8 valide (serveurs ou expéditeurs non conformes),
 // pour afficher « réunion » plutôt qu'un caractère de remplacement.
+// decodeWords décode les mots encodés RFC 2047 que le serveur laisse tels quels dans l'ENVELOPE
+// (« =?utf-8?q?Pinterest?= »), y compris entre guillemets.
+func decodeWords(s string) string {
+	if !strings.Contains(s, "=?") {
+		return s
+	}
+	if dec, err := (&mime.WordDecoder{CharsetReader: message.CharsetReader}).DecodeHeader(s); err == nil && dec != "" {
+		// Le serveur garde parfois les guillemets de la chaîne d'origine : ils n'ont plus lieu d'être.
+		if len(dec) > 1 && strings.HasPrefix(dec, `"`) && strings.HasSuffix(dec, `"`) {
+			dec = dec[1 : len(dec)-1]
+		}
+		return dec
+	}
+	return s
+}
+
 func fixUTF8(s string) string {
 	if utf8.ValidString(s) {
 		return s
@@ -395,15 +414,15 @@ func summaryOf(m *imapclient.FetchMessageBuffer) Summary {
 	s := Summary{UID: uint32(m.UID), Size: m.RFC822Size, Date: m.InternalDate, Arrival: m.InternalDate}
 	s.HasAttachment, s.AttachKind = attachmentInfo(m.BodyStructure)
 	if e := m.Envelope; e != nil {
-		s.Subject = fixUTF8(e.Subject)
+		s.Subject = decodeWords(fixUTF8(e.Subject))
 		if !e.Date.IsZero() {
 			s.Date = e.Date
 		}
 		for _, a := range e.From {
-			s.From = append(s.From, Address{Name: fixUTF8(a.Name), Email: fixUTF8(a.Addr())})
+			s.From = append(s.From, Address{Name: decodeWords(fixUTF8(a.Name)), Email: fixUTF8(a.Addr())})
 		}
 		for _, a := range e.To {
-			s.To = append(s.To, Address{Name: fixUTF8(a.Name), Email: fixUTF8(a.Addr())})
+			s.To = append(s.To, Address{Name: decodeWords(fixUTF8(a.Name)), Email: fixUTF8(a.Addr())})
 		}
 	}
 	for _, sec := range m.BodySection {
@@ -846,11 +865,30 @@ func (c *Conn) CreateFolder(name string) (err error) {
 	if !ValidFolderName(name) {
 		return fmt.Errorf("nom de dossier invalide : %q", name)
 	}
+	name = c.withNamespace(name)
 	if err = c.Client.Create(name, nil).Wait(); err != nil {
 		return err
 	}
 	_ = c.Client.Subscribe(name).Wait() // sans importance si le serveur refuse
 	return nil
+}
+
+// withNamespace ajoute le préfixe de l'espace de noms personnel (« INBOX. » sur Courier, « INBOX/ » sur certains
+// Cyrus) quand le serveur en annonce un et que le nom ne l'a pas déjà : sans lui, la création échoue ou crée un
+// dossier hors de la hiérarchie visible.
+func (c *Conn) withNamespace(name string) string {
+	if !c.Client.Caps().Has(imap.CapNamespace) {
+		return name
+	}
+	data, err := c.Client.Namespace().Wait()
+	if err != nil || data == nil || len(data.Personal) == 0 {
+		return name
+	}
+	prefix := data.Personal[0].Prefix
+	if prefix == "" || strings.HasPrefix(name, prefix) || strings.EqualFold(name, "INBOX") {
+		return name
+	}
+	return prefix + name
 }
 
 // RenameFolder renomme un dossier (ses sous-dossiers suivent, selon le serveur).

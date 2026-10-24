@@ -568,3 +568,18 @@ func slicesContains(l []string, v string) bool {
 	}
 	return false
 }
+
+func TestDecodeWordsFromEnvelope(t *testing.T) {
+	for in, want := range map[string]string{
+		"=?utf-8?q?Pinterest?=":            "Pinterest",
+		`"=?utf-8?q?Pinterest?="`:          "Pinterest",
+		"=?iso-8859-1?q?Andr=E9?=":         "André",
+		"Pinterest":                        "Pinterest",
+		"=?Windows-1252?Q?Id=E9e_D=E9co?=": "Idée Déco", // charset des vieux clients
+		"=?inconnu?q?Tel_quel?=":           "Tel quel",  // charset inconnu : windows-1252 de repli
+	} {
+		if got := decodeWords(in); got != want {
+			t.Errorf("decodeWords(%q) = %q, attendu %q", in, got, want)
+		}
+	}
+}

@@ -384,18 +384,32 @@ func (g *Guard) ListFolders(ctx context.Context, e Endpoint) ([]Folder, error) {
 	return folders, nil
 }
 
-// listFolders liste les dossiers ; withStatus ajoute les compteurs (un STATUS par dossier, envoyés à la suite).
+// listFolders liste les dossiers ; withStatus ajoute les compteurs. Avec LIST-STATUS (ou IMAP4rev2), les compteurs
+// arrivent avec la liste : une seule commande au lieu d'un STATUS par dossier.
 func listFolders(c *imapclient.Client, withStatus bool) ([]Folder, error) {
-	list, err := c.List("", "*", nil).Collect()
+	var opts *imap.ListOptions
+	oneShot := withStatus && (c.Caps().Has(imap.CapListStatus) || c.Caps().Has(imap.CapIMAP4rev2))
+	if oneShot {
+		opts = &imap.ListOptions{ReturnStatus: &imap.StatusOptions{NumMessages: true, NumUnseen: true}}
+	}
+	list, err := c.List("", "*", opts).Collect()
 	if err != nil {
 		return nil, err
 	}
 	folders := make([]Folder, 0, len(list))
 	for _, d := range list {
-		folders = append(folders, Folder{Name: d.Mailbox, Delim: d.Delim, Attrs: d.Attrs})
+		f := Folder{Name: d.Mailbox, Delim: d.Delim, Attrs: d.Attrs}
+		if st := d.Status; st != nil && st.NumMessages != nil {
+			f.Total = *st.NumMessages
+			if st.NumUnseen != nil {
+				f.Unseen = *st.NumUnseen
+			}
+			f.HasCount = true
+		}
+		folders = append(folders, f)
 	}
 	markUnsubscribed(c, folders)
-	if withStatus {
+	if withStatus && !oneShot {
 		cmds := make([]*imapclient.StatusCommand, len(folders))
 		for i, f := range folders {
 			if f.Selectable() {

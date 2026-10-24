@@ -520,3 +520,24 @@ func TestMalformedAddressHeaderKeepsReadableRecipients(t *testing.T) {
 		t.Errorf("destinataires : %+v", m.To)
 	}
 }
+
+
+// Mots encodés RFC 2047 laissés dans un nom entre guillemets : décodés quand même (comme RainLoop).
+func TestQuotedEncodedWordSender(t *testing.T) {
+	raw := "From: \"=?utf-8?q?Pinterest?=\" <no-reply@pinterest.com>\r\n" +
+		"To: \"=?iso-8859-1?q?Andr=E9?=\" <andre@example.org>\r\n" +
+		"Subject: =?utf-8?q?Id=C3=A9e_D=C3=A9co?=\r\n\r\nbonjour\r\n"
+	m, err := Parse([]byte(raw))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(m.From) != 1 || m.From[0].Name != "Pinterest" {
+		t.Errorf("expéditeur : %+v", m.From)
+	}
+	if len(m.To) != 1 || m.To[0].Name != "André" {
+		t.Errorf("destinataire : %+v", m.To)
+	}
+	if m.Subject != "Idée Déco" {
+		t.Errorf("objet : %q", m.Subject)
+	}
+}
