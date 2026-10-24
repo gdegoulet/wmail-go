@@ -74,6 +74,28 @@ func gravatarHash(email string) string {
 	return hex.EncodeToString(sum[:])
 }
 
+// avatarPossible dit s'il vaut la peine de demander une photo : une photo du carnet, ou Gravatar tant que le cache
+// ne nous a pas appris que ce correspondant n'en a pas. Évite une requête (et un 404 dans la console) par message.
+func (s *Server) avatarPossible(sess *session.Session, email string) bool {
+	email = strings.ToLower(strings.TrimSpace(email))
+	if email == "" || !strings.Contains(email, "@") {
+		return false
+	}
+	if _, _, ok := s.contactPhoto(sess, email); ok {
+		return true
+	}
+	sess.Mu.Lock()
+	mode := sess.Account.Data.Settings.Avatars
+	sess.Mu.Unlock()
+	if mode != "gravatar" {
+		return false
+	}
+	if e, ok := s.avatars.get(gravatarHash(email)); ok {
+		return len(e.data) > 0
+	}
+	return true // jamais demandé : on tente une fois, le résultat est mis en cache
+}
+
 // mailAvatar sert la photo d'un correspondant. Elle vient d'abord du carnet d'adresses ; si l'utilisateur a autorisé
 // Gravatar, elle est ensuite demandée à gravatar.com **par le serveur** (le navigateur ne contacte jamais ce service).
 // Sans photo, la réponse est 404 et l'interface garde la silhouette.

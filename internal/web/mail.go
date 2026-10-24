@@ -1002,7 +1002,7 @@ func (s *Server) buildMessageView(sess *session.Session, acc userdata.MailAccoun
 	if len(m.From) > 0 {
 		mv.SenderName, mv.SenderEmail = m.From[0].Short(), m.From[0].Email
 		mv.ContactID = s.contactIDFor(sess, mv.SenderEmail)
-		if s.avatarsEnabled(sess) {
+		if s.avatarsEnabled(sess) && s.avatarPossible(sess, mv.SenderEmail) {
 			mv.AvatarURL = "/mail/avatar?" + url.Values{"email": {mv.SenderEmail}}.Encode()
 		}
 	}

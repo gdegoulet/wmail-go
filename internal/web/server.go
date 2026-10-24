@@ -445,6 +445,28 @@ var themeFileRe = regexp.MustCompile(`^(theme\.css|background\.(jpe?g|png|webp|s
 
 // themeFile sert theme.css (dossier externe d'abord, puis thème embarqué) et l'image de fond background.* du dossier externe
 // <data_dir>/themes/<nom>/ : chacun peut y poser sa propre image sans recompiler.
+// dropMissingWallpaper retire du thème les couches d'image que personne n'a posées dans data/themes/<thème>/ :
+// sans cela le navigateur demanderait un fichier absent et noterait une erreur 404 dans sa console.
+func dropMissingWallpaper(css []byte, dataDir, theme string) []byte {
+	var keep []string
+	for _, line := range strings.Split(string(css), "\n") {
+		drop := false
+		for _, ext := range []string{"jpg", "jpeg", "png", "webp"} {
+			ref := "/themes/" + theme + "/background." + ext
+			if !strings.Contains(line, ref) {
+				continue
+			}
+			if _, err := os.Stat(filepath.Join(dataDir, "themes", theme, "background."+ext)); err != nil {
+				drop = true
+			}
+		}
+		if !drop {
+			keep = append(keep, line)
+		}
+	}
+	return []byte(strings.Join(keep, "\n"))
+}
+
 func (s *Server) themeFile(w http.ResponseWriter, r *http.Request) {
 	name, file := r.PathValue("name"), r.PathValue("file")
 	if !themeNameRe.MatchString(name) || !themeFileRe.MatchString(file) {
@@ -459,6 +481,9 @@ func (s *Server) themeFile(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.NotFound(w, r)
 		return
+	}
+	if file == "theme.css" {
+		data = dropMissingWallpaper(data, s.cfg.DataDir, name)
 	}
 	ct := "text/css; charset=utf-8"
 	switch {

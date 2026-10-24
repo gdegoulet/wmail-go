@@ -600,3 +600,27 @@ func TestThemeImageURLsAreAbsolute(t *testing.T) {
 		t.Error("URL relative dans le thème : elle serait résolue depuis /static/")
 	}
 }
+
+// Sans image personnelle dans data/themes/, le thème ne doit pas référencer background.jpg (404 inutile).
+func TestThemeDropsMissingWallpaper(t *testing.T) {
+	e := newEnv(t, nil)
+	c, _ := e.loggedIn("alice")
+	_, css := e.do(c, "GET", "/themes/rainloop/theme.css", nil, nil)
+	if strings.Contains(css, "background.jpg") {
+		t.Error("la couche background.jpg doit disparaître quand le fichier n'existe pas")
+	}
+	if !strings.Contains(css, "background.svg") {
+		t.Error("l'image livrée doit rester référencée")
+	}
+	dir := filepath.Join(e.cfg.DataDir, "themes", "rainloop")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "background.jpg"), []byte("\xff\xd8\xff"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	_, css = e.do(c, "GET", "/themes/rainloop/theme.css", nil, nil)
+	if !strings.Contains(css, "background.jpg") {
+		t.Error("l'image personnelle doit être référencée dès qu'elle existe")
+	}
+}

@@ -80,3 +80,21 @@ func TestGravatarHash(t *testing.T) {
 		t.Errorf("empreinte : %s", got)
 	}
 }
+
+// Aucun gestionnaire d'événement en ligne dans les gabarits : la politique de sécurité du contenu les refuse.
+func TestNoInlineEventHandlers(t *testing.T) {
+	entries, err := templateFS.ReadDir("templates")
+	if err != nil {
+		t.Fatal(err)
+	}
+	bad := regexp.MustCompile(`\son(error|click|load|change|submit|input|focus|blur)\s*=`)
+	for _, e := range entries {
+		b, err := templateFS.ReadFile("templates/" + e.Name())
+		if err != nil {
+			t.Fatal(err)
+		}
+		if m := bad.Find(b); m != nil {
+			t.Errorf("%s : gestionnaire en ligne %q interdit par la CSP", e.Name(), m)
+		}
+	}
+}
