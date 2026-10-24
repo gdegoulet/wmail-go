@@ -115,6 +115,15 @@ user-delete:
 theme-background-reset:
 	podman run --rm -v wmail-go_wmail-go-data:/data --user 0 docker.io/library/alpine:3 sh -c 'rm -f /data/themes/rainloop/background.jpg /data/themes/rainloop/background.png'
 
+# Change le chemin du module Go (à faire une fois, avant la première publication) :
+#   make module-path NEW=github.com/gdegoulet/wmail-go
+# Réécrit go.mod et tous les imports internes, puis vérifie que tout compile.
+module-path:
+	@test -n "$(NEW)" || { echo "usage : make module-path NEW=github.com/compte/depot"; exit 1; }
+	@OLD=$$(awk '/^module /{print $$2}' go.mod); 	echo "$$OLD -> $(NEW)"; 	grep -rl "$$OLD/internal" --include='*.go' . | xargs sed -i "s|$$OLD/internal|$(NEW)/internal|g"; 	sed -i "s|^module .*|module $(NEW)|" go.mod
+	$(DEV) sh -c "go mod tidy && go build ./... && go test ./internal/config/ -count=1"
+	@echo "chemin de module changé : relisez le diff avant de commiter"
+
 # --- sauvegarde et restauration du volume de données ---
 BACKUP_DIR ?= .
 VOLUME ?= wmail-go_wmail-go-data
