@@ -1302,7 +1302,8 @@ func (s *Server) mailAttachment(w http.ResponseWriter, r *http.Request, sess *se
 			}
 			h.Set("X-Content-Type-Options", "nosniff")
 			if kind == "pdf" { // le lecteur PDF du navigateur ne s'ouvre pas dans un document « sandbox » : CSP sans script ni ressource
-				h.Set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; img-src data:")
+				h.Set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-ancestors 'self'")
+				h.Set("X-Frame-Options", "SAMEORIGIN") // la visionneuse l'affiche dans une iframe de notre propre page
 				h.Set("Accept-Ranges", "bytes")
 				h.Set("Content-Type", ct)
 				h.Set("Content-Disposition", mime.FormatMediaType(disposition, map[string]string{"filename": name}))

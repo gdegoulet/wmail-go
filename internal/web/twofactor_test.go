@@ -163,8 +163,9 @@ func TestTwoFactorShowSecretAgain(t *testing.T) {
 	if !shown(page) {
 		t.Errorf("le secret doit être affiché après un code valide :\n%s", page)
 	}
-	_, page = e.do(c, "GET", "/settings/2fa", nil, nil)
-	if shown(page) {
-		t.Error("le secret ne doit être affiché qu'une fois")
+	// Le QR est demandé par le navigateur après la page : le secret reste affichable un court moment.
+	resp, png := e.do(c, "GET", "/settings/2fa/qr.png?again=1", nil, nil)
+	if resp.StatusCode != 200 || !strings.HasPrefix(png, "\x89PNG") {
+		t.Errorf("QR du secret révélé : statut %d", resp.StatusCode)
 	}
 }

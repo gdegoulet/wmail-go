@@ -229,7 +229,8 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
   réponse : OK
 
 [C-15] Ouverture dans un nouvel onglet
-  tester  : Alt+clic, puis clic du bouton du milieu
+  tester  : clic du bouton du milieu (Alt+clic, dans Chrome, télécharge la cible : comportement du navigateur,
+            pas de l'application)
   attendu : le message s'ouvre dans un nouvel onglet (pas de sélection)
   réponse : ERROR : ça download la page au lieu de l'afficher
 
@@ -750,20 +751,20 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 ```
 [J-01] Script dans un message
   attendu : aucun script exécuté, contenu affiché tel quel
-  réponse : A TOI DE TESTER CECI // PROCEDURE DE TEST/VALIDATION AUTOMATIQUE A METTRE EN PLACE
+  réponse : OK — couvert par TestSecurityMessageScriptsNeutralised (script, onerror, javascript:, iframe, object retirés ; corps en bac à sable)
 
 [J-02] Pixel espion
   attendu : signalé, bloqué avec les images distantes
-  réponse : A TOI DE TESTER CECI // PROCEDURE DE TEST/VALIDATION AUTOMATIQUE A METTRE EN PLACE
+  réponse : OK — couvert par TestSecurityRemoteImagesAndTrackers (références distantes bloquées, pixel 1×1 retiré même images autorisées)
 
 [J-03] CSRF
   tester  : soumettre un formulaire depuis un autre site
   attendu : refus explicite
-  réponse : A TOI DE TESTER CECI // PROCEDURE DE TEST/VALIDATION AUTOMATIQUE A METTRE EN PLACE
+  réponse : OK — couvert par TestSecurityCSRFRejected (jeton absent, jeton faux, Sec-Fetch-Site: cross-site → 403)
 
 [J-04] Serveur sur une adresse privée
   attendu : refus, sauf si allowed_private_hosts l'autorise
-  réponse : A TOI DE TESTER CECI // PROCEDURE DE TEST/VALIDATION AUTOMATIQUE A METTRE EN PLACE
+  réponse : OK — couvert par TestSecurityPrivateNetworkBlocked (refus IMAP et SMTP, acceptation si allowed_private_hosts)
 
 [J-05] HTTPS derrière votre proxy
   attendu : en-tête Strict-Transport-Security présent

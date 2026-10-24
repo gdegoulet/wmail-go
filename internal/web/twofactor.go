@@ -240,6 +240,9 @@ func groupSecret(s string) string {
 	return b.String()
 }
 
+// revealTTL : durée pendant laquelle un secret révélé reste affichable (page et QR).
+const revealTTL = 2 * time.Minute
+
 // twoFactorShow révèle de nouveau le secret (et le QR) après un code valide : installer l'application sur un autre appareil.
 func (s *Server) twoFactorShow(w http.ResponseWriter, r *http.Request, sess *session.Session) {
 	if !s.codeLimit(w, r, sess) {
@@ -251,8 +254,8 @@ func (s *Server) twoFactorShow(w http.ResponseWriter, r *http.Request, sess *ses
 		return
 	}
 	sess.Mu.Lock()
-	secret := sess.Account.Data.TwoFactor.Secret
-	sess.TwoFactorReveal = secret // consommé par la page, puis effacé
+	sess.TwoFactorReveal = sess.Account.Data.TwoFactor.Secret
+	sess.TwoFactorRevealUntil = time.Now().Add(revealTTL) // le QR est demandé après la page : garder le secret un court moment
 	sess.Mu.Unlock()
 	s.log.Info("secret du second facteur affiché de nouveau", "login", store.ReduceLogin(sess.Account.Login))
 	http.Redirect(w, r, "/settings/2fa", http.StatusSeeOther)
@@ -263,7 +266,9 @@ func (s *Server) twoFactorPage(w http.ResponseWriter, r *http.Request, sess *ses
 	tf := sess.Account.Data.TwoFactor
 	setup := sess.TwoFactorSetup
 	reveal := sess.TwoFactorReveal
-	sess.TwoFactorReveal = "" // une seule fois
+	if reveal != "" && time.Now().After(sess.TwoFactorRevealUntil) {
+		reveal, sess.TwoFactorReveal = "", "" // délai passé : le secret n'est plus affiché
+	}
 	sess.Mu.Unlock()
 	v := &TwoFactorView{Enabled: tf.Enabled, Setup: setup != "" && !tf.Enabled, Secret: groupSecret(setup), BackupLeft: len(tf.BackupHashes), NewCodes: codes, ShowSecret: groupSecret(reveal)}
 	s.render(w, r, sess, status, "twofactor", &Page{TitleKey: "twofactor.title", TwoFactor: v, Section: "security", ErrorKey: errKey})
@@ -285,8 +290,8 @@ func (s *Server) twoFactorStart(w http.ResponseWriter, r *http.Request, sess *se
 func (s *Server) twoFactorQR(w http.ResponseWriter, r *http.Request, sess *session.Session) {
 	sess.Mu.Lock()
 	secret, login := sess.TwoFactorSetup, sess.Account.Login
-	if secret == "" && r.URL.Query().Get("again") == "1" && sess.TwoFactorReveal != "" {
-		secret = sess.TwoFactorReveal // QR du secret révélé (la page l'affiche une seule fois)
+	if secret == "" && r.URL.Query().Get("again") == "1" && sess.TwoFactorReveal != "" && time.Now().Before(sess.TwoFactorRevealUntil) {
+		secret = sess.TwoFactorReveal // QR du secret révélé (visible le temps de revealTTL)
 	}
 	sess.Mu.Unlock()
 	if secret == "" {
