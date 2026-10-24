@@ -258,6 +258,11 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
   attendu : l'interface rend la main, journal lisible (make logs), pas de blocage
   réponse :
 
+[C-31] Voisin ouvert après suppression du message ouvert ⚠
+  tester  : ouvrir le 2e message d'une liste, le supprimer
+  attendu : le message suivant s'ouvre (ou le précédent s'il n'y a pas de suivant), pas de retour à la liste vide
+  réponse :
+
 [C-30] Liste d'une ligne (disposition « liste seule »)
   tester  : Réglages > Général > disposition « Liste seule »
   attendu : lignes de 35 px, expéditeur à gauche, objet extensible, date à droite
@@ -700,5 +705,5 @@ Je remplis ce tableau à partir de vos réponses : un retour `KO` y reste jusqu'
 
 ## Points livrés depuis la dernière session de test
 
-Ajoutés aux points ci-dessus, à valider en priorité : `C-12`, `C-13`, `C-14`, `C-15`, `C-30`, `D-10`, `D-15`, `D-16`,
+Ajoutés aux points ci-dessus, à valider en priorité : `C-12`, `C-13`, `C-14`, `C-15`, `C-30`, `C-31`, `D-10`, `D-15`, `D-16`,
 `D-21`, `D-22`, `E-03`, `F-01`, `F-05`, `G-02`, `G-07`, `I-01`, `I-05`, `I-09`, `I-11`, `A-08`, `C-24`.

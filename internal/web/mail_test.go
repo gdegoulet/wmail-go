@@ -1550,3 +1550,29 @@ func TestAttachmentIcon(t *testing.T) {
 		}
 	}
 }
+
+// Suppression du message ouvert : on ouvre son voisin (comme RainLoop).
+func TestDeleteOpenMessageOpensNeighbour(t *testing.T) {
+	e, c, tok := mailEnv(t, true)
+	_, page := e.do(c, "GET", "/", nil, nil)
+	uids := regexp.MustCompile(`name="uid" value="(\d+)"`).FindAllStringSubmatch(page, -1)
+	if len(uids) < 3 {
+		t.Fatalf("%d messages, 3 attendus au moins", len(uids))
+	}
+	open := uids[1][1]
+	_, page = e.do(c, "GET", "/?uid="+open, nil, nil)
+	m := regexp.MustCompile(`name="open_next" id="open-next" value="([^"]*)"`).FindStringSubmatch(page)
+	if m == nil || m[1] == "" {
+		t.Fatal("le volet de lecture doit indiquer le message voisin")
+	}
+	next := htmlUnescape(m[1])
+	resp, _ := e.do(c, "POST", "/mail/action", url.Values{"csrf": {tok}, "action": {"delete"}, "folder": {"INBOX"},
+		"uid": {open}, "back": {"/"}, "current_uid": {open}, "open_next": {next}}, nil)
+	if loc := resp.Header.Get("Location"); loc != next {
+		t.Errorf("redirection %q, attendu le voisin %q", loc, next)
+	}
+	// Avec plusieurs messages visés, retour à la liste.
+	resp, _ = e.do(c, "POST", "/mail/action", url.Values{"csrf": {tok}, "action": {"delete"}, "folder": {"INBOX"},
+		"uid": {uids[0][1], uids[2][1]}, "back": {"/"}, "current_uid": {uids[0][1]}, "open_next": {next}}, nil)
+	e.expect(resp, 303, "/")
+}

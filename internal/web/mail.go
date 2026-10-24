@@ -1567,6 +1567,11 @@ func (s *Server) mailAction(w http.ResponseWriter, r *http.Request, sess *sessio
 	default: // déplacement ou suppression : le message ouvert disparaît, sauf si l'action vise d'autres messages
 		if stay != "/" && open != "" && !slices.Contains(raw, open) {
 			next = stay
+		} else if open != "" && len(raw) == 1 && raw[0] == open {
+			// Seul le message ouvert vient de partir : ouvrir son voisin, comme RainLoop (suivant, sinon précédent).
+			if n := safeBack(r.PostFormValue("open_next")); n != "/" {
+				next = n
+			}
 		}
 	}
 	http.Redirect(w, r, next, http.StatusSeeOther)
