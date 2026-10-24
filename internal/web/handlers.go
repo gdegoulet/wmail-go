@@ -295,6 +295,7 @@ func (s *Server) settingsPage(sess *session.Session) *Page {
 			HideChecks:      set.HideCheckboxes,
 			TrustedSenders:  set.TrustedSenders,
 			NoAnim:          set.NoAnimations,
+			Avatars:         set.Avatars, // sans cela le sélecteur revenait toujours sur « aucune »
 			FaviconCount:    !set.NoFaviconCount,
 			NotifyDesktop:   set.NotifyDesktop,
 			Background:      set.Background,

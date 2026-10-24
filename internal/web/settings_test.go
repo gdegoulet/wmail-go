@@ -659,3 +659,25 @@ func headOf(raw string) string {
 	}
 	return raw
 }
+
+// Le choix « Photo du correspondant » doit être conservé et réaffiché.
+func TestAvatarsPreferenceRoundTrip(t *testing.T) {
+	e := newEnv(t, nil)
+	c, tok := e.loggedIn("alice")
+	form := url.Values{"csrf": {tok}, "language": {"fr"}, "theme": {"rainloop"}, "idle_minutes": {"30"},
+		"absolute_hours": {"8"}, "page_size": {"50"}, "avatars": {"gravatar"}}
+	resp, _ := e.do(c, "POST", "/settings/preferences", form, nil)
+	if resp.StatusCode >= 400 {
+		t.Fatalf("enregistrement : statut %d", resp.StatusCode)
+	}
+	_, page := e.do(c, "GET", "/settings", nil, nil)
+	if !regexp.MustCompile(`<option value="gravatar" selected`).MatchString(page) {
+		t.Errorf("le choix « gravatar » doit rester sélectionné :\n%s", page)
+	}
+	form.Set("avatars", "none")
+	e.do(c, "POST", "/settings/preferences", form, nil)
+	_, page = e.do(c, "GET", "/settings", nil, nil)
+	if !regexp.MustCompile(`<option value="none" selected`).MatchString(page) {
+		t.Error("le retour à « aucune » doit être conservé")
+	}
+}
