@@ -35,6 +35,7 @@
 <symbol id="i-star-o" viewBox="0 0 24 24"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></symbol>
 <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></symbol>
 <symbol id="i-reply" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M10 6 3 12l7 6v-3.6c5 0 8 1.4 11 5.1-.7-6.2-4.3-10.5-11-10.500z"/></symbol>
+<symbol id="i-reply-all" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M8 7 2 12l6 5v-3c4.2 0 6.8 1.2 9.3 4.3C16.7 13 13.7 9.4 8 9.4z"/><path fill="currentColor" stroke="none" d="M14 7 8.6 11.5l1.2 1 4.2-3.4z"/></symbol>
 <symbol id="i-forward" viewBox="0 0 24 24"><path transform="matrix(-1 0 0 1 24 0)" fill="currentColor" stroke="none" d="M10 6 3 12l7 6v-3.6c5 0 8 1.4 11 5.1-.7-6.2-4.3-10.5-11-10.500z"/></symbol>
 <symbol id="i-attach" viewBox="0 0 24 24"><path d="m20 11-8.5 8.5a5 5 0 0 1-7-7L13 4a3.3 3.3 0 0 1 4.7 4.7l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4L14 7.5"/></symbol>
 <symbol id="i-save" viewBox="0 0 24 24"><path d="M4 4h13l3 3v13H4z"/><path d="M8 4v6h8V4M8 20v-6h8v6"/></symbol>
@@ -278,7 +279,9 @@
 {{if .ToShort}}<p class="to">{{$.T "mail.to_label"}} {{.ToShort}}</p>{{end}}
 </div>
 <span class="replygroup">
-{{if .IsDraft}}<a class="reply" href="{{.ComposeURL "draft"}}" title="{{$.T "mail.edit_draft"}}">{{template "icon" "doc"}}</a>{{else}}<a class="reply" href="{{.ComposeURL .ReplyMode}}" title="{{$.T (printf "mail.%s" (replykey .ReplyMode))}}" aria-label="{{$.T (printf "mail.%s" (replykey .ReplyMode))}}">{{if eq .ReplyMode "forward"}}{{template "icon" "forward"}}{{else}}{{template "icon" "reply"}}{{end}}</a>{{end}}
+{{if .IsDraft}}<a class="reply" href="{{.ComposeURL "draft"}}" title="{{$.T "mail.edit_draft"}}">{{template "icon" "doc"}}</a>{{else}}<a class="reply" href="{{.ComposeURL "reply"}}" title="{{$.T "mail.reply"}}" aria-label="{{$.T "mail.reply"}}">{{template "icon" "reply"}}</a>
+<a class="reply" href="{{.ComposeURL "replyall"}}" title="{{$.T "mail.reply_all"}}" aria-label="{{$.T "mail.reply_all"}}">{{template "icon" "reply-all"}}</a>
+<a class="reply" href="{{.ComposeURL "forward"}}" title="{{$.T "mail.forward"}}" aria-label="{{$.T "mail.forward"}}">{{template "icon" "forward"}}</a>{{end}}
 <details class="dropdown right" data-dropdown><summary class="reply" title="{{$.T "mail.more"}}" aria-label="{{$.T "mail.more"}}">{{template "icon" "caret"}}</summary>
 <div class="menu">
 {{if .IsDraft}}<a href="{{.ComposeURL "draft"}}">{{$.T "mail.edit_draft"}}</a>{{end}}
