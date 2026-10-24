@@ -236,11 +236,14 @@ func parseListParams(v url.Values) listParams {
 	case "desc":
 		lp.Desc = true
 	}
-	if q := strings.TrimSpace(strings.Join(append([]string{v.Get("q")}, advancedTerms(v, time.Now())...), " ")); q != "" {
-		if r := []rune(q); len(r) > 200 {
-			q = string(r[:200])
-		}
-		lp.Q = q
+	// Chaque terme est borné séparément : tronquer la requête assemblée pourrait couper un opérateur
+	// en deux (« from: adr… ») et la recherche repartirait en texte libre.
+	terms := append([]string{v.Get("q")}, advancedTerms(v, time.Now())...)
+	for i, t := range terms {
+		terms[i] = clipRunes(t, 200)
+	}
+	if q := strings.TrimSpace(strings.Join(terms, " ")); q != "" {
+		lp.Q = clipRunes(q, 400)
 	}
 	switch s := v.Get("scope"); s {
 	case "subject", "from", "body":
@@ -843,6 +846,14 @@ func (s *Server) mailPane(w http.ResponseWriter, r *http.Request, sess *session.
 }
 
 // --- lecture d'un message ---
+
+// clipRunes borne une chaîne à n runes.
+func clipRunes(s string, n int) string {
+	if r := []rune(s); len(r) > n {
+		return strings.TrimSpace(string(r[:n]))
+	}
+	return s
+}
 
 func parseUID(s string) (uint32, bool) {
 	n, err := strconv.ParseUint(s, 10, 32)
