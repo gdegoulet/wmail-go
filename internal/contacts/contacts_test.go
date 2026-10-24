@@ -149,3 +149,59 @@ func TestCSV(t *testing.T) {
 		t.Errorf("aller-retour : %+v %v", back, err)
 	}
 }
+
+func TestPhoneSearchByDigitsAndTypedCSVHeaders(t *testing.T) {
+	b := &Book{}
+	c := &Contact{First: "Anne", Phones: []Typed{{Type: "cell", Value: "+33 6 12 34 56 78"}}}
+	if err := b.Save(c); err != nil {
+		t.Fatal(err)
+	}
+	for _, q := range []string{"0612", "612345", "+33 6 12"} {
+		if l, _ := b.Search(q, "", 1); len(l) != 1 {
+			t.Errorf("recherche %q : %d résultats", q, len(l))
+		}
+	}
+	if l, _ := b.Search("99", "", 1); len(l) != 0 {
+		t.Error("deux chiffres ne doivent pas suffire")
+	}
+	in := "First Name,Home Email,Business Email,Business Mobile,Home Fax\r\nZoé,perso@x.fr,pro@x.fr,0611,0144\r\n"
+	list, _, err := ParseCSV(strings.NewReader(in))
+	if err != nil || len(list) != 1 {
+		t.Fatalf("%v %v", list, err)
+	}
+	got := list[0]
+	if len(got.Emails) != 2 || got.Emails[0].Type != "home" || got.Emails[1].Type != "work" {
+		t.Errorf("adresses typées : %+v", got.Emails)
+	}
+	if len(got.Phones) != 2 || got.Phones[0].Type != "cell" || got.Phones[1].Type != "fax" {
+		t.Errorf("téléphones typés : %+v", got.Phones)
+	}
+}
+
+func TestVCardKeepsUnknownPropertiesAndPrefFirst(t *testing.T) {
+	in := "BEGIN:VCARD\r\nVERSION:3.0\r\nFN:Zoé\r\nEMAIL:second@x.fr\r\nEMAIL;TYPE=PREF:premier@x.fr\r\nTEL;TYPE=MOBILE:0600\r\nTEL;TYPE=WORK,FAX:0144\r\nIMPP:xmpp:zoe@x.fr\r\nX-SOCIALPROFILE;TYPE=twitter:@zoe\r\nEND:VCARD\r\n"
+	list, _, err := ParseVCards(strings.NewReader(in))
+	if err != nil || len(list) != 1 {
+		t.Fatalf("%v %v", list, err)
+	}
+	c := list[0]
+	if c.Emails[0].Value != "premier@x.fr" {
+		t.Errorf("l'adresse PREF doit venir en tête : %+v", c.Emails)
+	}
+	if c.Phones[0].Type != "cell" || c.Phones[1].Type != "work,fax" {
+		t.Errorf("types de téléphone : %+v", c.Phones)
+	}
+	if len(c.Extra) != 2 {
+		t.Fatalf("propriétés inconnues gardées : %v", c.Extra)
+	}
+	var out bytes.Buffer
+	if err := EncodeVCard(&out, list); err != nil {
+		t.Fatal(err)
+	}
+	s := out.String()
+	for _, want := range []string{"IMPP:xmpp:zoe@x.fr", "X-SOCIALPROFILE", "@zoe"} {
+		if !strings.Contains(s, want) {
+			t.Errorf("%q absent de la vCard réécrite :\n%s", want, s)
+		}
+	}
+}

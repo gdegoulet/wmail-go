@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"errors"
 	"io"
+	"slices"
+	"sort"
 	"strings"
 
 	"github.com/emersion/go-vcard"
@@ -38,13 +40,33 @@ func ParseVCards(r io.Reader) (list []*Contact, skipped int, err error) {
 	}
 }
 
+// normType ramène les étiquettes des autres logiciels à celles que nous utilisons (« mobile » de RainLoop → « cell »).
+var normType = map[string]string{"mobile": "cell", "cellular": "cell", "voice": "", "internet": "", "pref": "", "x-mobile": "cell"}
+
+// typeOf donne l'étiquette d'une valeur (home, work, cell…) ; les types composés sont conservés (« work,fax »).
 func typeOf(f *vcard.Field) string {
+	var kept []string
 	for _, t := range f.Params.Types() {
-		if t = strings.ToLower(t); t != "pref" && t != "internet" {
-			return t
+		t = strings.ToLower(strings.TrimSpace(t))
+		if n, ok := normType[t]; ok {
+			t = n
+		}
+		if t != "" && !slices.Contains(kept, t) {
+			kept = append(kept, t)
 		}
 	}
-	return ""
+	return strings.Join(kept, ",")
+}
+
+// prefFirst place en tête la valeur marquée PREF, comme le font les autres carnets.
+func prefFirst(fields []*vcard.Field) []*vcard.Field {
+	for i, f := range fields {
+		if f.Params.Get(vcard.ParamPreferred) == "1" || slices.ContainsFunc(f.Params.Types(), func(t string) bool { return strings.EqualFold(t, "pref") }) {
+			out := append([]*vcard.Field{f}, fields[:i]...)
+			return append(out, fields[i+1:]...)
+		}
+	}
+	return fields
 }
 
 func fromCard(card vcard.Card) *Contact {
@@ -62,13 +84,13 @@ func fromCard(card vcard.Card) *Contact {
 		}
 	}
 	c.Nick = card.Value(vcard.FieldNickname)
-	for _, f := range card[vcard.FieldEmail] {
+	for _, f := range prefFirst(card[vcard.FieldEmail]) {
 		c.Emails = append(c.Emails, Typed{typeOf(f), f.Value})
 	}
-	for _, f := range card[vcard.FieldTelephone] {
+	for _, f := range prefFirst(card[vcard.FieldTelephone]) {
 		c.Phones = append(c.Phones, Typed{typeOf(f), f.Value})
 	}
-	for _, f := range card[vcard.FieldURL] {
+	for _, f := range prefFirst(card[vcard.FieldURL]) {
 		c.URLs = append(c.URLs, Typed{typeOf(f), f.Value})
 	}
 	for _, a := range card.Addresses() {
@@ -83,6 +105,7 @@ func fromCard(card vcard.Card) *Contact {
 		c.Birthday = bd[:4] + "-" + bd[4:6] + "-" + bd[6:8]
 	}
 	c.Photo = photoFromCard(card)
+	c.Extra = extraFromCard(card)
 	if cat := card.Value(vcard.FieldCategories); cat != "" {
 		c.Tags = strings.Split(cat, ",")
 	}
@@ -122,6 +145,18 @@ func toCard(c *Contact) vcard.Card {
 			_, b64, _ := strings.Cut(c.Photo, ",")
 			card.Add(vcard.FieldPhoto, &vcard.Field{Value: strings.Join(strings.Fields(b64), ""),
 				Params: vcard.Params{"ENCODING": {"b"}, vcard.ParamType: {strings.ToUpper(strings.TrimPrefix(mime, "image/"))}}})
+		}
+	}
+	for _, line := range c.Extra { // propriétés inconnues conservées telles quelles (IMPP, X-…)
+		if k, v, ok := strings.Cut(line, ":"); ok && k != "" {
+			name, params, _ := strings.Cut(k, ";")
+			f := &vcard.Field{Value: v, Params: vcard.Params{}}
+			for _, kv := range strings.Split(params, ";") {
+				if pk, pv, ok := strings.Cut(kv, "="); ok {
+					f.Params.Add(strings.ToUpper(pk), pv)
+				}
+			}
+			card.Add(strings.ToUpper(name), f)
 		}
 	}
 	add(vcard.FieldEmail, c.Emails)
@@ -179,4 +214,44 @@ func photoFromCard(card vcard.Card) string {
 		mime = "image/webp"
 	}
 	return "data:" + mime + ";base64," + strings.Join(strings.Fields(v), "")
+}
+
+// knownFields : propriétés que ce carnet sait lire et réécrire ; les autres sont gardées telles quelles.
+var knownFields = map[string]bool{
+	vcard.FieldVersion: true, vcard.FieldUID: true, vcard.FieldFormattedName: true, vcard.FieldName: true,
+	vcard.FieldNickname: true, vcard.FieldEmail: true, vcard.FieldTelephone: true, vcard.FieldURL: true,
+	vcard.FieldAddress: true, vcard.FieldOrganization: true, vcard.FieldTitle: true, vcard.FieldNote: true,
+	vcard.FieldBirthday: true, vcard.FieldCategories: true, vcard.FieldPhoto: true, "PRODID": true, "REV": true,
+}
+
+// extraFromCard garde les propriétés que nous ne connaissons pas, pour les réécrire lors d'une synchronisation CardDAV.
+func extraFromCard(card vcard.Card) []string {
+	var out []string
+	total := 0
+	for name, fields := range card {
+		if knownFields[strings.ToUpper(name)] {
+			continue
+		}
+		for _, f := range fields {
+			var params []string
+			for k, vals := range f.Params {
+				for _, v := range vals {
+					params = append(params, strings.ToUpper(k)+"="+v)
+				}
+			}
+			sort.Strings(params)
+			line := strings.ToUpper(name)
+			if len(params) > 0 {
+				line += ";" + strings.Join(params, ";")
+			}
+			line += ":" + f.Value
+			if total+len(line) > MaxExtra || len(out) >= 40 {
+				return out
+			}
+			total += len(line)
+			out = append(out, line)
+		}
+	}
+	sort.Strings(out)
+	return out
 }

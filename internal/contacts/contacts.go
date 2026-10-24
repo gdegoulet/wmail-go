@@ -26,6 +26,7 @@ const (
 	MaxField    = 500 // longueur d'un champ texte simple
 	MaxNotes    = 10000
 	MaxPhoto    = 350 << 10 // image d'un contact (URI data:)
+	MaxExtra    = 8 << 10   // propriétés vCard conservées telles quelles
 	PageSize    = 50
 )
 
@@ -70,6 +71,7 @@ type Contact struct {
 	Birthday string   `json:"bd,omitempty"` // AAAA-MM-JJ
 	Notes    string   `json:"note,omitempty"`
 	Photo    string   `json:"photo,omitempty"` // image du contact en URI data: (vCard PHOTO)
+	Extra    []string `json:"extra,omitempty"` // propriétés vCard que ce carnet ne gère pas, gardées pour CardDAV
 	Tags     []string `json:"tags,omitempty"`
 	Frec     int      `json:"frec,omitempty"`
 	Changed  int64    `json:"ch,omitempty"`
@@ -135,6 +137,18 @@ func (c *Contact) Normalize() error {
 	if !photoRe.MatchString(c.Photo) || len(c.Photo) > MaxPhoto {
 		c.Photo = ""
 	}
+	total := 0
+	extra := c.Extra[:0]
+	for _, e := range c.Extra {
+		if e = strings.TrimSpace(e); e == "" || strings.ContainsAny(e, "\r\n") || !strings.Contains(e, ":") {
+			continue
+		}
+		if total += len(e); total > MaxExtra || len(extra) >= 40 {
+			break
+		}
+		extra = append(extra, e)
+	}
+	c.Extra = extra
 	if _, err := time.Parse("2006-01-02", c.Birthday); err != nil {
 		c.Birthday = ""
 	}
@@ -259,6 +273,9 @@ func (b *Book) Save(c *Contact) error {
 	for i, old := range b.Contacts {
 		if old.ID == c.ID {
 			c.Frec, c.UID, c.Href, c.ETag = old.Frec, firstNonEmpty(c.UID, old.UID), old.Href, old.ETag
+			if len(c.Extra) == 0 {
+				c.Extra = old.Extra
+			}
 			b.Contacts[i] = c
 			return nil
 		}
@@ -333,6 +350,27 @@ func fold(s string) string {
 	return out
 }
 
+// digitsOnly ne garde que les chiffres (recherche d'un numéro de téléphone : espaces, points et « + » ignorés).
+func digitsOnly(s string) string {
+	var b strings.Builder
+	for _, r := range s {
+		if r >= '0' && r <= '9' {
+			b.WriteRune(r)
+		}
+	}
+	return b.String()
+}
+
+// phoneDigits donne les numéros en chiffres seuls, sans les zéros de tête, pour comparer « 0612 » à « +33 6 12 … ».
+func (c *Contact) phoneDigits() string {
+	var b strings.Builder
+	for _, p := range c.Phones {
+		b.WriteString(strings.TrimLeft(digitsOnly(p.Value), "0"))
+		b.WriteByte('\n')
+	}
+	return b.String()
+}
+
 func (c *Contact) haystack() string {
 	parts := []string{c.Display(), c.Nick, c.Org, c.Notes}
 	for _, t := range c.Emails {
@@ -357,7 +395,10 @@ func (b *Book) Search(q, tag string, page int) (list []*Contact, total int) {
 			continue
 		}
 		if q != "" && !strings.Contains(c.haystack(), q) {
-			continue
+			// un numéro de téléphone se cherche aussi en chiffres seuls (« 0612 » trouve « +33 6 12 … »)
+			if d := strings.TrimLeft(digitsOnly(q), "0"); len(d) < 3 || !strings.Contains(c.phoneDigits(), d) {
+				continue
+			}
 		}
 		all = append(all, c)
 	}

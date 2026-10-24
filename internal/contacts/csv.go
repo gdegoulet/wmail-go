@@ -66,8 +66,18 @@ func headerKind(h string) colKind {
 		return colKind{"code", ""}
 	case "country", "home country", "business country", "pays":
 		return colKind{"country", ""}
-	case "mobile phone", "mobile", "cell phone", "portable", "telephone portable":
+	case "mobile phone", "mobile", "cell phone", "portable", "telephone portable", "mobile number", "business mobile", "mobile telephone number", "telephone mobile":
 		return colKind{"phone", "cell"}
+	case "home fax", "business fax", "fax", "other fax", "telecopie", "fax number":
+		return colKind{"phone", "fax"}
+	case "home email", "home e mail", "personal email", "email personnel", "adresse personnelle":
+		return colKind{"email", "home"}
+	case "business email", "business e mail", "work email", "email professionnel", "email bureau":
+		return colKind{"email", "work"}
+	case "other email", "other e mail", "autre email", "email 3", "e mail 3":
+		return colKind{"email", "other"}
+	case "primary email", "secondary email", "email principal", "email secondaire":
+		return colKind{"email", ""}
 	case "home phone", "telephone domicile", "telephone fixe":
 		return colKind{"phone", "home"}
 	case "business phone", "work phone", "telephone bureau", "telephone professionnel":
@@ -79,7 +89,7 @@ func headerKind(h string) colKind {
 			return colKind{}
 		}
 		return colKind{"email", ""}
-	case strings.HasPrefix(h, "phone") || h == "tel" || h == "telephone" || strings.HasSuffix(h, " phone"):
+	case strings.HasPrefix(h, "phone") || h == "tel" || h == "telephone" || strings.HasSuffix(h, " phone") || strings.HasSuffix(h, "phone number"):
 		if strings.HasSuffix(h, " type") || strings.HasSuffix(h, " label") {
 			return colKind{}
 		}
@@ -185,7 +195,7 @@ func ParseCSV(r io.Reader) (list []*Contact, skipped int, err error) {
 				c.URLs = append(c.URLs, Typed{Value: v})
 			case "email":
 				for _, a := range strings.FieldsFunc(v, func(r rune) bool { return r == ';' || r == ',' || r == ' ' }) {
-					c.Emails = append(c.Emails, Typed{Value: a})
+					c.Emails = append(c.Emails, Typed{Type: k.typ, Value: a})
 				}
 			case "phone":
 				c.Phones = append(c.Phones, Typed{k.typ, v})
