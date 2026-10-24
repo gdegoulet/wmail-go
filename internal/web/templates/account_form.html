@@ -113,7 +113,7 @@
 <label>{{.T "identities.bcc"}}
 <input name="bcc" type="text" maxlength="500" value="{{.Form.Bcc}}"></label>
 <label>{{.T "accounts.form.signature"}}
-<textarea name="signature" rows="4" maxlength="5000">{{.Form.Signature}}</textarea></label>
+<textarea name="signature" rows="4" maxlength="5000" data-rich data-rich-labels="{{.T "compose.tb.bold"}}|{{.T "compose.tb.italic"}}|{{.T "compose.tb.underline"}}|{{.T "compose.tb.ul"}}|{{.T "compose.tb.ol"}}|{{.T "compose.tb.link"}}|{{.T "compose.tb.clear"}}|{{.T "rich.plain"}}|{{.T "rich.toggle"}}|{{.T "rich.rich"}}" data-link-prompt="{{.T "compose.tb.link_prompt"}}" data-link-bad="{{.T "compose.tb.link_bad"}}">{{.Form.Signature}}</textarea></label>
 <small>{{.T "accounts.form.signature_hint"}}</small>
 <label class="check"><input name="signature_before" type="checkbox"{{if .Form.SignatureBefore}} checked{{end}}> {{.T "accounts.form.signature_before"}}</label>
 </fieldset>
@@ -126,4 +126,4 @@
 </form>
 {{template "setclose" .}}{{end}}
 
-{{define "scripts"}}<script src="/static/accounts.js" defer></script>{{end}}
+{{define "scripts"}}<script src="/static/accounts.js" defer></script><script src="/static/richtext.js" defer></script>{{end}}

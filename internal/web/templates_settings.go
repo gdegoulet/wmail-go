@@ -1,18 +1,22 @@
 package web
 
 import (
+	"encoding/json"
+
 	"crypto/rand"
 	"encoding/hex"
 	"net/http"
 	"slices"
 	"strings"
 	"time"
+	"wmail-go/internal/mailview"
 
 	"wmail-go/internal/session"
 	"wmail-go/internal/userdata"
 )
 
 const (
+	htmlPrefix      = ":HTML:"
 	maxTemplates    = 50
 	maxTemplateName = 100
 	maxTemplateBody = 20000
@@ -131,10 +135,20 @@ func (s *Server) templatesBody(w http.ResponseWriter, r *http.Request, sess *ses
 		http.NotFound(w, r)
 		return
 	}
-	now := time.Now()
+	now := time.Now().In(s.userLoc(sess))
+	html := strings.HasPrefix(body, htmlPrefix)
+	body = strings.TrimPrefix(body, htmlPrefix)
 	body = strings.NewReplacer("{{DATE}}", now.Format("2006-01-02"), "{{TIME}}", now.Format("15:04")).Replace(body)
 	body = momentRe.ReplaceAllStringFunc(body, func(m string) string { return momentFormat(momentRe.FindStringSubmatch(m)[1], now) })
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	w.Header().Set("Cache-Control", "no-store")
-	_, _ = w.Write([]byte(body))
+	h := w.Header()
+	h.Set("Cache-Control", "no-store")
+	if html {
+		// Modèle mis en forme : assaini comme un message, et converti en texte pour une composition en texte brut.
+		clean, _ := mailview.Sanitize(body, mailview.SanitizeOptions{BlockRemote: true})
+		h.Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]string{"html": clean, "text": mailview.HTMLToText(clean)})
+		return
+	}
+	h.Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(map[string]string{"text": body})
 }

@@ -226,16 +226,21 @@
     b.addEventListener("click", function () {
       var d = b.closest("details"); if (d) d.open = false;
       fetch("/settings/templates/body?id=" + encodeURIComponent(b.getAttribute("data-template")), { credentials: "same-origin" })
-        .then(function (r) { return r.ok ? r.text() : ""; })
-        .then(function (text) {
-          if (!text) return;
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (tpl) {
+          if (!tpl) return;
+          var text = tpl.text || "";
           var editor = document.getElementById("cp-editor");
           if (editor && !editor.hidden) {
             editor.focus();
-            text.split("\n").forEach(function (line, i) {
-              if (i > 0) document.execCommand("insertLineBreak");
-              if (line) document.execCommand("insertText", false, line);
-            });
+            if (tpl.html) {
+              document.execCommand("insertHTML", false, tpl.html);
+            } else {
+              text.split("\n").forEach(function (line, i) {
+                if (i > 0) document.execCommand("insertLineBreak");
+                if (line) document.execCommand("insertText", false, line);
+              });
+            }
           } else {
             var area = document.getElementById("cp-bodytext");
             if (!area) return;

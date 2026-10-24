@@ -702,5 +702,9 @@
   "settings.prefs.avatars.gravatar": "Address book, then Gravatar",
   "settings.prefs.avatars_hint": "A picture stored in the address book is always used when present. With Gravatar, the server (never your browser) asks gravatar.com for the picture: the hash of your correspondents' addresses is sent to that service.",
   "contacts.photo": "Picture",
-  "contacts.photo_remove": "Remove the picture"
+  "contacts.photo_remove": "Remove the picture",
+  "rich.plain": "plain text",
+  "rich.rich": "formatting",
+  "rich.toggle": "Switch between plain text and formatting",
+  "templates.rich_hint": "A formatted template is inserted as is into an HTML message, and converted to text in a plain-text message."
 }

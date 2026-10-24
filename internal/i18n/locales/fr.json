@@ -702,5 +702,9 @@
   "settings.prefs.avatars.gravatar": "Carnet d'adresses, puis Gravatar",
   "settings.prefs.avatars_hint": "La photo du carnet d'adresses est toujours utilisée quand elle existe. Avec Gravatar, le serveur (jamais votre navigateur) demande la photo à gravatar.com : l'empreinte de l'adresse de vos correspondants lui est alors transmise.",
   "contacts.photo": "Photo",
-  "contacts.photo_remove": "Retirer la photo"
+  "contacts.photo_remove": "Retirer la photo",
+  "rich.plain": "texte brut",
+  "rich.rich": "mise en forme",
+  "rich.toggle": "Basculer entre texte brut et mise en forme",
+  "templates.rich_hint": "Un modèle mis en forme est inséré tel quel dans un message HTML, et converti en texte dans un message en texte brut."
 }

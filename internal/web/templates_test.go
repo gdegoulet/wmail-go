@@ -1,6 +1,7 @@
 package web
 
 import (
+	"encoding/json"
 	"net/url"
 	"regexp"
 	"strings"
@@ -30,8 +31,9 @@ func TestMessageTemplatesLifecycle(t *testing.T) {
 		t.Error("le modèle n'est pas proposé dans la composition")
 	}
 	resp, body := e.do(c, "GET", "/settings/templates/body?id="+id, nil, nil)
-	if resp.StatusCode != 200 || !strings.HasPrefix(body, "Bonjour,\nLe 20") || strings.Contains(body, "{{") {
-		t.Errorf("corps : %q", body)
+	var tpl struct{ Text, HTML string }
+	if err := json.Unmarshal([]byte(body), &tpl); err != nil || resp.StatusCode != 200 || !strings.HasPrefix(tpl.Text, "Bonjour,\nLe 20") || strings.Contains(tpl.Text, "{{") {
+		t.Errorf("corps : %q (%v)", body, err)
 	}
 	if resp, _ = e.do(c, "GET", "/settings/templates/body?id=nope", nil, nil); resp.StatusCode != 404 {
 		t.Errorf("modèle inconnu : %d", resp.StatusCode)
@@ -43,8 +45,14 @@ func TestMessageTemplatesLifecycle(t *testing.T) {
 	}
 	e.do(c, "POST", "/settings/templates/save", url.Values{"csrf": {tok}, "id": {id}, "name": {"Renommé"}, "body": {"Nouveau"}}, nil)
 	_, body = e.do(c, "GET", "/settings/templates/body?id="+id, nil, nil)
-	if body != "Nouveau" {
+	if !strings.Contains(body, `"text":"Nouveau"`) {
 		t.Errorf("après modification : %q", body)
+	}
+	// modèle mis en forme : HTML assaini et version texte
+	e.do(c, "POST", "/settings/templates/save", url.Values{"csrf": {tok}, "id": {id}, "name": {"Riche"}, "body": {":HTML:<p>Bonjour <b>Anne</b></p><script>alert(1)</script>"}}, nil)
+	_, body = e.do(c, "GET", "/settings/templates/body?id="+id, nil, nil)
+	if err := json.Unmarshal([]byte(body), &tpl); err != nil || !strings.Contains(tpl.HTML, "<b>Anne</b>") || strings.Contains(tpl.HTML, "script") || tpl.Text != "Bonjour Anne" {
+		t.Errorf("modèle mis en forme : %q (%v)", body, err)
 	}
 	if resp, _ = e.do(c, "POST", "/settings/templates/save", url.Values{"csrf": {tok}, "id": {"inconnu"}, "name": {"x"}, "body": {"y"}}, nil); resp.StatusCode != 404 {
 		t.Errorf("id inconnu : %d", resp.StatusCode)

@@ -21,8 +21,9 @@
 <form method="post" action="/settings/templates/save">
 <input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="id" value="{{.Edit.ID}}">
 <label>{{$.T "templates.name"}}<input type="text" name="name" required maxlength="100" value="{{.Edit.Name}}"></label>
-<label>{{$.T "templates.body"}}<textarea name="body" rows="10" maxlength="20000" required>{{.Edit.Body}}</textarea></label>
+<label>{{$.T "templates.body"}}<textarea name="body" rows="10" maxlength="20000" required data-rich data-rich-labels="{{$.T "compose.tb.bold"}}|{{$.T "compose.tb.italic"}}|{{$.T "compose.tb.underline"}}|{{$.T "compose.tb.ul"}}|{{$.T "compose.tb.ol"}}|{{$.T "compose.tb.link"}}|{{$.T "compose.tb.clear"}}|{{$.T "rich.plain"}}|{{$.T "rich.toggle"}}|{{$.T "rich.rich"}}" data-link-prompt="{{$.T "compose.tb.link_prompt"}}" data-link-bad="{{$.T "compose.tb.link_bad"}}">{{.Edit.Body}}</textarea></label>
 <small>{{$.T "templates.vars"}}</small>
+<small>{{$.T "templates.rich_hint"}}</small>
 <button type="submit">{{$.T "contacts.save"}}</button>
 {{if .Editing}} <a href="/settings/templates">{{$.T "accounts.form.cancel"}}</a>{{end}}
 </form>
@@ -30,3 +31,4 @@
 {{end}}
 {{end}}
 {{template "setclose" $}}{{end}}
+{{define "scripts"}}<script src="/static/richtext.js" defer></script>{{end}}

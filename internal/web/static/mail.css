@@ -521,3 +521,12 @@ form.search { position: relative; }
 .avatar { position: relative; overflow: hidden; }
 .avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
 .c-photo img { border-radius: .3rem; object-fit: cover; }
+
+/* Éditeur riche des signatures et des modèles */
+.rt { border: 1px solid var(--border, #ccc); border-radius: .3rem; background: var(--input-bg, #fff); margin-top: .25rem; }
+.rt-bar { display: flex; flex-wrap: wrap; gap: .2rem; padding: .25rem; border-bottom: 1px solid var(--border, #ddd); background: linear-gradient(#f8f8f8, #ececec); border-radius: .3rem .3rem 0 0; }
+.rt-bar button { margin: 0; padding: .1rem .45rem; min-width: 1.8rem; font-size: .9rem; background: #fff; color: #333; border: 1px solid #ccc; border-radius: .2rem; cursor: pointer; }
+.rt-bar button:hover { background: #eee; }
+.rt-bar .rt-toggle { margin-left: auto; font-size: .8rem; }
+.rt-editor { min-height: 7rem; max-height: 22rem; overflow: auto; padding: .5rem .6rem; outline: 0; color: var(--fg, #222); }
+.rt textarea { border: 0; border-radius: 0 0 .3rem .3rem; margin: 0; }
