@@ -24,6 +24,21 @@
     if (now) { a.click(); return; }
     timer = setTimeout(function () { a.click(); }, 200); // une touche maintenue n'ouvre que le dernier message
   }
+  // Sélection par Maj+flèches : ancre fixe, la plage suit le curseur. Changer de sens réduit la plage
+  // (les lignes quittées sont décochées), sauf celles déjà cochées avant la série.
+  var anchor = -1, before = null;
+  function uidOf(row) { var c = row.querySelector("input[name=uid]"); return c ? c.value : ""; }
+  function applyRange(all, from, to) {
+    var lo = Math.min(from, to), hi = Math.max(from, to), changed = false;
+    all.forEach(function (row, idx) {
+      var c = row.querySelector("input[name=uid]");
+      if (!c) return;
+      var want = (idx >= lo && idx <= hi) || before[c.value] === true;
+      if (c.checked !== want) { c.checked = want; changed = true; }
+    });
+    if (changed) document.dispatchEvent(new Event("wmail:pane")); // recompte la sélection et les boutons
+  }
+
   function check(row, on) {
     var c = row.querySelector("input[name=uid]");
     if (c) { c.checked = on === undefined ? !c.checked : on; c.dispatchEvent(new Event("click", { bubbles: true })); }
@@ -34,6 +49,9 @@
     while (n && n.tagName !== "A") n = rel === "next" ? n.nextElementSibling : n.previousElementSibling;
     return n || null;
   }
+
+  // Un clic dans la liste repart d'une nouvelle ancre pour Maj+flèches.
+  list.addEventListener("click", function () { anchor = -1; before = null; });
 
   document.addEventListener("keydown", function (e) {
     if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey || typing(e.target)) return;
@@ -53,16 +71,26 @@
     else if (k === "End") to = all.length - 1;
     else if (k === "PageDown") to = Math.min((i < 0 ? 0 : i) + 10, all.length - 1);
     else if (k === "PageUp") to = Math.max((i < 0 ? 0 : i) - 10, 0);
-    else if ((k === " " || k === "Insert") && cur) { e.preventDefault(); check(cur); return; }
+    else if ((k === " " || k === "Insert") && cur) { e.preventDefault(); anchor = -1; check(cur); return; }
     else if (k === "Enter" && cur) { e.preventDefault(); open(cur, true); return; }
     else return;
     e.preventDefault();
     if (e.shiftKey && (k === "ArrowDown" || k === "ArrowUp")) {
-      if (cur) check(cur, true);
-      check(all[to], true);
+      if (anchor < 0 || anchor >= all.length) {
+        anchor = i < 0 ? to : i;
+        before = {};
+        all.forEach(function (row) {
+          var c = row.querySelector("input[name=uid]");
+          if (c && c.checked) before[c.value] = true;
+        });
+        delete before[uidOf(all[anchor])]; // l'ancre appartient à la plage, pas aux cases d'avant
+      }
+      applyRange(all, anchor, to);
       setFocus(all[to]);
       return;
     }
+    anchor = -1; // toute autre navigation repart d'une nouvelle ancre
+    before = null;
     setFocus(all[to]);
     open(all[to]);
   });

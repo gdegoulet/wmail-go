@@ -58,11 +58,21 @@ const badgeNums = d => [...d.querySelectorAll(".folder-list li.active .badge, .f
   {
     const { w, d, calls } = boot();
     const a = d.querySelector(".msgrow a.rowlink");
-    for (const init of [{ ctrlKey: true }, { metaKey: true }, { shiftKey: true }, { altKey: true }, { button: 1 }]) {
+    for (const init of [{ altKey: true }, { button: 1 }]) {
       const e = click(w, a, init);
       if (e.defaultPrevented) ok(false, "clic avec " + JSON.stringify(init) + " intercepté à tort");
     }
-    ok(calls.length === 0, "clic avec modificateur ou bouton du milieu : navigation normale (nouvel onglet possible)");
+    ok(calls.length === 0, "Alt+clic et bouton du milieu : navigation normale (nouvel onglet possible)");
+    // Ctrl+clic et Maj+clic cochent la ligne au lieu de l'ouvrir.
+    const box = d.querySelector(".msgrow input[name=uid]");
+    const e1 = click(w, a, { ctrlKey: true });
+    ok(e1.defaultPrevented && box.checked && calls.length === 0, "Ctrl+clic coche la ligne sans l'ouvrir");
+    const e2 = click(w, a, { ctrlKey: true });
+    ok(e2.defaultPrevented && !box.checked, "Ctrl+clic de nouveau : décoche");
+    click(w, d.querySelectorAll(".msgrow a.rowlink")[1], { ctrlKey: true });
+    const e3 = click(w, d.querySelectorAll(".msgrow a.rowlink")[4], { shiftKey: true });
+    const n = [...d.querySelectorAll("input[name=uid]")].filter(c => c.checked).length;
+    ok(e3.defaultPrevented && n === 4, "Maj+clic étend la sélection depuis la dernière ligne cochée : " + n);
   }
   {
     const pending = [];

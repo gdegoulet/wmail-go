@@ -135,7 +135,27 @@
 
   form.addEventListener("click", function (e) {
     var t = e.target;
-    if (!t || t.type !== "checkbox" || t.name !== "uid") return;
+    if (!t || !t.closest) return;
+    // Ctrl+clic (ou Cmd) sur une ligne : coche ou décoche sans ouvrir le message ; Maj+clic : étend la sélection.
+    if (t.type !== "checkbox" && !t.closest("input, button, .star, .threads, a.preview") && (e.ctrlKey || e.metaKey || e.shiftKey)) {
+      var row = t.closest(".msgrow");
+      var box = row && row.querySelector("input[name=uid]");
+      if (box) {
+        e.preventDefault();
+        e.stopPropagation();
+        var list = boxes(), at = list.indexOf(box);
+        if (e.shiftKey && lastIndex >= 0 && lastIndex !== at) {
+          var a = Math.min(at, lastIndex), b = Math.max(at, lastIndex);
+          for (var j = a; j <= b; j++) list[j].checked = true;
+        } else {
+          box.checked = !box.checked;
+        }
+        lastIndex = at;
+        refresh();
+        return;
+      }
+    }
+    if (t.type !== "checkbox" || t.name !== "uid") return;
     var all = boxes();
     var i = all.indexOf(t);
     if (e.shiftKey && lastIndex >= 0 && lastIndex !== i) {
