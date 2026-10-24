@@ -22,6 +22,13 @@
   // Réponse : le curseur va au début du texte (au-dessus de la citation).
   if ($("cp-to").value !== "" && !body.hidden && $("cp-pane-text").getAttribute("data-mode") !== "html") { body.focus(); body.setSelectionRange(0, 0); body.scrollTop = 0; }
 
+  // Sur mobile, le clavier des champs d'adresse montre « @ » : chips.js recrée le champ de saisie, on lui
+  // repasse l'attribut inputmode posé dans le gabarit.
+  ["cp-to", "cp-cc", "cp-bcc", "cp-replyto"].forEach(function (id) {
+    var el = $(id);
+    if (el && el.chipsInput) el.chipsInput.setAttribute("inputmode", el.getAttribute("inputmode") || "email");
+  });
+
   // --- champs facultatifs ---
   function rowOf(name) { return form.querySelector('[data-row="' + name + '"]'); }
   ["cc", "bcc", "reply_to"].forEach(function (n) {

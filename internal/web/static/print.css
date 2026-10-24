@@ -1,10 +1,60 @@
-body { margin: 1.5cm; font: 12pt/1.4 Arial, "Liberation Sans", sans-serif; color: #000; background: #fff; }
-h1 { font-size: 16pt; margin: 0 0 .6em; }
-table.hdr { border-collapse: collapse; margin-bottom: 1em; width: 100%; border-bottom: 1px solid #999; }
-table.hdr th { text-align: left; vertical-align: top; width: 4.5em; padding: .15em .6em .15em 0; color: #555; font-weight: normal; }
+/* Version imprimable d'un message : en-tête complet, corps assaini, rien d'autre.
+   À l'impression : aucune barre d'outils, aucun aplat de couleur (encre), l'adresse des liens en toutes lettres. */
+html { print-color-adjust: economy; -webkit-print-color-adjust: economy; }
+body { margin: 1.5cm; font: 12pt/1.45 Arial, "Liberation Sans", sans-serif; color: #000; background: #fff; }
+
+/* Bouton d'impression : à l'écran seulement. */
+.noprint { margin: 0 0 1.2em; }
+#print-btn { font: inherit; padding: .25em 1.2em; color: #333; background: #f2f2f2; border: 1px solid #ccc; border-radius: 3px; cursor: pointer; }
+#print-btn:hover { background: #e6e6e6; }
+
+/* En-tête : objet, puis De, À, Cc, Cci, Répondre à, Date, pièces jointes. */
+table.hdr { border-collapse: collapse; margin: 0 0 1em; width: 100%; border-bottom: 1px solid #999; }
+table.hdr th { text-align: left; vertical-align: top; width: 7.5em; padding: .15em .6em .15em 0; color: #555; font-weight: normal; }
 table.hdr td { padding: .15em 0; overflow-wrap: anywhere; }
+table.hdr tr.subject th { padding-top: .25em; }
+table.hdr tr.subject td { padding-bottom: .5em; font-size: 15pt; font-weight: bold; line-height: 1.25; }
+ul.att { margin: 0; padding-left: 1.3em; }
+ul.att li { padding: .05em 0; overflow-wrap: anywhere; }
+ul.att .size { color: #555; }
+
+/* Corps : mêmes règles d'affichage que le volet de lecture (voir bodyDocHead). */
 .body { overflow-wrap: anywhere; }
+.body a { color: #00f; }
+.body a:visited { color: #609; }
 .body img { max-width: 100%; height: auto; }
+.body img[data-blocked] { display: inline-block; min-width: 1em; min-height: 1em; outline: 1px dashed #bbb; }
+.body table { max-width: 100%; }
 .body blockquote { margin: 0; padding: 0 10px; border-left: 2px solid #000; }
-.body pre { white-space: pre-wrap; }
-@media print { .noprint { display: none; } body { margin: 0; } }
+.body pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.body div.plain { white-space: pre-wrap; font-family: Monaco, Menlo, Consolas, "Courier New", monospace; font-size: .93em; }
+.body div.plain blockquote { margin: 0; padding: 0 10px; border-left: 2px solid #00f; color: #00f; }
+.body div.plain blockquote blockquote { border-color: #080; color: #080; }
+.body div.plain blockquote blockquote blockquote { border-color: #c00; color: #c00; }
+.body .nobody { color: #555; font-style: italic; }
+
+@media print {
+  @page { margin: 1.5cm; }
+  body { margin: 0; }
+  .noprint { display: none !important; }
+
+  /* Aucune encre pour les fonds du message : seul le texte est imprimé. */
+  .body, .body * { background: transparent !important; background-image: none !important; box-shadow: none !important; }
+  .body *:not(a) { color: #000 !important; }
+  .body div.plain blockquote { color: #00f !important; }
+  .body div.plain blockquote blockquote { color: #080 !important; }
+  .body div.plain blockquote blockquote blockquote { color: #c00 !important; }
+  .body a, .body a:visited { color: #000 !important; text-decoration: underline; }
+
+  /* Un lien n'est pas cliquable sur le papier : son adresse suit le texte, sauf si le texte est déjà l'adresse
+     (print.js pose « data-same » dans ce cas). */
+  .body a[href^="http://"]:not([data-same])::after,
+  .body a[href^="https://"]:not([data-same])::after,
+  .body a[href^="mailto:"]:not([data-same])::after { content: " (" attr(href) ")"; font-size: .85em; overflow-wrap: anywhere; }
+
+  /* Sauts de page : l'en-tête ne se détache pas du corps, rien n'est coupé au milieu. */
+  table.hdr { page-break-inside: avoid; break-inside: avoid; page-break-after: avoid; break-after: avoid; }
+  .body p, .body li, .body blockquote, .body div.plain { orphans: 3; widows: 3; }
+  .body img, .body pre, .body tr, ul.att li { page-break-inside: avoid; break-inside: avoid; }
+  .body h1, .body h2, .body h3, .body h4 { page-break-after: avoid; break-after: avoid; }
+}

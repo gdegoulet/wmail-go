@@ -1,2 +1,17 @@
-/* Sans JavaScript, l'arbre des dossiers reste entièrement visible (on ne pourrait pas le déplier). */
+/* Feuille appliquée uniquement quand JavaScript est absent (<noscript> de base.html).
+   Objectif : tout ce qui reste à l'écran doit fonctionner, et rien d'utile ne doit rester caché. */
+
+/* Courrier : l'arbre des dossiers reste entièrement déplié (on ne pourrait pas le déplier à la main). */
 .f[hidden] { display: flex !important; }
+
+/* Les séparateurs de volets se déplacent à la souris : sans JavaScript ils ne sont qu'un trait. */
+.splitter { cursor: default; }
+
+/* Composition : les pièces jointes partent par XMLHttpRequest ; sans JavaScript le dépôt de fichiers et le
+   sélecteur ne mèneraient à rien, on les retire plutôt que de les laisser sans effet. */
+.cp-drop { display: none !important; }
+.cp-atts button[data-remove] { display: none !important; } /* le retrait passe lui aussi par une requête */
+
+/* La zone de texte brut et les pièces jointes déjà jointes, elles, restent affichées : sans les onglets
+   (réservés à JavaScript) les deux volets se suivent simplement. */
+.cp-files { min-height: 0; }

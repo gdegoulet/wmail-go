@@ -116,28 +116,46 @@ func (s *Server) mailPrint(w http.ResponseWriter, r *http.Request, sess *session
 		}
 		return strings.Join(parts, ", ")
 	}
+	subject := strings.TrimSpace(m.Subject)
+	if subject == "" {
+		subject = t("mail.no_subject")
+	}
 	var b strings.Builder
-	b.WriteString("<!doctype html><html lang=\"" + lang + "\"><head><meta charset=\"utf-8\"><meta name=\"referrer\" content=\"no-referrer\"><title>" + html.EscapeString(m.Subject) + "</title>")
+	b.WriteString("<!doctype html><html lang=\"" + lang + "\"><head><meta charset=\"utf-8\">")
+	b.WriteString("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta name=\"color-scheme\" content=\"light\">")
+	b.WriteString("<meta name=\"referrer\" content=\"no-referrer\"><meta name=\"robots\" content=\"noindex, nofollow\">")
+	b.WriteString("<title>" + html.EscapeString(subject) + "</title>")
 	b.WriteString("<link rel=\"stylesheet\" href=\"/static/print.css\"></head><body>")
+	// Seul élément de l'application sur la page : il disparaît à l'impression (aucune barre d'outils sur le papier).
 	b.WriteString("<p class=\"noprint\"><button type=\"button\" id=\"print-btn\">" + html.EscapeString(t("mail.print")) + "</button></p>")
-	b.WriteString("<h1>" + html.EscapeString(m.Subject) + "</h1><table class=\"hdr\">")
-	row := func(label, value string) {
+	b.WriteString("<table class=\"hdr\">")
+	row := func(class, label, value string) {
 		if value != "" {
-			b.WriteString("<tr><th>" + html.EscapeString(label) + "</th><td>" + value + "</td></tr>")
+			b.WriteString("<tr" + class + "><th>" + html.EscapeString(label) + "</th><td>" + value + "</td></tr>")
 		}
 	}
-	row(t("mail.from"), list(m.From))
-	row(t("mail.to"), list(m.To))
-	row(t("mail.cc"), list(m.Cc))
-	row(t("mail.date"), html.EscapeString(formatFullDate(m.Date, lang, s.userLoc(sess))))
+	// Ordre des en-têtes de RainLoop (gabarit PopupsWindowSimpleMessage), l'objet mis en avant comme titre du document.
+	row(" class=\"subject\"", t("compose.subject"), html.EscapeString(subject))
+	row("", t("mail.from"), list(m.From))
+	row("", t("mail.to"), list(m.To))
+	row("", t("mail.cc"), list(m.Cc))
+	row("", t("mail.bcc"), list(m.Bcc))
+	row("", t("mail.reply_to"), list(m.ReplyTo))
+	row("", t("mail.date"), html.EscapeString(formatFullDate(m.Date, lang, s.userLoc(sess))))
 	if len(m.Attachments) > 0 {
-		names := make([]string, len(m.Attachments))
-		for i, a := range m.Attachments {
-			names[i] = html.EscapeString(a.Name + " (" + humanSize(int64(a.Size), lang) + ")")
+		var att strings.Builder
+		att.WriteString("<ul class=\"att\">")
+		for _, a := range m.Attachments {
+			att.WriteString("<li>" + html.EscapeString(a.Name) + " <span class=\"size\">(" + html.EscapeString(humanSize(int64(a.Size), lang)) + ")</span></li>")
 		}
-		row(t("mail.attachments"), strings.Join(names, ", "))
+		att.WriteString("</ul>")
+		row("", t("mail.attachments"), att.String())
 	}
-	b.WriteString("</table><div class=\"body\">" + body + "</div><script src=\"/static/print.js\"></script></body></html>")
+	b.WriteString("</table>")
+	if strings.TrimSpace(body) == "" { // message sans partie affichable : on l'écrit plutôt que d'imprimer une page vide
+		body = "<p class=\"nobody\">" + html.EscapeString(t("mail.no_body")) + "</p>"
+	}
+	b.WriteString("<div class=\"body\">" + body + "</div><script src=\"/static/print.js\"></script></body></html>")
 	h := w.Header()
 	img := "img-src data:"
 	if !block {

@@ -1,0 +1,34 @@
+/* Composition : ajustements que le gabarit seul ne peut pas obtenir (largeur intrinsèque des champs).
+   Chargé par compose.html ; complète mail.css sans la remplacer. */
+
+/* Un <select> prend la largeur de son option la plus longue : une identité au libellé à rallonge élargissait
+   toute la grille des en-têtes, et le champ « À », le bouton « Contacts » et les liens Cc/Cci sortaient de l'écran. */
+.cp-from select { min-width: 0; max-width: 100%; }
+
+/* Même raison pour un nom de pièce jointe très long : sans min-width nul, « text-overflow: ellipsis » ne joue pas. */
+.cp-atts .name { min-width: 0; }
+
+@media (max-width: 40rem) {
+  /* Sur petit écran les lignes sont déjà empilées (mail.css) : la grille n'a plus besoin d'être un tableau,
+     et redevenue un bloc elle ne peut plus être élargie par son contenu. */
+  .cp-grid { display: block; }
+
+  /* L'identité occupe la ligne, les liens Cc/Cci/Répondre à passent dessous plutôt que de déborder. */
+  .cp-from .cp-value { flex-wrap: wrap; gap: .43rem; }
+  .cp-from select { flex: 1 1 100%; }
+  .cp-links { margin-left: auto; }
+  .cp-links a:first-child { margin-left: 0; }
+
+  /* Onglets, bascule HTML/texte, modèles et menu d'options : passage à la ligne plutôt que débordement.
+     Les onglets et le menu d'options gardent la première ligne (comme sur grand écran), les deux boutons
+     à libellé long passent dessous. */
+  .cp-tools .cp-value { flex-wrap: wrap; gap: .43rem; justify-content: flex-start; }
+  .cp-tools .cp-tabs { order: 1; }
+  .cp-tools .cp-opts { order: 2; }
+  .cp-tools .cp-mode { order: 3; margin: 0; }
+  .cp-tools .cp-value > details.dropdown { order: 4; }
+
+  /* Pièces jointes : le nom garde la ligne, la taille et la croix restent atteignables au doigt. */
+  .cp-atts li { gap: .43rem; }
+  .cp-atts button.link { padding: 0 .3rem; }
+}
