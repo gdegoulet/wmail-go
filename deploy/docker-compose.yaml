@@ -67,9 +67,6 @@ networks:
         - subnet: 10.89.77.0/24
 
 volumes:
-  # Mêmes comptes qu'en développement (volume créé par « make up »). Pour une installation séparée, remplacez ce
-  # bloc par « wmail-go-data: » seul : un volume vide sera créé, et il faudra y créer un compte
-  # (make user-add LOGIN=… pointe, lui, sur le volume de développement).
+  # Volume propre au déploiement. Sur le poste de développement, « make tls-up-dev » ajoute une surcharge qui le
+  # remplace par le volume de « make up », afin de retrouver les mêmes comptes.
   wmail-go-data:
-    external: true
-    name: wmail-go_wmail-go-data

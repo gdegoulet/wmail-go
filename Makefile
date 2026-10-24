@@ -125,6 +125,7 @@ restore:
 
 # --- déploiement derrière nginx (terminaison TLS, certificat auto-signé) ---
 TLS := docker compose -f deploy/docker-compose.yaml
+TLS_DEV := docker compose -f deploy/docker-compose.yaml -f deploy/docker-compose.partage.yaml
 TLS_HOST ?= localhost
 
 # Certificat auto-signé (825 jours) : deploy/certs/wmail-go.crt et .key. CN et SAN = $(TLS_HOST).
@@ -137,8 +138,19 @@ tls-cert:
 tls-up: deploy/certs/wmail-go.crt
 	$(TLS) up -d --build
 
+# Même pile, mais sur les données de « make up » (poste de développement seulement).
+tls-up-dev: deploy/certs/wmail-go.crt
+	$(TLS_DEV) up -d --build
+
+# Crée un compte dans le volume du déploiement : make tls-user-add LOGIN=alice
+tls-user-add:
+	$(TLS) run --rm --no-deps webmail user add $(LOGIN)
+
+tls-user-list:
+	$(TLS) run --rm --no-deps webmail user list
+
 tls-down:
-	$(TLS) down
+	$(TLS_DEV) down
 
 tls-logs:
 	$(TLS) logs -f --tail=100

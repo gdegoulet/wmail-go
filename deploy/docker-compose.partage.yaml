@@ -1,0 +1,12 @@
+# Surcharge réservée au poste de développement : la pile HTTPS utilise le volume de « make up », donc les mêmes
+# comptes et les mêmes réglages. À ne pas utiliser sur un serveur. Employée par « make tls-up-dev ».
+
+services:
+  webmail:
+    volumes:
+      - ../config/config.json:/config/config.json:ro   # inscription ouverte, journaux texte
+
+volumes:
+  wmail-go-data:
+    external: true
+    name: wmail-go_wmail-go-data
