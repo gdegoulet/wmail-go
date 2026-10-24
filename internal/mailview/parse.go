@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime"
 	"regexp"
 	"strconv"
 	"strings"
@@ -83,13 +84,46 @@ type Message struct {
 func addresses(h mail.Header, key string) []Address {
 	list, err := h.AddressList(key)
 	if err != nil && len(list) == 0 {
-		return nil
+		// En-tête mal formé : plutôt que de perdre tous les destinataires, on récupère les adresses lisibles.
+		return looseAddresses(h.Get(key))
 	}
 	out := make([]Address, 0, len(list))
 	for _, a := range list {
 		out = append(out, Address{Name: a.Name, Email: a.Address})
 	}
 	return out
+}
+
+var rawMailRe = regexp.MustCompile(`[^\s<>,;:"]+@[^\s<>,;:"]+\.[^\s<>,;:"]+`)
+
+// looseAddresses extrait les adresses d'un en-tête que l'analyseur strict refuse (adresse sans chevrons mêlée à un nom
+// non protégé, séparateur fantaisiste…). Le nom qui précède chaque adresse est conservé quand il est reconnaissable.
+func looseAddresses(raw string) []Address {
+	if raw == "" {
+		return nil
+	}
+	var out []Address
+	for _, part := range strings.FieldsFunc(raw, func(r rune) bool { return r == ',' || r == ';' }) {
+		m := rawMailRe.FindStringIndex(part)
+		if m == nil {
+			continue
+		}
+		email := strings.Trim(part[m[0]:m[1]], ".<>")
+		name := strings.TrimSpace(strings.Trim(strings.TrimSpace(part[:m[0]]), `"'<`))
+		if dec, err := (&mime.WordDecoder{CharsetReader: charsetReader}).DecodeHeader(name); err == nil {
+			name = dec
+		}
+		out = append(out, Address{Name: name, Email: email})
+		if len(out) >= 100 {
+			break
+		}
+	}
+	return out
+}
+
+// charsetReader sert aux mots encodés (RFC 2047) des en-têtes : il suit la même tolérance que le corps.
+func charsetReader(label string, input io.Reader) (io.Reader, error) {
+	return message.CharsetReader(label, input)
 }
 
 // NormalizeCID retire les chevrons et le préfixe « cid: » et met en minuscules.

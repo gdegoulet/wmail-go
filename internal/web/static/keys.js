@@ -20,6 +20,18 @@
     for (var i = 0; i < links.length; i++) if (re.test(links[i].getAttribute("href"))) return links[i];
     return null;
   }
+  // toggleFlag suit ou ne suit plus les messages visés : si tous sont déjà suivis, l'étoile est retirée.
+  function toggleFlag() {
+    var rows = Array.prototype.slice.call(document.querySelectorAll(".msgrow"));
+    var targets = rows.filter(function (r) { var c = r.querySelector("input[name=uid]"); return c && c.checked; });
+    if (!targets.length) targets = rows.filter(function (r) { return r.classList.contains("selected") || r.classList.contains("focused"); });
+    var open = document.querySelector(".msgview .star");
+    var allOn = targets.length
+      ? targets.every(function (r) { return !!r.querySelector(".star.on"); })
+      : !!(open && open.classList.contains("on"));
+    return click('button[form=bulk][name=action][value=' + (allOn ? "unflag" : "flag") + ']');
+  }
+
   function toggleHelp(show) {
     if (!help) return;
     help.hidden = !(show === undefined ? help.hidden : show);
@@ -37,7 +49,8 @@
     if (k === "Escape") {
       if (help && !help.hidden) { toggleHelp(false); e.preventDefault(); return; }
       if (document.querySelector("input[name=uid]:checked")) return; // Échap efface d'abord la sélection (list.js)
-      handled = go(document.querySelector("a.mh-close"));
+      // puis annule la recherche, puis ferme la conversation ouverte, puis ferme le message
+      handled = go(document.querySelector(".search-clear")) || go(document.querySelector(".threadbar a")) || go(document.querySelector("a.mh-close"));
     } else if (k === "?") {
       toggleHelp();
     } else if (k === "/") {
@@ -59,7 +72,7 @@
         case "z": handled = click('button[form=bulk][name=action][value=archive]'); break;
         case "q": handled = click('button[form=bulk][name=action][value=read]'); break;
         case "u": handled = click('button[form=bulk][name=action][value=unread]'); break;
-        case "i": handled = click('button[form=bulk][name=action][value=flag]'); break;
+        case "i": handled = toggleFlag(); break;
         case "t": handled = go(document.querySelector(".msgrow.focused .threads, .msgrow.selected .threads")); break;
         case "m": handled = click(".mb-mid details.dropdown summary"); break;
         case "`": handled = click(".mb-right details.dropdown summary"); break;

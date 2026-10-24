@@ -78,4 +78,24 @@ function boot(file) {
   d.querySelector("[data-keyhelp-close]").click();
   ok(help.hidden, "le bouton Fermer referme l'aide");
 }
+{
+  // Touche I : bascule suivre / ne plus suivre selon l'état des lignes visées
+  const { w, d } = boot("home3.html");
+  const pressed = [];
+  d.querySelectorAll("button[form=bulk][name=action]").forEach((b) => b.addEventListener("click", () => pressed.push(b.value)));
+  const rows = d.querySelectorAll(".msgrow");
+  const key = (k) => d.body.dispatchEvent(new w.KeyboardEvent("keydown", { key: k, bubbles: true, cancelable: true }));
+  rows[0].querySelector("input[name=uid]").checked = true;
+  key("i");
+  ok(pressed[pressed.length - 1] === "flag", "ligne non suivie : I ajoute l'étoile (" + pressed + ")");
+  rows[0].querySelector("input[name=uid]").checked = false;
+  // une ligne déjà suivie : la même touche retire l'étoile
+  const star = rows[1].querySelector(".star");
+  if (star) star.classList.add("on");
+  rows[1].querySelector("input[name=uid]").checked = true;
+  key("i");
+  ok(pressed[pressed.length - 1] === "unflag", "ligne déjà suivie : I retire l'étoile (" + pressed + ")");
+}
+
 if (fails) { console.log(fails + " échec(s)"); process.exit(1); }
+console.log("TOUS LES CONTRÔLES PASSENT");

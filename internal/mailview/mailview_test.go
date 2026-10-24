@@ -506,3 +506,17 @@ func TestHTMLToTextQuotesListsLinksAndWrapping(t *testing.T) {
 		t.Errorf("le préfixe de citation doit être repris sur les lignes coupées :\n%s", q)
 	}
 }
+
+func TestMalformedAddressHeaderKeepsReadableRecipients(t *testing.T) {
+	raw := "From: a@x.fr\r\nTo: Service Client service@x.fr, \"Durand, Anne\" <anne@y.fr>; bob@z.fr\r\nSubject: s\r\n\r\ncorps\r\n"
+	m, err := Parse([]byte(raw))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(m.To) != 3 {
+		t.Fatalf("%d destinataires : %+v", len(m.To), m.To)
+	}
+	if m.To[0].Email != "service@x.fr" || m.To[0].Name != "Service Client" || m.To[2].Email != "bob@z.fr" {
+		t.Errorf("destinataires : %+v", m.To)
+	}
+}
