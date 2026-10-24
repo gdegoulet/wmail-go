@@ -81,7 +81,9 @@ body.dragging iframe { pointer-events: none; }
 .account-switch select { margin: 0; padding: .25rem; }
 .folder-list { list-style: none; margin: 0; padding: 0; }
 .f { position: relative; display: flex; align-items: center; justify-content: space-between; height: 2.429rem; line-height: 2.429rem; padding: 0 .714rem; background: transparent; }
-.f a { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: inherit; text-decoration: none; }
+.f a, .f .fname { color: inherit; text-decoration: none; }
+/* Seul le nom s'étire : l'étoile de la boîte de réception ne doit pas prendre de place sur lui. */
+.f > .fname { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .f:hover { background: var(--folders-sel); }
 .f.active { background: var(--folders-sel); }
 .sys .f { font-weight: 700; }
@@ -527,7 +529,7 @@ dialog.viewer .v-prev { left: .3rem; top: 45%; } dialog.viewer .v-next { right: 
 body.msg-fullscreen .mailbox > .folders, body.msg-fullscreen .mailbox > .listpane, body.msg-fullscreen .mailbox > .splitter { display: none; }
 body.msg-fullscreen .mailbox > .readpane { grid-column: 1 / -1; }
 body.msg-fullscreen .mailbar { display: none; }
-.folder-list .fstar { margin-left: .4rem; opacity: .6; } .folder-list .fstar:hover, .folder-list .fstar.on { opacity: 1; } .folder-list .fstar.on { color: #e6a700; }
+.folder-list .fstar { flex: none; margin-left: .4rem; opacity: .6; } .folder-list .fstar:hover, .folder-list .fstar.on { opacity: 1; } .folder-list .fstar.on { color: #e6a700; }
 .eml-drop { position: fixed; inset: 20% 25%; z-index: 80; display: flex; align-items: center; justify-content: center; text-align: center; padding: 2rem; font-size: 1.3rem; background: rgba(255,255,255,.92); color: #333; border: 3px dashed #6a9bd8; border-radius: .6rem; }
 .eml-drop.over { background: #eef5ff; }
 .msgrow .threads { display: inline-block; min-width: 1.3em; margin-right: .4rem; padding: 0 .35em; text-align: center; font-size: .8em; line-height: 1.5; border-radius: .6em; background: #8a8a8a; color: #fff; text-decoration: none; }

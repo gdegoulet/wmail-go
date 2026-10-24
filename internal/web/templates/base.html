@@ -222,7 +222,7 @@
 {{else}}
 <ul class="folder-list sys">
 {{range .Folders}}{{if .System}}<li class="f role-{{.Role}}{{if .Active}} active{{end}}{{if .Bold}} has-unread{{end}}"{{if eq .Badge 0}}{{if not .Bold}} data-nobadge{{end}}{{end}}{{if .Selectable}} data-drop="{{.Name}}"{{end}}>
-<a class="fname" href="{{.URL}}">{{$.FolderName .}}</a>{{if gt .Badge 0}}<span class="badge" data-unread-badge>{{.Badge}}</span>{{end}}{{if eq .Role "inbox"}}{{$on := and $.List (eq $.List.Query "is:flagged")}}<a class="fstar{{if $on}} on{{end}}" href="{{if $on}}/{{else}}/?q=is%3Aflagged{{end}}" title="{{$.T "mail.flagged_only"}}" aria-label="{{$.T "mail.flagged_only"}}">{{if $on}}{{template "icon" "star"}}{{else}}{{template "icon" "star-o"}}{{end}}</a>{{end}}
+<a class="fname" href="{{.URL}}">{{$.FolderName .}}</a>{{if eq .Role "inbox"}}{{$on := and $.List (eq $.List.Query "is:flagged")}}<a class="fstar{{if $on}} on{{end}}" href="{{if $on}}/{{else}}/?q=is%3Aflagged{{end}}" title="{{$.T "mail.flagged_only"}}" aria-label="{{$.T "mail.flagged_only"}}">{{if $on}}{{template "icon" "star"}}{{else}}{{template "icon" "star-o"}}{{end}}</a>{{end}}{{if gt .Badge 0}}<span class="badge" data-unread-badge>{{.Badge}}</span>{{end}}
 </li>{{end}}{{end}}
 </ul>
 <hr class="fsep">
