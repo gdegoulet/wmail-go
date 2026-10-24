@@ -141,7 +141,8 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 
 [B-07] Quota
   tester  : boîte dont le serveur annonce QUOTA
-  attendu : occupation et pourcentage en bas du panneau des dossiers
+  attendu : occupation et pourcentage en bas du panneau des dossiers ; barre verte visible même à moins de 1 %
+            (rouge au-delà de 90 %) ; le texte garde la valeur exacte
   réponse :
 ```
 

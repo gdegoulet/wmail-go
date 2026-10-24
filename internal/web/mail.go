@@ -571,6 +571,7 @@ func (s *Server) home(w http.ResponseWriter, r *http.Request, sess *session.Sess
 	_ = s.pool.Do(ctx, key, ep, func(c *mailconn.Conn) error {
 		if used, limit, ok := c.Quota(); ok {
 			p.Quota = quotaView(used, limit, lang)
+			s.log.Debug("quota", "account", acc.ID, "octets_utilises", used, "limite", limit, "pourcent", p.Quota.Percent)
 		}
 		return nil
 	})
@@ -1598,12 +1599,19 @@ func (s *Server) mailAction(w http.ResponseWriter, r *http.Request, sess *sessio
 type QuotaView struct {
 	Used, Limit string
 	Percent     int
+	Bar         int // largeur de la barre : au moins 2 % dès que la boîte n'est pas vide
 	Full        bool // 90 % ou plus
 }
 
 func quotaView(used, limit int64, lang string) *QuotaView {
 	pct := int(float64(used) / float64(limit) * 100)
-	return &QuotaView{Used: humanSize(used, lang), Limit: humanSize(limit, lang), Percent: min(pct, 100), Full: pct >= 90}
+	v := &QuotaView{Used: humanSize(used, lang), Limit: humanSize(limit, lang), Percent: min(pct, 100), Full: pct >= 90}
+	// La barre garde un trait visible dès qu'il y a des messages : à 0,3 % d'occupation, elle paraîtrait vide.
+	v.Bar = v.Percent
+	if used > 0 && v.Bar < 2 {
+		v.Bar = 2
+	}
+	return v
 }
 
 func (s *Server) openFolders(sess *session.Session, account string) map[string]bool {

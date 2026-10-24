@@ -1606,3 +1606,17 @@ func TestZipSelectedAttachments(t *testing.T) {
 		t.Errorf("index inconnu : statut %d, attendu 404", resp.StatusCode)
 	}
 }
+
+func TestQuotaBarMinimum(t *testing.T) {
+	// 0,3 % d'occupation : le texte garde la valeur exacte, la barre reste visible.
+	v := quotaView(3<<20, 1<<30, "fr")
+	if v.Percent != 0 || v.Bar != 2 {
+		t.Errorf("pourcent %d, barre %d (attendu 0 et 2)", v.Percent, v.Bar)
+	}
+	if v = quotaView(0, 1<<30, "fr"); v.Bar != 0 {
+		t.Errorf("boîte vide : barre %d, attendu 0", v.Bar)
+	}
+	if v = quotaView(950<<20, 1<<30, "fr"); !v.Full || v.Bar != v.Percent {
+		t.Errorf("boîte pleine : %+v", v)
+	}
+}
