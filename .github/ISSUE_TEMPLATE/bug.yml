@@ -1,0 +1,42 @@
+name: Anomalie
+description: Signaler un comportement incorrect
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de ne **jamais** coller d'identifiants, de contenu de message privé ou d'adresse réelle.
+        Pour une faille de sécurité, suivez SECURITY.md plutôt que d'ouvrir un ticket public.
+  - type: textarea
+    id: quoi
+    attributes:
+      label: Ce qui se passe
+      description: Décrivez le comportement observé et celui attendu.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Comment le reproduire
+      placeholder: |
+        1. Ouvrir …
+        2. Cliquer …
+        3. Observer …
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: "Sortie de `git rev-parse --short HEAD` ou numéro de version affiché au démarrage."
+  - type: input
+    id: env
+    attributes:
+      label: Environnement
+      placeholder: "navigateur, système, serveur IMAP (Dovecot 2.3, Gmail, …)"
+  - type: textarea
+    id: journaux
+    attributes:
+      label: Journaux
+      description: "Extrait de `make logs` (les identifiants n'y figurent pas, mais relisez avant de coller)."
+      render: text

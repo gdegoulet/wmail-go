@@ -1,0 +1,48 @@
+# Intégration continue : construction, analyse statique et tests. Tout tourne dans des conteneurs, comme en local.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  go:
+    name: Go (vet, tests, course)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          check-latest: true
+      - name: Format
+        run: test -z "$(gofmt -l ./cmd ./internal)" || { gofmt -l ./cmd ./internal; exit 1; }
+      - name: Vet
+        run: go vet ./...
+      - name: Tests avec détecteur de concurrence
+        run: go test -race -count=1 ./...
+
+  js:
+    name: Contrôles JavaScript (jsdom)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+      - name: Contrôles jsdom sur les pages réelles (conteneurs)
+        run: make test-js
+
+  image:
+    name: Image de conteneur
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Construction
+        run: docker build --target runtime -t wmail-go:ci .
+      - name: Taille de l'image
+        run: docker image inspect wmail-go:ci --format 'taille : {{.Size}} octets'

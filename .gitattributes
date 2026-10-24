@@ -1,0 +1,6 @@
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.woff2 binary
+# Les analyses de RainLoop et les captures ne reflètent pas la langue du code du projet.
+docs/** linguist-documentation

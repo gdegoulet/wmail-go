@@ -1,0 +1,20 @@
+name: Demande de fonctionnalité
+description: Proposer une amélioration
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: besoin
+    attributes:
+      label: Le besoin
+      description: Quel problème concret cela résout-il ? Évitez de décrire d'emblée la solution.
+    validations:
+      required: true
+  - type: textarea
+    id: rainloop
+    attributes:
+      label: Équivalent RainLoop
+      description: Si RainLoop le faisait, décrivez comment (le projet vise cette ergonomie).
+  - type: textarea
+    id: idee
+    attributes:
+      label: Piste de solution

@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Faille de sécurité
+    url: https://github.com/gdegoulet/wmail-go/blob/main/SECURITY.md
+    about: Les failles ne se signalent pas dans un ticket public — voir SECURITY.md.
