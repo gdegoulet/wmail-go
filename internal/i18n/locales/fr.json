@@ -490,6 +490,7 @@
   "folders.system": "Dossiers système de la boîte mail",
   "mail.copy_to": "Copier vers",
   "mail.act.read_all": "Marquer tous les messages du dossier comme lus",
+  "mail.act.unread_all": "Marquer tous les messages du dossier comme non lus",
   "mail.print": "Imprimer",
   "mail.view_headers": "Voir les en-têtes du message",
   "mail.view_source": "Voir la source du message",

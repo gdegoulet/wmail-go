@@ -914,8 +914,17 @@ func (c *Conn) Quota() (used, limit int64, ok bool) {
 }
 
 // MarkAllRead marque tous les messages d'un dossier comme lus et renvoie leur nombre.
-func (c *Conn) MarkAllRead(folder string) (n int, err error) {
-	defer c.trace("tout-lire", true, "dossier", folder)(&err)
+func (c *Conn) MarkAllRead(folder string) (int, error) { return c.markAll(folder, true) }
+
+// MarkAllUnread marque tous les messages d'un dossier comme non lus et renvoie leur nombre.
+func (c *Conn) MarkAllUnread(folder string) (int, error) { return c.markAll(folder, false) }
+
+func (c *Conn) markAll(folder string, seen bool) (n int, err error) {
+	op := imap.StoreFlagsAdd
+	if !seen {
+		op = imap.StoreFlagsDel
+	}
+	defer c.trace("tout-marquer", true, "dossier", folder, "lu", seen)(&err)
 	sel, err := c.Select(folder, false)
 	if err != nil {
 		return 0, err
@@ -923,9 +932,12 @@ func (c *Conn) MarkAllRead(folder string) (n int, err error) {
 	if sel.NumMessages == 0 {
 		return 0, nil
 	}
+	if len(permittedFlags(sel, []imap.Flag{imap.FlagSeen})) == 0 {
+		return 0, nil
+	}
 	var all imap.UIDSet
 	all.AddRange(1, 0) // 1:*
-	if err = c.Client.Store(all, &imap.StoreFlags{Op: imap.StoreFlagsAdd, Silent: true, Flags: []imap.Flag{imap.FlagSeen}}, nil).Close(); err != nil {
+	if err = c.Client.Store(all, &imap.StoreFlags{Op: op, Silent: true, Flags: []imap.Flag{imap.FlagSeen}}, nil).Close(); err != nil {
 		return 0, err
 	}
 	return int(sel.NumMessages), nil

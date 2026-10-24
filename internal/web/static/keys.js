@@ -57,6 +57,8 @@
       var q = document.getElementById("q");
       handled = !!q;
       if (q) q.focus();
+    } else if (k === "Delete" && e.shiftKey) {
+      handled = click("button[data-purge]"); // Maj+Suppr : suppression définitive (avec confirmation)
     } else if (k === "Delete" || k === "#") {
       handled = click('button[form=bulk][name=action][value=delete]');
     } else if (e.shiftKey && (k === "F" || k === "f")) {

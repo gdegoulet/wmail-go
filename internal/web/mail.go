@@ -1365,8 +1365,8 @@ func (s *Server) mailAction(w http.ResponseWriter, r *http.Request, sess *sessio
 	if len(raw) == 0 && open != "" {
 		raw = []string{open}
 	}
-	if action == "readall" && mailconn.ValidFolderName(folder) { // tout le dossier, sans sélection
-		s.markAllRead(w, r, sess, acc, folder, back)
+	if (action == "readall" || action == "unreadall") && mailconn.ValidFolderName(folder) { // tout le dossier, sans sélection
+		s.markAllSeen(w, r, sess, acc, folder, back, action == "readall")
 		return
 	}
 	if v := r.PostFormValue("copy_to"); v != "" { // menu « copier vers »
@@ -1397,7 +1397,7 @@ func (s *Server) mailAction(w http.ResponseWriter, r *http.Request, sess *sessio
 		add(u)
 		// Une conversation cochée entraîne tous ses messages pour supprimer, déplacer, copier, archiver : pas pour les
 		// drapeaux, qui ne concernent que le message représentant.
-		if slices.Contains([]string{"delete", "move", "copy", "archive", "spam"}, action) {
+		if slices.Contains([]string{"delete", "purge", "move", "copy", "archive", "spam"}, action) {
 			if members := r.PostFormValue("th_" + v); members != "" {
 				for _, m := range strings.Split(members, ",") {
 					mu, ok := parseUID(m)
@@ -1410,7 +1410,7 @@ func (s *Server) mailAction(w http.ResponseWriter, r *http.Request, sess *sessio
 			}
 		}
 	}
-	if !slices.Contains([]string{"read", "unread", "flag", "unflag", "delete", "move", "copy", "archive", "spam", "notspam"}, action) ||
+	if !slices.Contains([]string{"read", "unread", "flag", "unflag", "delete", "purge", "move", "copy", "archive", "spam", "notspam"}, action) ||
 		((action == "move" || action == "copy") && (!mailconn.ValidFolderName(dest) || (action == "move" && dest == folder))) {
 		s.message(w, r, sess, http.StatusBadRequest, "", "mail.err.bad_request")
 		return
@@ -1469,6 +1469,8 @@ func (s *Server) mailAction(w http.ResponseWriter, r *http.Request, sess *sessio
 			return moveTo(junk)
 		case "notspam":
 			return moveTo("INBOX")
+		case "purge": // Maj+Suppr : suppression définitive, sans passer par la corbeille
+			return c.Expunge(folder, uids)
 		default: // delete : corbeille, ou suppression définitive si le dossier est déjà la corbeille
 			if strings.EqualFold(folder, trash) {
 				return c.Expunge(folder, uids)
@@ -1514,19 +1516,23 @@ func (s *Server) openFolders(sess *session.Session, account string) map[string]b
 	return openFolderSet(set, account)
 }
 
-// markAllRead marque tous les messages d'un dossier comme lus.
-func (s *Server) markAllRead(w http.ResponseWriter, r *http.Request, sess *session.Session, acc userdata.MailAccount, folder, back string) {
+// markAllSeen marque tous les messages d'un dossier comme lus (seen) ou comme non lus.
+func (s *Server) markAllSeen(w http.ResponseWriter, r *http.Request, sess *session.Session, acc userdata.MailAccount, folder, back string, seen bool) {
 	ctx, cancel := s.mailCtx(r)
 	defer cancel()
 	n := 0
 	if err := s.pool.Do(ctx, s.poolKey(sess, acc), imapEndpoint(acc), func(c *mailconn.Conn) (err error) {
-		n, err = c.MarkAllRead(folder)
+		if seen {
+			n, err = c.MarkAllRead(folder)
+		} else {
+			n, err = c.MarkAllUnread(folder)
+		}
 		return
 	}); err != nil {
 		s.mailErr(w, r, sess, err)
 		return
 	}
-	s.log.Info("tous les messages marqués comme lus", "login", store.ReduceLogin(sess.Account.Login), "messages", n)
+	s.log.Info("tous les messages marqués", "login", store.ReduceLogin(sess.Account.Login), "lu", seen, "messages", n)
 	http.Redirect(w, r, back, http.StatusSeeOther)
 }
 

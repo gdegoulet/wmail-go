@@ -490,6 +490,7 @@
   "folders.system": "System folders of the mailbox",
   "mail.copy_to": "Copy to",
   "mail.act.read_all": "Mark all messages in the folder as read",
+  "mail.act.unread_all": "Mark all messages in the folder as unread",
   "mail.print": "Print",
   "mail.view_headers": "View message headers",
   "mail.view_source": "View message source",

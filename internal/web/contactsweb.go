@@ -374,7 +374,7 @@ func (s *Server) contactsSuggest(w http.ResponseWriter, r *http.Request, sess *s
 			}
 			return
 		}
-		out = b.Suggest(q, 8)
+		out = b.Suggest(q, 20) // comme RainLoop
 	})
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Cache-Control", "no-store")

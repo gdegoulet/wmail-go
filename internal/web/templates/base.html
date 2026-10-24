@@ -122,6 +122,9 @@
 <button type="submit" form="bulk" name="action" value="flag" data-needs-selection>{{.T "mail.act.flag"}}</button>
 <button type="submit" form="bulk" name="action" value="unflag" data-needs-selection>{{.T "mail.act.unflag"}}</button>
 <button type="submit" form="bulk" name="action" value="readall">{{.T "mail.act.read_all"}}</button>
+<button type="submit" form="bulk" name="action" value="unreadall">{{.T "mail.act.unread_all"}}</button>
+<hr>
+<button type="submit" form="bulk" name="action" value="purge" data-needs-selection data-confirm="{{.T "mail.delete_forever_confirm"}}" data-purge>{{.T "mail.act.delete_permanent"}}</button>
 {{if .List.SortURLs}}
 <hr>
 <span class="menu-title">{{.T "mail.filter.label"}}</span>
@@ -169,6 +172,7 @@
 <tr><td><kbd>Ctrl</kbd>+<kbd>A</kbd></td><td>{{.T "keys.select_all"}}</td></tr>
 <tr><td><kbd>Z</kbd></td><td>{{.T "mail.act.archive"}}</td></tr>
 <tr><td><kbd>Suppr</kbd> <kbd>#</kbd></td><td>{{.T "mail.act.delete"}}</td></tr>
+<tr><td><kbd>Maj</kbd>+<kbd>Suppr</kbd></td><td>{{.T "mail.act.delete_permanent"}}</td></tr>
 <tr><td><kbd>M</kbd></td><td>{{.T "mail.move_to"}}</td></tr>
 <tr><td><kbd>Q</kbd> / <kbd>U</kbd></td><td>{{.T "keys.read_unread"}}</td></tr>
 <tr><td><kbd>I</kbd></td><td>{{.T "keys.flag"}}</td></tr>
