@@ -134,6 +134,11 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
   attendu : trois résultats — IMAP, SMTP, ManageSieve
   réponse :
 
+[B-12] Réordonner par glisser-déposer
+  tester  : glisser une ligne dans la liste des comptes, puis des identités, puis des modèles
+  attendu : nouvel ordre conservé après rechargement ; sans JavaScript les pages restent utilisables
+  réponse :
+
 [B-08] Boîte en double refusée
   tester  : ajouter deux fois la même adresse sur le même serveur IMAP
   attendu : refus explicite au deuxième ajout
@@ -247,6 +252,11 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
   attendu : déplacement effectif, dossier cible en surbrillance pendant le glisser
   réponse :
 
+[C-34] Repères pendant le glisser
+  tester  : glisser deux messages cochés vers un dossier
+  attendu : pastille indiquant « 2 » près du curseur, ligne inclinée et rayée, dossier cible mis en évidence
+  réponse :
+
 [C-20] Menu « Déplacer vers » ⚠
   tester  : menu seul, puis avec Ctrl enfoncé
   attendu : déplacement ; avec Ctrl, copie (le libellé du menu change)
@@ -320,6 +330,11 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 [D-02] Comparaison directe d'un même message
   tester  : ouvrir le même message dans les deux webmails
   attendu : espacement, polices, couleurs et liens identiques
+  réponse :
+
+[D-27] Domaine international lisible
+  tester  : message venant d'une adresse à domaine accentué (punycode xn--…)
+  attendu : le domaine s'affiche en clair ; un domaine trompeur reste en xn--
   réponse :
 
 [D-26] Images incorporées d'Outlook (Content-Location)
@@ -690,6 +705,16 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
   attendu : un compteur par boîte, rafraîchi au sondage (2 min)
   réponse :
 
+[I-14] Réglages enregistrés à la volée
+  tester  : changer la taille de police, la langue, une case à cocher dans Réglages > Général
+  attendu : coche verte à côté du réglage, valeur conservée après rechargement, sans cliquer « Enregistrer »
+  réponse :
+
+[I-15] Vignettes de thèmes
+  tester  : Réglages > Général, zone « Thème »
+  attendu : une vignette par thème, celle du thème courant mise en évidence, changement immédiat
+  réponse :
+
 [I-11] Boutons des réglages
   attendu : relief léger, bord foncé, comme RainLoop
   réponse :
@@ -777,4 +802,4 @@ Je remplis ce tableau à partir de vos réponses : un retour `KO` y reste jusqu'
 ## Points livrés depuis la dernière session de test
 
 Ajoutés aux points ci-dessus, à valider en priorité : `C-12`, `C-13`, `C-14`, `C-15`, `C-30`, `C-31`, `D-10`, `D-15`, `D-16`,
-`D-21`, `D-22`, `E-03`, `F-01`, `F-05`, `G-02`, `G-07`, `I-01`, `I-05`, `I-09`, `I-11`, `A-08`, `C-24`, `B-08`, `B-09`, `C-32`, `I-12`, `I-13`, `D-23`, `A-11`, `B-10`, `A-12`, `D-24`, `C-33`, `B-11`, `D-25`, `D-26`, `I-01`.
+`D-21`, `D-22`, `E-03`, `F-01`, `F-05`, `G-02`, `G-07`, `I-01`, `I-05`, `I-09`, `I-11`, `A-08`, `C-24`, `B-08`, `B-09`, `C-32`, `I-12`, `I-13`, `D-23`, `A-11`, `B-10`, `A-12`, `D-24`, `C-33`, `B-11`, `B-12`, `C-34`, `D-25`, `D-26`, `D-27`, `I-01`, `I-14`, `I-15`.
