@@ -214,6 +214,8 @@
   "mail.show_images": "Show images",
   "mail.details": "Details",
   "mail.close": "Close",
+  "mail.prev_msg": "Previous message",
+  "mail.next_msg": "Next message",
   "mail.reply_soon": "Reply: coming soon.",
   "mail.to_label": "To:",
   "mail.att.zip": "Download all (.zip)",

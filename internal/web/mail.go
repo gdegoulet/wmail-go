@@ -122,6 +122,7 @@ type MessageView struct {
 	Truncated, Partial               bool
 	NoBody                           bool
 	Back, Self                       string
+	PrevMsgURL, NextMsgURL           string // message précédent et suivant dans la liste affichée
 	MoveTargets                      []string
 	InTrash, IsDraft                 bool
 	ReadReceipt                      string      // adresse qui demande une confirmation de lecture (vide : rien à traiter)
@@ -709,6 +710,19 @@ func (s *Server) home(w http.ResponseWriter, r *http.Request, sess *session.Sess
 			p.Msg = s.buildMessageView(sess, acc, lp.Folder, selUID, raw, parsed, folders, lang, q.Get("remote") == "1", q.Get("view") == "text", lv.Back,
 				func(extra url.Values) string { return lp.PaneURL(selUID, extra) })
 			lv.Stay = p.Msg.Self
+			// Flèches « précédent / suivant » : voisins du message dans la page affichée.
+			for i, row := range lv.Rows {
+				if row.UID != selUID {
+					continue
+				}
+				if i > 0 {
+					p.Msg.PrevMsgURL = lv.Rows[i-1].ReadURL
+				}
+				if i+1 < len(lv.Rows) {
+					p.Msg.NextMsgURL = lv.Rows[i+1].ReadURL
+				}
+				break
+			}
 		}
 	}
 	s.render(w, r, sess, http.StatusOK, "home", p)

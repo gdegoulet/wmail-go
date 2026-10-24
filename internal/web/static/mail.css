@@ -126,6 +126,10 @@ form.search details.adv { position: absolute; right: 0; top: 0; bottom: 0; }
 .msgrow.unread { background: var(--unread-bg); }
 .msgrow.unread .sidebar { background: var(--unread-bar); }
 .msgrow.unread .from, .msgrow.unread .subj { font-weight: 700; }
+.mh-nav { display: inline-flex; align-items: center; color: #777; text-decoration: none; padding: 0 .2rem; }
+.mh-nav:hover { color: #333; }
+.mh-nav.off { opacity: .3; cursor: default; }
+.mh-nav .i { width: 1.1rem; height: 1.1rem; }
 .msgrow.subunread { background: var(--subunread-bg, #ffffd9); }
 .msgrow.subunread .sidebar { background: var(--subunread-bar, #ffdb99); }
 .msgrow.checked .sidebar { background: #69a8f5; }

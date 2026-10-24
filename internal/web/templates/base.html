@@ -64,6 +64,8 @@
 <symbol id="i-info" viewBox="0 0 24 24"><path d="M12 11v6M12 7v.5"/></symbol>
 <symbol id="i-close" viewBox="0 0 24 24"><path d="m5 5 14 14M19 5 5 19"/></symbol>
 <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></symbol>
+<symbol id="i-up-arrow" viewBox="0 0 24 24"><path d="M12 19V7M7 12l5-5 5 5"/></symbol>
+<symbol id="i-down-arrow" viewBox="0 0 24 24"><path d="M12 5v12M7 12l5 5 5-5"/></symbol>
 </defs></svg>{{end}}
 
 {{define "icon"}}<svg class="i" aria-hidden="true" focusable="false"><use href="#i-{{.}}"/></svg>{{end}}
@@ -269,6 +271,8 @@
 <button type="submit" class="star{{if .Flagged}} on{{end}}" name="{{if .Flagged}}star_off{{else}}star_on{{end}}" value="{{.UID}}" title="{{if .Flagged}}{{$.T "mail.act.unflag"}}{{else}}{{$.T "mail.act.flag"}}{{end}}">{{if .Flagged}}{{template "icon" "star"}}{{else}}{{template "icon" "star-o"}}{{end}}</button>
 </form>
 <h1 class="msg-subject">{{.Subject}}</h1>
+{{if .PrevMsgURL}}<a class="mh-nav" href="{{.PrevMsgURL}}" data-pane title="{{$.T "mail.prev_msg"}}" aria-label="{{$.T "mail.prev_msg"}}">{{template "icon" "up-arrow"}}</a>{{else}}<span class="mh-nav off">{{template "icon" "up-arrow"}}</span>{{end}}
+{{if .NextMsgURL}}<a class="mh-nav" href="{{.NextMsgURL}}" data-pane title="{{$.T "mail.next_msg"}}" aria-label="{{$.T "mail.next_msg"}}">{{template "icon" "down-arrow"}}</a>{{else}}<span class="mh-nav off">{{template "icon" "down-arrow"}}</span>{{end}}
 <button type="button" class="mh-full" data-fullscreen-msg data-js-only hidden title="{{$.T "mail.fullscreen"}}" aria-label="{{$.T "mail.fullscreen"}}">{{template "icon" "expand"}}</button>
 <a class="mh-close" href="{{.Back}}" title="{{$.T "mail.close"}}" aria-label="{{$.T "mail.close"}}">{{template "icon" "close"}}</a>
 </div>
