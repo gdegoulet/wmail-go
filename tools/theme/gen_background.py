@@ -64,7 +64,7 @@ def main(path):
         '<stop offset="0" stop-color="#2a2f8f" stop-opacity=".5"/>'
         '<stop offset="1" stop-color="#2a2f8f" stop-opacity="0"/></radialGradient>')
     # Un halo = un disque flouté ; trois forces de flou suffisent à donner la profondeur.
-    for i, dev in enumerate((3, 9, 22)):
+    for i, dev in enumerate((1.5, 4, 9)):
         add(f'<filter id="b{i}" x="-60%" y="-60%" width="220%" height="220%">'
             f'<feGaussianBlur stdDeviation="{dev}"/></filter>')
     add("</defs>")
@@ -78,7 +78,7 @@ def main(path):
     for _ in range(110):
         x = rnd.uniform(-40, W + 40)
         y = rnd.uniform(-20, H + 20)
-        r = rnd.choice([rnd.uniform(14, 34), rnd.uniform(30, 64), rnd.uniform(55, 110)])
+        r = rnd.choice([rnd.uniform(22, 40), rnd.uniform(36, 70), rnd.uniform(60, 115)])
         halos.append((x, y, r))
     halos.sort(key=lambda h: -h[2])
     for x, y, r in halos:
@@ -96,14 +96,13 @@ def main(path):
             add(f'<circle cx="{x:.0f}" cy="{y:.0f}" r="{r:.0f}" fill="{rgb(c)}" '
                 f'opacity="{op:.2f}" filter="url(#b{blur})"/>')
 
-    # Étincelles : petits points nets, un peu de blanc chaud.
-    for _ in range(220):
-        x = rnd.uniform(0, W)
-        y = rnd.uniform(0, H)
-        r = rnd.uniform(0.8, 2.6)
-        c = mix(hue(x / W), (255, 250, 230), 0.65)
-        add(f'<circle cx="{x:.0f}" cy="{y:.0f}" r="{r:.1f}" fill="{rgb(c)}" '
-            f'opacity="{rnd.uniform(0.25, 0.85):.2f}"/>')
+
+    # Assombrissement du haut : la barre d'outils et son texte blanc passent dessus.
+    add('<linearGradient id="top" x1="0" y1="0" x2="0" y2="1">'
+        '<stop offset="0" stop-color="#0d0616" stop-opacity=".7"/>'
+        '<stop offset="0.12" stop-color="#0d0616" stop-opacity=".45"/>'
+        '<stop offset="0.3" stop-color="#0d0616" stop-opacity="0"/></linearGradient>')
+    add(f'<rect width="{W}" height="{H}" fill="url(#top)"/>')
 
     # Assombrissement du bord gauche : le panneau des dossiers (texte blanc) se pose dessus.
     add('<linearGradient id="left" x1="0" y1="0" x2="1" y2="0">'
