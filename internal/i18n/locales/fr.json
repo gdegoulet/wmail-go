@@ -614,6 +614,8 @@
   "twofactor.setup_text": "Scannez ce code avec votre application d'authentification, puis saisissez le code qu'elle affiche pour confirmer.",
   "twofactor.qr_alt": "Code QR de configuration",
   "twofactor.secret": "Ou saisissez cette clé :",
+  "twofactor.show_secret": "Revoir le secret",
+  "twofactor.show_secret_text": "Saisissez un code valide pour afficher de nouveau le secret et le QR code (installation sur un autre appareil).",
   "twofactor.confirm": "Confirmer et activer",
   "twofactor.enabled": "L'authentification en deux étapes est activée.",
   "twofactor.backup_left": "%d code(s) de secours restants",

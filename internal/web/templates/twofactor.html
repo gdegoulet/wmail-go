@@ -14,6 +14,18 @@
 {{else if .Enabled}}
 <section>
 <p class="msg info">{{$.T "twofactor.enabled"}} ({{$.T "twofactor.backup_left" .BackupLeft}})</p>
+{{if .ShowSecret}}
+<p>{{$.T "twofactor.secret"}} <code>{{.ShowSecret}}</code></p>
+<p><img src="/settings/2fa/qr.png?again=1" width="256" height="256" alt="{{$.T "twofactor.qr_alt"}}"></p>
+{{else}}
+<details><summary>{{$.T "twofactor.show_secret"}}</summary>
+<form method="post" action="/settings/2fa/show">
+<input type="hidden" name="csrf" value="{{$.CSRF}}">
+<p>{{$.T "twofactor.show_secret_text"}}</p>
+<label>{{$.T "twofactor.code"}} <input name="code" type="text" inputmode="numeric" autocomplete="one-time-code" required maxlength="20"></label>
+<button type="submit">{{$.T "twofactor.show_secret"}}</button>
+</form></details>
+{{end}}
 <form method="post" action="/settings/2fa/codes">
 <input type="hidden" name="csrf" value="{{$.CSRF}}">
 <label>{{$.T "twofactor.code"}} <input name="code" type="text" inputmode="numeric" autocomplete="one-time-code" required maxlength="20"></label>

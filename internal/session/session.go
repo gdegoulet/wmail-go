@@ -30,6 +30,7 @@ type Session struct {
 	ContactsTried      time.Time      // dernier essai de synchronisation (automatique ou manuel)
 	Contacts           *contacts.Book // carnet en cache (protégé par ContactsMu)
 	TwoFactorSetup     string         // secret en cours d'installation (pas encore confirmé), protégé par Mu
+	TwoFactorReveal    string         // secret révélé après un code valide, affiché une seule fois, protégé par Mu
 	Flash              string         // clé d'un message à afficher une seule fois (protégée par Mu)
 }
 

@@ -133,3 +133,36 @@ func TestTwoFactorPendingExpiresAndLimitsTries(t *testing.T) {
 		t.Errorf("sans étape : %d", resp.StatusCode)
 	}
 }
+
+// Revoir le secret : refusé sans code valide, affiché une seule fois ensuite.
+func TestTwoFactorShowSecretAgain(t *testing.T) {
+	e := newEnv(t, nil)
+	c, tok := e.loggedIn("alice")
+	e.do(c, "POST", "/settings/2fa/start", url.Values{"csrf": {tok}}, nil)
+	_, page := e.do(c, "GET", "/settings/2fa", nil, nil)
+	secret := regexp.MustCompile(`<code>([A-Z2-7]+)</code>`).FindStringSubmatch(page)
+	if secret == nil {
+		t.Fatalf("secret absent :\n%s", page)
+	}
+	step := totp.Step(time.Now())
+	code, _ := totp.Code(secret[1], step)
+	if r, _ := e.do(c, "POST", "/settings/2fa/enable", url.Values{"csrf": {tok}, "code": {code}}, nil); r.StatusCode != 200 {
+		t.Fatalf("activation : statut %d", r.StatusCode)
+	}
+
+	resp, page := e.do(c, "POST", "/settings/2fa/show", url.Values{"csrf": {tok}, "code": {"000000"}}, nil)
+	if resp.StatusCode != 401 || strings.Contains(page, secret[1]) {
+		t.Fatalf("code invalide : statut %d, le secret ne doit pas apparaître", resp.StatusCode)
+	}
+	code2, _ := totp.Code(secret[1], step+1) // pas suivant : le premier a servi à activer
+	resp, _ = e.do(c, "POST", "/settings/2fa/show", url.Values{"csrf": {tok}, "code": {code2}}, nil)
+	e.expect(resp, 303, "/settings/2fa")
+	_, page = e.do(c, "GET", "/settings/2fa", nil, nil)
+	if !strings.Contains(page, secret[1]) {
+		t.Errorf("le secret doit être affiché après un code valide :\n%s", page)
+	}
+	_, page = e.do(c, "GET", "/settings/2fa", nil, nil)
+	if strings.Contains(page, secret[1]) {
+		t.Error("le secret ne doit être affiché qu'une fois")
+	}
+}

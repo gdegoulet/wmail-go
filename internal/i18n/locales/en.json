@@ -614,6 +614,8 @@
   "twofactor.setup_text": "Scan this code with your authenticator app, then enter the code it shows to confirm.",
   "twofactor.qr_alt": "Setup QR code",
   "twofactor.secret": "Or enter this key:",
+  "twofactor.show_secret": "Show the secret again",
+  "twofactor.show_secret_text": "Enter a valid code to show the secret and QR code again (setting up another device).",
   "twofactor.confirm": "Confirm and enable",
   "twofactor.enabled": "Two-step authentication is enabled.",
   "twofactor.backup_left": "%d backup code(s) left",

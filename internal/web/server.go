@@ -182,6 +182,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("POST /settings/2fa/start", s.auth(s.twoFactorStart))
 	mux.HandleFunc("POST /settings/2fa/enable", s.auth(s.twoFactorEnable))
 	mux.HandleFunc("POST /settings/2fa/codes", s.auth(s.twoFactorRegen))
+	mux.HandleFunc("POST /settings/2fa/show", s.auth(s.twoFactorShow))
 	mux.HandleFunc("POST /settings/2fa/disable", s.auth(s.twoFactorDisable))
 	mux.HandleFunc("GET /settings/filters", s.auth(s.filtersGet))
 	mux.HandleFunc("GET /settings/filters/edit", s.auth(s.filterEdit))

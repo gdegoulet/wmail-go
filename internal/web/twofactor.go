@@ -225,14 +225,35 @@ type TwoFactorView struct {
 	Secret         string
 	BackupLeft     int
 	NewCodes       []string
+	ShowSecret     string // secret révélé après un code valide (réinstaller l'application)
+}
+
+// twoFactorShow révèle de nouveau le secret (et le QR) après un code valide : installer l'application sur un autre appareil.
+func (s *Server) twoFactorShow(w http.ResponseWriter, r *http.Request, sess *session.Session) {
+	if !s.codeLimit(w, r, sess) {
+		return
+	}
+	if !s.secondFactorOK(sess, r.PostFormValue("code")) {
+		s.codeFailed(r, sess)
+		s.twoFactorPage(w, r, sess, http.StatusUnauthorized, nil, "twofactor.bad_code")
+		return
+	}
+	sess.Mu.Lock()
+	secret := sess.Account.Data.TwoFactor.Secret
+	sess.TwoFactorReveal = secret // consommé par la page, puis effacé
+	sess.Mu.Unlock()
+	s.log.Info("secret du second facteur affiché de nouveau", "login", store.ReduceLogin(sess.Account.Login))
+	http.Redirect(w, r, "/settings/2fa", http.StatusSeeOther)
 }
 
 func (s *Server) twoFactorPage(w http.ResponseWriter, r *http.Request, sess *session.Session, status int, codes []string, errKey string) {
 	sess.Mu.Lock()
 	tf := sess.Account.Data.TwoFactor
 	setup := sess.TwoFactorSetup
+	reveal := sess.TwoFactorReveal
+	sess.TwoFactorReveal = "" // une seule fois
 	sess.Mu.Unlock()
-	v := &TwoFactorView{Enabled: tf.Enabled, Setup: setup != "" && !tf.Enabled, Secret: setup, BackupLeft: len(tf.BackupHashes), NewCodes: codes}
+	v := &TwoFactorView{Enabled: tf.Enabled, Setup: setup != "" && !tf.Enabled, Secret: setup, BackupLeft: len(tf.BackupHashes), NewCodes: codes, ShowSecret: reveal}
 	s.render(w, r, sess, status, "twofactor", &Page{TitleKey: "twofactor.title", TwoFactor: v, Section: "security", ErrorKey: errKey})
 }
 
@@ -252,6 +273,9 @@ func (s *Server) twoFactorStart(w http.ResponseWriter, r *http.Request, sess *se
 func (s *Server) twoFactorQR(w http.ResponseWriter, r *http.Request, sess *session.Session) {
 	sess.Mu.Lock()
 	secret, login := sess.TwoFactorSetup, sess.Account.Login
+	if secret == "" && r.URL.Query().Get("again") == "1" && sess.TwoFactorReveal != "" {
+		secret = sess.TwoFactorReveal // QR du secret révélé (la page l'affiche une seule fois)
+	}
 	sess.Mu.Unlock()
 	if secret == "" {
 		http.NotFound(w, r)
