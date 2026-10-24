@@ -74,7 +74,11 @@ func (p *Pool) Do(ctx context.Context, key string, ep Endpoint, fn func(*Conn) e
 		reused := e.client != nil && e.ep == ep && !closedClient(e.client)
 		if !reused {
 			e.drop()
-			dctx, cancel := context.WithTimeout(ctx, dialTimeout)
+			d := dialTimeout
+			if t := p.guard.DialTimeout(); t > 0 {
+				d = t + 5*time.Second // la garde borne déjà la connexion elle-même ; on laisse la marge du TLS
+			}
+			dctx, cancel := context.WithTimeout(ctx, d)
 			start := time.Now()
 			c, err := p.guard.LoginIMAPDetached(dctx, ep)
 			cancel()

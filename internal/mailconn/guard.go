@@ -92,6 +92,9 @@ func (g *Guard) SetDialTimeout(d time.Duration) {
 	}
 }
 
+// DialTimeout renvoie le délai d'établissement d'une connexion.
+func (g *Guard) DialTimeout() time.Duration { return g.dialTimeout }
+
 // NewGuard crée un Guard. allowed contient des noms d'hôtes, des adresses IP ou des réseaux CIDR
 // autorisés même s'ils sont privés ; il n'a d'effet que si blockPrivate est vrai.
 func NewGuard(blockPrivate bool, allowed []string) (*Guard, error) {
