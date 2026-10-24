@@ -228,6 +228,18 @@ type TwoFactorView struct {
 	ShowSecret     string // secret révélé après un code valide (réinstaller l'application)
 }
 
+// groupSecret coupe la clé en groupes de quatre caractères : plus facile à recopier dans l'application.
+func groupSecret(s string) string {
+	var b strings.Builder
+	for i, r := range s {
+		if i > 0 && i%4 == 0 {
+			b.WriteByte(' ')
+		}
+		b.WriteRune(r)
+	}
+	return b.String()
+}
+
 // twoFactorShow révèle de nouveau le secret (et le QR) après un code valide : installer l'application sur un autre appareil.
 func (s *Server) twoFactorShow(w http.ResponseWriter, r *http.Request, sess *session.Session) {
 	if !s.codeLimit(w, r, sess) {
@@ -253,7 +265,7 @@ func (s *Server) twoFactorPage(w http.ResponseWriter, r *http.Request, sess *ses
 	reveal := sess.TwoFactorReveal
 	sess.TwoFactorReveal = "" // une seule fois
 	sess.Mu.Unlock()
-	v := &TwoFactorView{Enabled: tf.Enabled, Setup: setup != "" && !tf.Enabled, Secret: setup, BackupLeft: len(tf.BackupHashes), NewCodes: codes, ShowSecret: reveal}
+	v := &TwoFactorView{Enabled: tf.Enabled, Setup: setup != "" && !tf.Enabled, Secret: groupSecret(setup), BackupLeft: len(tf.BackupHashes), NewCodes: codes, ShowSecret: groupSecret(reveal)}
 	s.render(w, r, sess, status, "twofactor", &Page{TitleKey: "twofactor.title", TwoFactor: v, Section: "security", ErrorKey: errKey})
 }
 

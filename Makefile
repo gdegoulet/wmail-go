@@ -107,6 +107,32 @@ user-delete:
 theme-background-reset:
 	podman run --rm -v wmail-go_wmail-go-data:/data --user 0 docker.io/library/alpine:3 sh -c 'rm -f /data/themes/rainloop/background.jpg /data/themes/rainloop/background.png'
 
+# --- déploiement derrière nginx (terminaison TLS, certificat auto-signé) ---
+TLS := docker compose -f deploy/docker-compose.yaml
+TLS_HOST ?= localhost
+
+# Certificat auto-signé (825 jours) : deploy/certs/wmail-go.crt et .key. CN et SAN = $(TLS_HOST).
+tls-cert:
+	mkdir -p deploy/certs
+	docker run --rm -v "$(CURDIR)/deploy/certs":/certs:Z docker.io/library/alpine:3 sh -c '		apk add --no-cache openssl >/dev/null && 		openssl req -x509 -newkey rsa:2048 -nodes -days 825 -sha256 			-keyout /certs/wmail-go.key -out /certs/wmail-go.crt 			-subj "/CN=$(TLS_HOST)" -addext "subjectAltName=DNS:$(TLS_HOST),DNS:localhost,IP:127.0.0.1" && 		chmod 644 /certs/wmail-go.crt && chmod 640 /certs/wmail-go.key && \
+		chown 101:101 /certs/wmail-go.key /certs/wmail-go.crt'
+	@echo "certificat engendré pour $(TLS_HOST) : deploy/certs/wmail-go.crt"
+
+tls-up: deploy/certs/wmail-go.crt
+	$(TLS) up -d --build
+
+tls-down:
+	$(TLS) down
+
+tls-logs:
+	$(TLS) logs -f --tail=100
+
+tls-ps:
+	$(TLS) ps
+
+deploy/certs/wmail-go.crt:
+	$(MAKE) tls-cert
+
 # Pose une image de fond pour le thème « rainloop » dans le volume de données (dossier externe des thèmes).
 theme-background:
 	@test -f "$(FILE)" || { echo "usage : make theme-background FILE=chemin/image.jpg"; exit 1; }

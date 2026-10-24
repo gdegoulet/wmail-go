@@ -33,22 +33,22 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 [A-01] Écran de connexion fidèle à RainLoop
   tester  : ouvrir /login
   attendu : carte centrée verticalement, fond DarkShine, icônes enveloppe et clé dans les champs
-  réponse :
+  réponse : OK
 
 [A-02] Limitation des tentatives
   tester  : 6 connexions avec un mauvais mot de passe
   attendu : erreur à chaque fois, puis blocage temporaire annoncé
-  réponse :
+  réponse : OK
 
 [A-03] Connexion normale
   tester  : se connecter avec le bon mot de passe
   attendu : arrivée sur la boîte de réception, dernier compte mail actif
-  réponse :
+  réponse : OK
 
 [A-04] Double authentification (TOTP)
   tester  : Réglages > Sécurité, activer, se déconnecter, se reconnecter
   attendu : code demandé, code de votre application accepté
-  réponse :
+  réponse : 
 
 [A-05] Appareil de confiance
   tester  : cocher la case au second facteur, se reconnecter

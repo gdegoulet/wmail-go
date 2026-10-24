@@ -6,3 +6,5 @@ users.idx
 /rainloop/
 /rainloop_plugins/
 /scratch/
+# certificats engendrés localement
+/deploy/certs/

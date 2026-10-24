@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	secretRe  = regexp.MustCompile(`<code>([A-Z2-7]+)</code>`)
+	secretRe  = regexp.MustCompile(`<code>([A-Z2-7 ]+)</code>`) // la clé est affichée par groupes de quatre
 	backupRe  = regexp.MustCompile(`(?m)^(\d{4}-\d{4}-\d{2})$`)
 	pendingRe = regexp.MustCompile(`wm_2fa=`)
 )
@@ -28,7 +28,7 @@ func TestTwoFactorFullFlow(t *testing.T) {
 	if m == nil || !strings.Contains(page, "/settings/2fa/qr.png") {
 		t.Fatalf("page d'installation :\n%s", page)
 	}
-	secret := m[1]
+	secret := strings.ReplaceAll(m[1], " ", "")
 	resp, png := e.do(c, "GET", "/settings/2fa/qr.png", nil, nil)
 	if resp.StatusCode != 200 || resp.Header.Get("Content-Type") != "image/png" || !strings.HasPrefix(png, "\x89PNG") {
 		t.Errorf("QR : %d %s", resp.StatusCode, resp.Header.Get("Content-Type"))
@@ -111,7 +111,7 @@ func TestTwoFactorPendingExpiresAndLimitsTries(t *testing.T) {
 	c, tok := e.loggedIn("bob")
 	e.do(c, "POST", "/settings/2fa/start", url.Values{"csrf": {tok}}, nil)
 	_, page := e.do(c, "GET", "/settings/2fa", nil, nil)
-	secret := secretRe.FindStringSubmatch(page)[1]
+	secret := strings.ReplaceAll(secretRe.FindStringSubmatch(page)[1], " ", "")
 	code, _ := totp.Code(secret, totp.Step(time.Now()))
 	e.do(c, "POST", "/settings/2fa/enable", url.Values{"csrf": {tok}, "code": {code}}, nil)
 
@@ -140,10 +140,11 @@ func TestTwoFactorShowSecretAgain(t *testing.T) {
 	c, tok := e.loggedIn("alice")
 	e.do(c, "POST", "/settings/2fa/start", url.Values{"csrf": {tok}}, nil)
 	_, page := e.do(c, "GET", "/settings/2fa", nil, nil)
-	secret := regexp.MustCompile(`<code>([A-Z2-7]+)</code>`).FindStringSubmatch(page)
+	secret := regexp.MustCompile(`<code>([A-Z2-7 ]+)</code>`).FindStringSubmatch(page)
 	if secret == nil {
 		t.Fatalf("secret absent :\n%s", page)
 	}
+	secret[1] = strings.ReplaceAll(secret[1], " ", "")
 	step := totp.Step(time.Now())
 	code, _ := totp.Code(secret[1], step)
 	if r, _ := e.do(c, "POST", "/settings/2fa/enable", url.Values{"csrf": {tok}, "code": {code}}, nil); r.StatusCode != 200 {
@@ -151,18 +152,19 @@ func TestTwoFactorShowSecretAgain(t *testing.T) {
 	}
 
 	resp, page := e.do(c, "POST", "/settings/2fa/show", url.Values{"csrf": {tok}, "code": {"000000"}}, nil)
-	if resp.StatusCode != 401 || strings.Contains(page, secret[1]) {
+	if resp.StatusCode != 401 || strings.Contains(strings.ReplaceAll(page, " ", ""), secret[1]) {
 		t.Fatalf("code invalide : statut %d, le secret ne doit pas apparaître", resp.StatusCode)
 	}
 	code2, _ := totp.Code(secret[1], step+1) // pas suivant : le premier a servi à activer
 	resp, _ = e.do(c, "POST", "/settings/2fa/show", url.Values{"csrf": {tok}, "code": {code2}}, nil)
 	e.expect(resp, 303, "/settings/2fa")
 	_, page = e.do(c, "GET", "/settings/2fa", nil, nil)
-	if !strings.Contains(page, secret[1]) {
+	shown := func(p string) bool { return strings.Contains(strings.ReplaceAll(p, " ", ""), secret[1]) }
+	if !shown(page) {
 		t.Errorf("le secret doit être affiché après un code valide :\n%s", page)
 	}
 	_, page = e.do(c, "GET", "/settings/2fa", nil, nil)
-	if strings.Contains(page, secret[1]) {
+	if shown(page) {
 		t.Error("le secret ne doit être affiché qu'une fois")
 	}
 }
