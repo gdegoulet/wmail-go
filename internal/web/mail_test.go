@@ -1620,3 +1620,22 @@ func TestQuotaBarMinimum(t *testing.T) {
 		t.Errorf("boîte pleine : %+v", v)
 	}
 }
+
+// La barre de quota ne doit pas porter la classe « bar » : elle sert déjà aux barres d'outils (display:flex),
+// ce qui empêchait Chromium de peindre la partie remplie.
+func TestQuotaBarClassDoesNotClash(t *testing.T) {
+	css, err := staticFS.ReadFile("static/mail.css")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(css), ".folders .quota progress.qbar::-webkit-progress-value") {
+		t.Error("règle de la barre de quota absente")
+	}
+	tpl, err := templateFS.ReadFile("templates/base.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(tpl), `<progress class="qbar"`) {
+		t.Error(`la barre de quota doit utiliser class="qbar"`)
+	}
+}

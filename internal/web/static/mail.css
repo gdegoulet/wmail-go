@@ -446,14 +446,14 @@ body:has(.authpage) { margin: 0; }
 .mdnbar button { margin: 0; height: 1.9rem; padding: 0 .8rem; }
 
 .folders .quota { margin: .8rem .6rem; font-size: .79rem; color: var(--folders-fg, #fff); opacity: .85; }
-.folders .quota progress.bar { display: block; width: 100%; height: .5rem; margin-bottom: .25rem; border: 0; border-radius: .2rem; overflow: hidden;
+.folders .quota progress.qbar { display: block; width: 100%; height: .5rem; margin-bottom: .25rem; border: 0; border-radius: .2rem; overflow: hidden;
   background: rgba(255,255,255,.25); color: #84ab04; -webkit-appearance: none; -moz-appearance: none; appearance: none; }
-.folders .quota.full progress.bar { color: #bd362f; } /* repli des navigateurs sans pseudo-élément */
-.folders .quota progress.bar::-webkit-progress-bar { background: rgba(255,255,255,.25); }
-.folders .quota progress.bar::-webkit-progress-value { background: #84ab04; }
-.folders .quota progress.bar::-moz-progress-bar { background: #84ab04; }
-.folders .quota.full progress.bar::-webkit-progress-value { background: #bd362f; }
-.folders .quota.full progress.bar::-moz-progress-bar { background: #bd362f; }
+.folders .quota.full progress.qbar { color: #bd362f; } /* repli des navigateurs sans pseudo-élément */
+.folders .quota progress.qbar::-webkit-progress-bar { background: rgba(255,255,255,.25); }
+.folders .quota progress.qbar::-webkit-progress-value { background: #84ab04; }
+.folders .quota progress.qbar::-moz-progress-bar { background: #84ab04; }
+.folders .quota.full progress.qbar::-webkit-progress-value { background: #bd362f; }
+.folders .quota.full progress.qbar::-moz-progress-bar { background: #bd362f; }
 
 /* Arbre des dossiers repliable et volet des dossiers masquable */
 .f[hidden] { display: none; }

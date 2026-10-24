@@ -238,7 +238,7 @@
 <a class="tbtn" data-newfolder href="/settings/folders#create" title="{{.T "folders.create"}}" aria-label="{{.T "folders.create"}}">{{template "icon" "folder"}}</a>
 <a class="tbtn" href="/settings" title="{{.T "nav.settings"}}" aria-label="{{.T "nav.settings"}}">{{template "icon" "gear"}}</a>
 </div>
-{{if .Quota}}<p class="quota{{if .Quota.Full}} full{{end}}" title="{{.T "quota.title"}}"><progress class="bar" max="100" value="{{.Quota.Bar}}"></progress> {{.T "quota.text" .Quota.Used .Quota.Percent .Quota.Limit}}</p>
+{{if .Quota}}<p class="quota{{if .Quota.Full}} full{{end}}" title="{{.T "quota.title"}}"><progress class="qbar" max="100" value="{{.Quota.Bar}}"></progress> {{.T "quota.text" .Quota.Used .Quota.Percent .Quota.Limit}}</p>
 {{end}}
 <div id="newfolder" class="keyhelp newfolder" role="dialog" aria-modal="true" aria-labelledby="newfolder-title" hidden>
 <h2 id="newfolder-title">{{.T "folders.create"}}</h2>
