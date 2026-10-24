@@ -682,7 +682,7 @@ func TestPageSizeSelector(t *testing.T) {
 			selected = o[1]
 		}
 	}
-	if strings.Join(values, ",") != "50,100,200,500" || selected != "50" {
+	if strings.Join(values, ",") != "10,20,30,50,100,200,500" || selected != "50" {
 		t.Errorf("choix %v, sélection %q (50 par défaut)", values, selected)
 	}
 
@@ -713,7 +713,7 @@ func TestPageSizeSelector(t *testing.T) {
 	}
 
 	// Valeurs refusées.
-	for _, bad := range []string{"30", "1000", "0", "-5", "abc", "", "50 "} {
+	for _, bad := range []string{"40", "1000", "0", "-5", "abc", "", "50 "} {
 		if r := post(bad, "/"); r.StatusCode != 400 {
 			t.Errorf("taille %q : statut %d, attendu 400", bad, r.StatusCode)
 		}

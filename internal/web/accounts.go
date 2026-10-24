@@ -412,6 +412,13 @@ func (s *Server) accountSave(w http.ResponseWriter, r *http.Request, sess *sessi
 	if existing == nil && len(list) >= maxMailAccounts {
 		errs = append(errs, "accounts.err.limit")
 	}
+	// Même adresse sur le même serveur IMAP : c'est la même boîte, déjà ajoutée.
+	for _, a := range list {
+		if a.ID != acc.ID && strings.EqualFold(a.Email, acc.Email) && strings.EqualFold(a.IMAP.Host, acc.IMAP.Host) {
+			errs = append(errs, "accounts.err.duplicate")
+			break
+		}
+	}
 	if len(errs) > 0 {
 		s.accountForm(w, r, sess, http.StatusBadRequest, &Page{Form: form, FormErrorKeys: errs})
 		return

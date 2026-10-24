@@ -40,7 +40,7 @@ const (
 )
 
 // pageSizes sont les tailles de page proposées dans la liste (50 par défaut).
-var pageSizes = []int{50, 100, 200, 500}
+var pageSizes = []int{10, 20, 30, 50, 100, 200, 500}
 
 // MessageRow est une ligne de la liste des messages.
 type MessageRow struct {

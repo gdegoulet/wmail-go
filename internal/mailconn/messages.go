@@ -793,9 +793,14 @@ func (c *Conn) EnsureFolder(name string) (err error) {
 
 // Append dépose un message dans un dossier (brouillon, copie d'un message envoyé) et renvoie son UID, ou 0 si le
 // serveur ne l'indique pas (sans UIDPLUS) et que la recherche par Message-ID ne le retrouve pas.
-func (c *Conn) Append(folder string, raw []byte, messageID string, flags ...imap.Flag) (uid uint32, err error) {
+func (c *Conn) Append(folder string, raw []byte, messageID string, flags ...imap.Flag) (uint32, error) {
+	return c.AppendAt(folder, raw, messageID, time.Time{}, flags...)
+}
+
+// AppendAt ajoute un message en fixant sa date interne (INTERNALDATE) : l'import d'un .eml garde la date d'origine.
+func (c *Conn) AppendAt(folder string, raw []byte, messageID string, when time.Time, flags ...imap.Flag) (uid uint32, err error) {
 	defer c.trace("ajouter", true, "dossier", folder, "octets", len(raw))(&err)
-	cmd := c.Client.Append(folder, int64(len(raw)), &imap.AppendOptions{Flags: flags})
+	cmd := c.Client.Append(folder, int64(len(raw)), &imap.AppendOptions{Flags: flags, Time: when})
 	if _, err = cmd.Write(raw); err != nil {
 		_ = cmd.Close()
 		return 0, err
@@ -808,7 +813,7 @@ func (c *Conn) Append(folder string, raw []byte, messageID string, flags ...imap
 		if !c.createMissing(folder, err) {
 			return 0, err
 		}
-		return c.Append(folder, raw, messageID, flags...)
+		return c.AppendAt(folder, raw, messageID, when, flags...)
 	}
 	if data != nil && data.UID != 0 {
 		return uint32(data.UID), nil

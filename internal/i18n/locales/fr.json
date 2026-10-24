@@ -128,6 +128,7 @@
   "accounts.err.smtp_port": "Port SMTP invalide.",
   "accounts.err.smtp_security": "Sécurité SMTP invalide.",
   "accounts.err.limit": "Nombre maximal de comptes mail atteint.",
+  "accounts.err.duplicate": "Cette boîte est déjà ajoutée (même adresse et même serveur IMAP).",
   "accounts.err.first_must_pass": "Le premier compte mail doit réussir le test de connexion avant d'être enregistré.",
   "mail.search.label": "Rechercher",
   "mail.search.placeholder": "Rechercher dans ce dossier",

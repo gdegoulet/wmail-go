@@ -54,7 +54,7 @@ func (s *Server) mailAppend(w http.ResponseWriter, r *http.Request, sess *sessio
 	defer cancel()
 	var uid uint32
 	err = s.pool.Do(ctx, s.poolKey(sess, acc), imapEndpoint(acc), func(c *mailconn.Conn) (err error) {
-		uid, err = c.Append(folder, raw, m.MessageID, imap.FlagSeen)
+		uid, err = c.AppendAt(folder, raw, m.MessageID, m.Date, imap.FlagSeen) // la date du message, pas celle de l'import
 		return
 	})
 	if err != nil {

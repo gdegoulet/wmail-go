@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -141,6 +142,7 @@ func TestSecondAccountEditDeleteSelect(t *testing.T) {
 	// Un deuxième compte s'enregistre sans test, même injoignable.
 	second := accountForm(tok, ports, "save")
 	second.Set("name", "Cassé")
+	second.Set("email", "casse@example.org") // une autre boîte : même adresse + même serveur serait refusé
 	second.Set("imap_port", "1")
 	resp, _ := e.do(c, "POST", "/accounts/save", second, nil)
 	e.expect(resp, 303, "/")
@@ -172,6 +174,7 @@ func TestSecondAccountEditDeleteSelect(t *testing.T) {
 	}
 	fix := accountForm(tok, ports, "save")
 	fix.Set("id", ids[1])
+	fix.Set("email", "casse@example.org")
 	fix.Set("name", "Réparé")
 	fix.Del("imap_password")
 	fix.Del("smtp_password")
@@ -254,11 +257,15 @@ func TestAccountLimit(t *testing.T) {
 	ports := startMail(t)
 	c, tok := e.loggedIn("alice")
 	e.expect1(e.do(c, "POST", "/accounts/save", accountForm(tok, ports, "save"), nil))
-	for range maxMailAccounts - 1 {
-		resp, _ := e.do(c, "POST", "/accounts/save", accountForm(tok, ports, "save"), nil)
+	for i := range maxMailAccounts - 1 {
+		f := accountForm(tok, ports, "save")
+		f.Set("email", fmt.Sprintf("boite%d@example.org", i)) // adresses distinctes : sinon doublon refusé
+		resp, _ := e.do(c, "POST", "/accounts/save", f, nil)
 		e.expect(resp, 303, "/")
 	}
-	resp, _ := e.do(c, "POST", "/accounts/save", accountForm(tok, ports, "save"), nil)
+	last := accountForm(tok, ports, "save")
+	last.Set("email", "trop@example.org")
+	resp, _ := e.do(c, "POST", "/accounts/save", last, nil)
 	e.expect(resp, 400, "")
 }
 

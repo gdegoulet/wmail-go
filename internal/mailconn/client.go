@@ -574,23 +574,28 @@ const (
 
 // ResolveSent renvoie le dossier des messages envoyés.
 func ResolveSent(folders []Folder, configured string) string {
-	return ResolveFolder(folders, configured, imap.MailboxAttrSent, DefaultSent, "Sent Items", "Envoyés", "INBOX.Sent")
+	return ResolveFolder(folders, configured, imap.MailboxAttrSent, DefaultSent,
+		"Sent Items", "SentMail", "Sent Mail", "Sent Mails", "Sent Messages", "Envoyés", "Messages envoyés", "Outbox",
+		"INBOX.Sent", "INBOX.Sent Items")
 }
 
 // ResolveDrafts renvoie le dossier des brouillons.
 func ResolveDrafts(folders []Folder, configured string) string {
-	return ResolveFolder(folders, configured, imap.MailboxAttrDrafts, DefaultDrafts, "Brouillons", "INBOX.Drafts")
+	return ResolveFolder(folders, configured, imap.MailboxAttrDrafts, DefaultDrafts,
+		"Draft", "Drafts Mail", "Brouillons", "INBOX.Drafts", "INBOX.Draft")
 }
 
 // ResolveTrash renvoie le dossier de corbeille.
 func ResolveTrash(folders []Folder, configured string) string {
 	return ResolveFolder(folders, configured, imap.MailboxAttrTrash, DefaultTrash,
-		"Deleted Items", "Deleted Messages", "Deleted", "Corbeille", "Éléments supprimés", "INBOX.Trash", "INBOX.Deleted Items")
+		"Deleted Items", "Deleted Messages", "Deleted", "Bin", "Corbeille", "Éléments supprimés", "Supprimés",
+		"INBOX.Trash", "INBOX.Deleted Items", "INBOX.Bin")
 }
 
 // ResolveArchive renvoie le dossier d'archives.
 func ResolveArchive(folders []Folder, configured string) string {
-	return ResolveFolder(folders, configured, imap.MailboxAttrArchive, DefaultArchive, "Archives")
+	return ResolveFolder(folders, configured, imap.MailboxAttrArchive, DefaultArchive,
+		"Archives", "All Mail", "AllMail", "Tous les messages", "INBOX.Archive", "INBOX.Archives")
 }
 
 // ResolveJunk renvoie le dossier des indésirables.
