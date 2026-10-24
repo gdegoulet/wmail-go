@@ -7,7 +7,7 @@ Document à remplir par l'utilisateur, point par point. Il sert aussi de journal
 Chaque point a un **identifiant stable** (`C-12`, `D-09`…). Répondez sur la ligne `réponse :`.
 
 ```
-[C-12] Ctrl+clic coche la ligne sans ouvrir le message
+[X-00] Exemple (ce point n'existe pas : il montre seulement la forme attendue)
   tester  : Ctrl (ou Cmd) + clic sur une ligne de la liste
   attendu : la case se coche, le message ne s'ouvre pas
   réponse : OK
