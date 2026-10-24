@@ -498,6 +498,7 @@ type Page struct {
 	Form          *AccountForm
 	IMAPResult    *TestResult
 	SMTPResult    *TestResult
+	SieveResult   *TestResult
 	FormErrorKeys []string
 	ActiveID      string
 	Folders       []FolderRow

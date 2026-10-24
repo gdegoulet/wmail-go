@@ -119,6 +119,11 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
   attendu : en-têtes Reply-To et Bcc présents dans le message reçu
   réponse :
 
+[B-10] Test ManageSieve inclus
+  tester  : bouton « Test » d'une boîte dont les filtres sont actifs
+  attendu : trois résultats — IMAP, SMTP, ManageSieve
+  réponse :
+
 [B-08] Boîte en double refusée
   tester  : ajouter deux fois la même adresse sur le même serveur IMAP
   attendu : refus explicite au deuxième ajout
@@ -741,4 +746,4 @@ Je remplis ce tableau à partir de vos réponses : un retour `KO` y reste jusqu'
 ## Points livrés depuis la dernière session de test
 
 Ajoutés aux points ci-dessus, à valider en priorité : `C-12`, `C-13`, `C-14`, `C-15`, `C-30`, `C-31`, `D-10`, `D-15`, `D-16`,
-`D-21`, `D-22`, `E-03`, `F-01`, `F-05`, `G-02`, `G-07`, `I-01`, `I-05`, `I-09`, `I-11`, `A-08`, `C-24`, `B-08`, `B-09`, `C-32`, `I-12`, `I-13`, `D-23`, `A-11`.
+`D-21`, `D-22`, `E-03`, `F-01`, `F-05`, `G-02`, `G-07`, `I-01`, `I-05`, `I-09`, `I-11`, `A-08`, `C-24`, `B-08`, `B-09`, `C-32`, `I-12`, `I-13`, `D-23`, `A-11`, `B-10`.

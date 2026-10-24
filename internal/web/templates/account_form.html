@@ -5,6 +5,7 @@
 
 {{with .IMAPResult}}<p class="msg {{if .OK}}info{{else}}error{{end}}" role="status"><strong>IMAP</strong> : {{if .OK}}{{$.T "accounts.test.ok"}}{{else}}{{$.T (printf "accounts.test.fail.%s" .Kind)}}<br><small>{{.Detail}}</small>{{end}}</p>{{end}}
 {{with .SMTPResult}}<p class="msg {{if .OK}}info{{else}}error{{end}}" role="status"><strong>SMTP</strong> : {{if .OK}}{{$.T "accounts.test.ok"}}{{else}}{{$.T (printf "accounts.test.fail.%s" .Kind)}}<br><small>{{.Detail}}</small>{{end}}</p>{{end}}
+{{with .SieveResult}}<p class="msg {{if .OK}}info{{else}}error{{end}}" role="status"><strong>ManageSieve</strong> : {{if .OK}}{{$.T "accounts.test.ok"}}{{else}}{{$.T (printf "accounts.test.fail.%s" .Kind)}}<br><small>{{.Detail}}</small>{{end}}</p>{{end}}
 
 <form method="post" action="/accounts/save" id="account-form">
 <input type="hidden" name="csrf" value="{{.CSRF}}">

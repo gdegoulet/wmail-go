@@ -225,8 +225,8 @@ func TestPrivateNetworkBlockedInForm(t *testing.T) {
 	c, tok := e.loggedIn("alice")
 	resp, page := e.do(c, "POST", "/accounts/save", accountForm(tok, ports, "test"), nil)
 	e.expect(resp, 200, "")
-	if strings.Count(page, "réseau privé non autorisé") != 2 {
-		t.Fatalf("le réseau privé doit être refusé pour IMAP et SMTP :\n%s", page)
+	if strings.Count(page, "réseau privé non autorisé") != 3 {
+		t.Fatalf("le réseau privé doit être refusé pour IMAP, SMTP et ManageSieve :\n%s", page)
 	}
 	resp, _ = e.do(c, "POST", "/accounts/save", accountForm(tok, ports, "save"), nil)
 	e.expect(resp, 422, "")

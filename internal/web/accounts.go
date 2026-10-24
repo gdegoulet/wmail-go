@@ -307,16 +307,20 @@ func toResult(err error) *TestResult {
 	return &TestResult{Kind: te.Kind, Detail: te.Detail}
 }
 
-// testAccount teste l'IMAP et le SMTP en parallèle.
-func (s *Server) testAccount(ctx context.Context, a userdata.MailAccount) (imapRes, smtpRes *TestResult) {
+// testAccount teste l'IMAP, le SMTP et (si les filtres sont actifs) ManageSieve, en parallèle.
+func (s *Server) testAccount(ctx context.Context, a userdata.MailAccount) (imapRes, smtpRes, sieveRes *TestResult) {
 	ctx, cancel := context.WithTimeout(ctx, testTimeout)
 	defer cancel()
 	var wg sync.WaitGroup
 	wg.Add(2)
 	go func() { defer wg.Done(); imapRes = toResult(s.guard.TestIMAP(ctx, imapEndpoint(a))) }()
 	go func() { defer wg.Done(); smtpRes = toResult(s.guard.TestSMTP(ctx, smtpEndpoint(a))) }()
+	if !a.Sieve.Disabled {
+		wg.Add(1)
+		go func() { defer wg.Done(); sieveRes = toResult(s.guard.TestSieve(ctx, sieveEndpoint(a))) }()
+	}
 	wg.Wait()
-	return imapRes, smtpRes
+	return imapRes, smtpRes, sieveRes
 }
 
 // --- accès aux comptes de la session ---
@@ -426,7 +430,7 @@ func (s *Server) accountSave(w http.ResponseWriter, r *http.Request, sess *sessi
 
 	action := r.PostFormValue("action")
 	first := len(list) == 0
-	var imapRes, smtpRes *TestResult
+	var imapRes, smtpRes, sieveRes *TestResult
 	if action == "test" || first {
 		rule := s.cfg.RateLimit.MailTest
 		ipKey, userKey := s.limitKeys("mailtest", r, sess.Account.Login)
@@ -435,16 +439,16 @@ func (s *Server) accountSave(w http.ResponseWriter, r *http.Request, sess *sessi
 			return
 		}
 		s.addFailure(rule, ipKey, userKey) // chaque test compte, réussi ou non
-		imapRes, smtpRes = s.testAccount(r.Context(), acc)
+		imapRes, smtpRes, sieveRes = s.testAccount(r.Context(), acc)
 		s.log.Info("test de compte mail", "login", store.ReduceLogin(sess.Account.Login),
 			"imap_ok", imapRes.OK, "smtp_ok", smtpRes.OK, "imap_kind", imapRes.Kind, "smtp_kind", smtpRes.Kind)
 		if action == "test" {
-			s.accountForm(w, r, sess, http.StatusOK, &Page{Form: form, IMAPResult: imapRes, SMTPResult: smtpRes})
+			s.accountForm(w, r, sess, http.StatusOK, &Page{Form: form, IMAPResult: imapRes, SMTPResult: smtpRes, SieveResult: sieveRes})
 			return
 		}
 		if !imapRes.OK || !smtpRes.OK {
 			s.accountForm(w, r, sess, http.StatusUnprocessableEntity, &Page{
-				Form: form, IMAPResult: imapRes, SMTPResult: smtpRes, FormErrorKeys: []string{"accounts.err.first_must_pass"}})
+				Form: form, IMAPResult: imapRes, SMTPResult: smtpRes, SieveResult: sieveRes, FormErrorKeys: []string{"accounts.err.first_must_pass"}})
 			return
 		}
 	}
