@@ -57,6 +57,11 @@
 <div class="menu"><form method="post" action="/settings/folders/action">{{template "boxfield" $}}
 <input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="action" value="rename"><input type="hidden" name="name" value="{{.Name}}"><input type="hidden" name="delim" value="{{.Delim}}">
 <input name="new_name" type="text" maxlength="100" value="{{.Leaf}}" required><button type="submit">{{$.T "folders.rename"}}</button></form></div></details>
+<details class="danger"><summary>{{$.T "folders.empty"}}</summary>
+<form method="post" action="/settings/folders/action">{{template "boxfield" $}}
+<input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="action" value="empty"><input type="hidden" name="name" value="{{.Name}}">
+<p>{{$.T "folders.empty_confirm" .Name}}</p>
+<button type="submit" class="danger">{{$.T "folders.empty_yes"}}</button></form></details>
 {{if .Removable}}<details class="danger"><summary>{{$.T "accounts.delete"}}</summary>
 <form method="post" action="/settings/folders/action">{{template "boxfield" $}}
 <input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="action" value="delete"><input type="hidden" name="name" value="{{.Name}}">

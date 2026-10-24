@@ -1,25 +1,26 @@
-# Point d'avancement de wmail-go (2026-10-24, soir)
+# Point d'avancement de wmail-go (2026-10-24, fin d'après-midi)
 
 Les pourcentages sont un **jugement pondéré**, pas une mesure. Détail des écarts : `docs/audit-rainloop/` ;
 décisions : `CAHIER_DES_CHARGES.md` ; historique : `git log`.
 
 ## 1. État par domaine
 
-| Domaine | Code | Tests automatiques | Validé par l'utilisateur | Reste à faire |
+| Domaine | Code | Tests automatiques | Validé par vous | Reste à faire |
 |---|---|---|---|---|
-| Socle : comptes chiffrés, sessions, plusieurs boîtes, fr/en, thèmes, conteneurs, dépôt Git | ~100 % | oui | en partie | HTTPS derrière votre proxy, sauvegarde du volume |
-| Liste : tri, recherche RainLoop, conversations, dossiers, glisser-déposer, clavier, actualisation automatique, pastilles | ~95 % | oui (+ Dovecot) | en partie | disposition « aperçu en bas », drapeaux rafraîchis au sondage, transfert groupé |
-| Lecture : HTML assaini, texte brut, charsets, pièces jointes par partie IMAP, ICS, images distantes, photo du correspondant | ~92 % | oui | **à valider** | espacement du corps (en attente du `.eml`), aperçu PDF intégré, bouton « haut de page » |
-| Composition : texte et HTML, pastilles, brouillons, modèles, signatures riches, Répondre à et Cci, accusés | ~95 % | oui + navigateur | non | avertissements à l'envoi côté navigateur, glisser une adresse entre champs |
-| Contacts : carnet chiffré, vCard/CSV, photo, autocomplétion, CardDAV, écrire à la sélection | ~93 % | oui (serveur CardDAV simulé) | non | vue deux volets, propriétés vCard inconnues conservées, en-têtes CSV supplémentaires |
-| Filtres Sieve, dossiers système, garde-fous, quota | ~96 % | oui (Dovecot) | en partie | quota réel à vérifier |
-| Sécurité : 2FA, clé de récupération, limitation de débit, anti-SSRF, mandataire d'images | ~100 % | oui | non | essai avec votre application TOTP |
+| Socle : comptes chiffrés, sessions, plusieurs boîtes, fr/en, thèmes, conteneurs, dépôt Git | ~100 % | oui | en partie | sauvegarde du volume |
+| Liste : tri, recherche, conversations, dossiers, glisser-déposer, clavier, actualisation, sélection souris et clavier | ~98 % | oui (+ Dovecot) | en partie | liste d'une ligne en disposition « liste seule » |
+| Lecture : HTML assaini, texte brut, charsets, pièces jointes, ICS, images distantes, photo, flèches préc./suiv. | ~95 % | oui | **à valider** | espacement du corps (en attente du `.eml`), aperçu PDF intégré, bouton « haut de page » |
+| Composition : texte et HTML, pastilles, brouillons, modèles, signatures, accusés, transfert groupé | ~97 % | oui + navigateur | non | glisser une adresse d'un champ à l'autre |
+| Contacts : deux volets, vCard/CSV, photo, autocomplétion, CardDAV, recherche par numéro | ~97 % | oui (serveur CardDAV simulé) | non | ordre des boutons de barre comme RainLoop |
+| Filtres Sieve, dossiers système, garde-fous, quota, vider un dossier | ~97 % | oui (Dovecot) | en partie | quota réel à vérifier |
+| Sécurité : 2FA, clé de récupération, limitation de débit, anti-SSRF, mandataire d'images, HSTS, cache | ~100 % | oui | non | essai avec votre application TOTP |
 | Vos plug-ins : ICS, X-Originating-IP | 100 % | oui | à valider | réponse accepter/refuser à une invitation |
-| **Fidélité visuelle DarkShine** | **~72 %** | captures | **partiellement conforme** | barre de composition sombre, icônes pleines, boutons des réglages, en-tête de composition gris, aperçu « N sélectionnés » |
-| Analyse de RainLoop | 100 % lue | — | — | P1 : 2/2 faits ; P2 : ~85 % ; P3 : ~35 % |
+| **Fidélité visuelle DarkShine** | **~85 %** | captures | **à revalider** | icônes pleines restantes, animations, largeurs par taille d'écran |
+| Analyse de RainLoop | 100 % lue | — | — | P1 : 2/2 ; P2 : ~95 % ; P3 : ~50 % |
 
-**Avancement global : environ 82 %** (fonctions 40 %, fidélité visuelle 25 %, validation sur vos boîtes 20 %, tests 15 %).
-Le point faible reste la validation sur vos vraies boîtes (~30 %).
+**Avancement global : environ 88 %** (fonctions 40 %, fidélité visuelle 25 %, validation sur vos boîtes 20 %, tests 15 %).
+Détail : fonctions ~95 %, couverture de RainLoop ~93 %, tests automatiques ~90 %, **validation par vous ~30 %**
+(c'est le point faible ; la matrice `MATRICE_DE_TEST.md`, 135 cas, sert à la faire monter).
 
 ## 2. Fait depuis le passage à Opus 5
 

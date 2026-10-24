@@ -219,6 +219,18 @@ func (s *Server) foldersAction(w http.ResponseWriter, r *http.Request, sess *ses
 			}
 			return c.DeleteFolder(name)
 		}
+	case "empty":
+		if !mailconn.ValidFolderName(name) {
+			s.foldersPage(w, r, sess, http.StatusBadRequest, "folders.err.name")
+			return
+		}
+		run = func(c *mailconn.Conn) error {
+			n, err := c.ClearFolder(name)
+			if err == nil {
+				s.log.Info("dossier vidé", "login", store.ReduceLogin(sess.Account.Login), "dossier", name, "messages", n)
+			}
+			return err
+		}
 	case "subscribe", "unsubscribe":
 		if !mailconn.ValidFolderName(name) {
 			s.foldersPage(w, r, sess, http.StatusBadRequest, "folders.err.name")
