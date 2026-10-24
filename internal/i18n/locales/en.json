@@ -683,6 +683,7 @@
   "accounts.move_down": "Move down",
   "settings.prefs.checkboxes": "Show checkboxes in the message list",
   "settings.prefs.animations": "Interface animations",
+  "settings.prefs.favicon_count": "Unread count on the tab icon",
   "accounts.form.proxy_images": "Load remote images through the server (the sender does not see your IP address)",
   "mail.trust_sender": "Always show images from this sender",
   "settings.trusted.title": "Trusted senders (images shown directly): %d",

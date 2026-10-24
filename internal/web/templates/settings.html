@@ -45,6 +45,7 @@
 <small>{{.T "settings.prefs.avatars_hint"}}</small>
 <label class="check"><input name="show_checkboxes" type="checkbox"{{if not .Prefs.HideChecks}} checked{{end}}> {{.T "settings.prefs.checkboxes"}}</label>
 <label class="check"><input name="animations" type="checkbox"{{if not .Prefs.NoAnim}} checked{{end}}> {{.T "settings.prefs.animations"}}</label>
+<label class="check"><input name="favicon_count" type="checkbox"{{if .Prefs.FaviconCount}} checked{{end}}> {{.T "settings.prefs.favicon_count"}}</label>
 <label class="check"><input name="threads" type="checkbox"{{if .Prefs.Threads}} checked{{end}}> {{.T "settings.prefs.threads"}}</label>
 <label class="check"><input name="contacts_autosave" type="checkbox"{{if .Prefs.ContactsAuto}} checked{{end}}> {{.T "settings.prefs.contacts_autosave"}}</label>
 <label class="check"><input id="notify-desktop" name="notify_desktop" type="checkbox"{{if .Prefs.NotifyDesktop}} checked{{end}}> {{.T "settings.prefs.notify_desktop"}}</label>

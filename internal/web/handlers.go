@@ -290,6 +290,7 @@ func (s *Server) settingsPage(sess *session.Session) *Page {
 			HideChecks:      set.HideCheckboxes,
 			TrustedSenders:  set.TrustedSenders,
 			NoAnim:          set.NoAnimations,
+			FaviconCount:    !set.NoFaviconCount,
 			NotifyDesktop:   set.NotifyDesktop,
 			Background:      set.Background,
 			NotifySound:     set.NotifySound,
@@ -445,6 +446,7 @@ func (s *Server) settingsPrefs(w http.ResponseWriter, r *http.Request, sess *ses
 	}
 	set.HideCheckboxes = r.PostFormValue("show_checkboxes") == ""
 	set.NoAnimations = r.PostFormValue("animations") == ""
+	set.NoFaviconCount = r.PostFormValue("favicon_count") == ""
 	set.NotifyDesktop = r.PostFormValue("notify_desktop") != ""
 	set.NotifySound = r.PostFormValue("notify_sound") != ""
 	err := s.store.SaveData(sess.Account)

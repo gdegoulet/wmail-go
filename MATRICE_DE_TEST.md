@@ -634,6 +634,16 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
   attendu : prise en compte après rechargement
   réponse :
 
+[I-12] Compteur de non lus sur l'icône de l'onglet
+  tester  : laisser des messages non lus, regarder l'onglet du navigateur ; décocher l'option dans Réglages > Général
+  attendu : pastille rouge avec le nombre sur l'icône ; elle disparaît quand l'option est décochée
+  réponse :
+
+[I-13] Non lus des autres boîtes
+  tester  : deux boîtes avec des non lus, ouvrir le menu du compte en haut à droite
+  attendu : un compteur par boîte, rafraîchi au sondage (2 min)
+  réponse :
+
 [I-11] Boutons des réglages
   attendu : relief léger, bord foncé, comme RainLoop
   réponse :
@@ -721,4 +731,4 @@ Je remplis ce tableau à partir de vos réponses : un retour `KO` y reste jusqu'
 ## Points livrés depuis la dernière session de test
 
 Ajoutés aux points ci-dessus, à valider en priorité : `C-12`, `C-13`, `C-14`, `C-15`, `C-30`, `C-31`, `D-10`, `D-15`, `D-16`,
-`D-21`, `D-22`, `E-03`, `F-01`, `F-05`, `G-02`, `G-07`, `I-01`, `I-05`, `I-09`, `I-11`, `A-08`, `C-24`, `B-08`, `B-09`, `C-32`.
+`D-21`, `D-22`, `E-03`, `F-01`, `F-05`, `G-02`, `G-07`, `I-01`, `I-05`, `I-09`, `I-11`, `A-08`, `C-24`, `B-08`, `B-09`, `C-32`, `I-12`, `I-13`.

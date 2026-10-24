@@ -16,7 +16,7 @@
 {{template "icons"}}
 {{if and .User (not .HideNav)}}{{if .Mail}}{{template "mailbar" .}}{{else}}{{template "nav" .}}{{end}}{{end}}
 {{template "content" .}}
-{{with .Poll}}<div id="poll" hidden data-unseen="{{.Unseen}}" data-title="{{$.T "app.name"}} – {{$.T $.TitleKey}}" data-many="{{$.T "notify.many" 0}}"{{if .Desktop}} data-desktop{{end}}{{if .Sound}} data-sound{{end}}></div><script src="/static/poll.js" defer></script>{{end}}
+{{with .Poll}}<div id="poll" hidden data-unseen="{{.Unseen}}" data-title="{{$.T "app.name"}} – {{$.T $.TitleKey}}" data-many="{{$.T "notify.many" 0}}"{{if .Desktop}} data-desktop{{end}}{{if .Sound}} data-sound{{end}}{{if .FaviconCount}} data-favicon{{end}}></div><script src="/static/poll.js" defer></script>{{end}}
 <script src="/static/menus.js" defer></script>
 {{block "scripts" .}}{{end}}
 </body>
@@ -168,7 +168,7 @@
 <span class="menu-title">{{.T "mailbox.account"}}</span>
 <form method="post" action="/accounts/select" class="acc-list">
 <input type="hidden" name="csrf" value="{{.CSRF}}">
-{{range .Accounts}}<button type="submit" name="id" value="{{.ID}}"{{if eq .ID $.ActiveID}} class="current" aria-current="true"{{end}}><span class="mark">{{if eq .ID $.ActiveID}}✓{{end}}</span> {{if .Email}}{{.Email}}{{else}}{{.Name}}{{end}}</button>{{end}}
+{{range .Accounts}}<button type="submit" name="id" value="{{.ID}}"{{if eq .ID $.ActiveID}} class="current" aria-current="true"{{end}}><span class="mark">{{if eq .ID $.ActiveID}}✓{{end}}</span> {{if .Email}}{{.Email}}{{else}}{{.Name}}{{end}}<span class="badge acc-badge" data-acc-badge="{{.ID}}" hidden></span></button>{{end}}
 </form>
 <hr>
 <span class="menu-title">{{.User}}</span>

@@ -683,6 +683,7 @@
   "accounts.move_down": "Descendre",
   "settings.prefs.checkboxes": "Afficher des cases à cocher dans la liste des messages",
   "settings.prefs.animations": "Animations de l'interface",
+  "settings.prefs.favicon_count": "Nombre de messages non lus sur l'icône de l'onglet",
   "accounts.form.proxy_images": "Charger les images distantes par le serveur (l'expéditeur ne voit pas votre adresse IP)",
   "mail.trust_sender": "Toujours afficher les images de cet expéditeur",
   "settings.trusted.title": "Expéditeurs de confiance (images affichées d'emblée) : %d",

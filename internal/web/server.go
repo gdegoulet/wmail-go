@@ -528,6 +528,7 @@ type Page struct {
 type PrefsView struct {
 	FontSize                   int
 	Layout                     string
+	FaviconCount               bool
 	Language, Theme            string
 	IdleMinutes, AbsoluteHours int
 	TrustedSenders             []string

@@ -62,6 +62,7 @@ type Settings struct {
 	TrustedSenders       []string            `json:"trusted_senders"`      // expéditeurs dont les images distantes s'affichent d'emblée
 	HideCheckboxes       bool                `json:"hide_checkboxes"`      // masque les cases à cocher de la liste (la sélection reste possible au clavier)
 	NoAnimations         bool                `json:"no_animations"`        // supprime les transitions de l'interface
+	NoFaviconCount       bool                `json:"no_favicon_count"`     // n'affiche pas le nombre de non lus sur l'icône de l'onglet
 	Threads              bool                `json:"threads"`              // regrouper les messages par conversation
 	LastReply            string              `json:"last_reply"`           // dernière action de réponse : reply, replyall ou forward
 	NotifyDesktop        bool                `json:"notify_desktop"`       // notification de bureau pour les nouveaux messages
