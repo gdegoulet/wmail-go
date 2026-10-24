@@ -439,6 +439,9 @@ func (s *Server) settingsPrefs(w http.ResponseWriter, r *http.Request, sess *ses
 	set.NoContactsAutosave = r.PostFormValue("contacts_autosave") == ""
 	set.Threads = r.PostFormValue("threads") != ""
 	set.Timezone = tz
+	if a := r.PostFormValue("avatars"); a == "none" || a == "gravatar" {
+		set.Avatars = a
+	}
 	set.HideCheckboxes = r.PostFormValue("show_checkboxes") == ""
 	set.NoAnimations = r.PostFormValue("animations") == ""
 	set.NotifyDesktop = r.PostFormValue("notify_desktop") != ""

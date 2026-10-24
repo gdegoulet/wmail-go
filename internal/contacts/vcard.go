@@ -82,6 +82,7 @@ func fromCard(card vcard.Card) *Contact {
 	if bd := strings.ReplaceAll(card.Value(vcard.FieldBirthday), "-", ""); len(bd) >= 8 {
 		c.Birthday = bd[:4] + "-" + bd[4:6] + "-" + bd[6:8]
 	}
+	c.Photo = photoFromCard(card)
 	if cat := card.Value(vcard.FieldCategories); cat != "" {
 		c.Tags = strings.Split(cat, ",")
 	}
@@ -116,6 +117,13 @@ func toCard(c *Contact) vcard.Card {
 			card.Add(k, f)
 		}
 	}
+	if c.Photo != "" {
+		if _, mime, ok := c.PhotoBytes(); ok {
+			_, b64, _ := strings.Cut(c.Photo, ",")
+			card.Add(vcard.FieldPhoto, &vcard.Field{Value: strings.Join(strings.Fields(b64), ""),
+				Params: vcard.Params{"ENCODING": {"b"}, vcard.ParamType: {strings.ToUpper(strings.TrimPrefix(mime, "image/"))}}})
+		}
+	}
 	add(vcard.FieldEmail, c.Emails)
 	add(vcard.FieldTelephone, c.Phones)
 	add(vcard.FieldURL, c.URLs)
@@ -145,4 +153,30 @@ func VCardBytes(c *Contact) ([]byte, error) {
 	var b bytes.Buffer
 	err := EncodeVCard(&b, []*Contact{c})
 	return b.Bytes(), err
+}
+
+// photoFromCard lit la photo d'une vCard : « data: » directement, ou valeur en base64 avec ENCODING=b / BASE64.
+func photoFromCard(card vcard.Card) string {
+	f := card.Get(vcard.FieldPhoto)
+	if f == nil || f.Value == "" || len(f.Value) > MaxPhoto {
+		return ""
+	}
+	v := strings.TrimSpace(f.Value)
+	if strings.HasPrefix(strings.ToLower(v), "data:image/") {
+		return v
+	}
+	enc := strings.ToLower(f.Params.Get("ENCODING"))
+	if enc != "b" && enc != "base64" {
+		return "" // une URL externe n'est pas rapatriée (elle révélerait l'adresse IP du lecteur)
+	}
+	mime := "image/jpeg"
+	switch strings.ToLower(f.Params.Get(vcard.ParamType)) {
+	case "png":
+		mime = "image/png"
+	case "gif":
+		mime = "image/gif"
+	case "webp":
+		mime = "image/webp"
+	}
+	return "data:" + mime + ";base64," + strings.Join(strings.Fields(v), "")
 }

@@ -32,3 +32,33 @@ func TestVCardRoundTrip(t *testing.T) {
 		t.Error("entrée invalide acceptée")
 	}
 }
+
+func TestVCardPhotoRoundTrip(t *testing.T) {
+	png := "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+	in := "BEGIN:VCARD\r\nVERSION:3.0\r\nFN:Zoé\r\nEMAIL:zoe@x.fr\r\nPHOTO;ENCODING=b;TYPE=PNG:" + png + "\r\nEND:VCARD\r\n"
+	list, _, err := ParseVCards(strings.NewReader(in))
+	if err != nil || len(list) != 1 {
+		t.Fatalf("%v %v", list, err)
+	}
+	if list[0].Photo != "data:image/png;base64,"+png {
+		t.Fatalf("photo lue : %.40s", list[0].Photo)
+	}
+	data, mime, ok := list[0].PhotoBytes()
+	if !ok || mime != "image/png" || len(data) == 0 {
+		t.Errorf("décodage : %v %q %d", ok, mime, len(data))
+	}
+	var out bytes.Buffer
+	if err := EncodeVCard(&out, list); err != nil {
+		t.Fatal(err)
+	}
+	back, _, _ := ParseVCards(&out)
+	if len(back) != 1 || back[0].Photo != list[0].Photo {
+		t.Errorf("aller-retour : %.40s", back[0].Photo)
+	}
+	// une photo donnée par une adresse web n'est pas rapatriée (elle révélerait l'adresse IP du lecteur)
+	ext := "BEGIN:VCARD\r\nVERSION:3.0\r\nFN:X\r\nEMAIL:x@y.fr\r\nPHOTO;VALUE=URI:https://exemple.fr/p.png\r\nEND:VCARD\r\n"
+	l2, _, _ := ParseVCards(strings.NewReader(ext))
+	if len(l2) != 1 || l2[0].Photo != "" {
+		t.Errorf("photo externe : %q", l2[0].Photo)
+	}
+}

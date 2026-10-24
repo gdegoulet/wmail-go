@@ -696,5 +696,11 @@
   "folders.err.not_empty": "Ce dossier contient des messages : déplacez-les ou videz le dossier avant de le supprimer.",
   "folders.err.has_children": "Ce dossier contient des sous-dossiers : supprimez-les d'abord.",
   "folders.err.system_delete": "Ce dossier joue un rôle système (corbeille, envoyés, brouillons, indésirables ou archive) : il n'est pas supprimable.",
-  "mail.move_copy_hint": "Ctrl + clic : copier"
+  "mail.move_copy_hint": "Ctrl + clic : copier",
+  "settings.prefs.avatars": "Photo du correspondant",
+  "settings.prefs.avatars.none": "Aucune (silhouette)",
+  "settings.prefs.avatars.gravatar": "Carnet d'adresses, puis Gravatar",
+  "settings.prefs.avatars_hint": "La photo du carnet d'adresses est toujours utilisée quand elle existe. Avec Gravatar, le serveur (jamais votre navigateur) demande la photo à gravatar.com : l'empreinte de l'adresse de vos correspondants lui est alors transmise.",
+  "contacts.photo": "Photo",
+  "contacts.photo_remove": "Retirer la photo"
 }

@@ -59,6 +59,10 @@
 <label>{{$.T "contacts.code"}}<input type="text" name="adr_code" maxlength="500" value="{{.Code}}"></label>
 <label>{{$.T "contacts.country"}}<input type="text" name="adr_country" maxlength="500" value="{{.Country}}"></label></div>{{end}}</fieldset>
 <label>{{$.T "contacts.tags"}}<input type="text" name="tags" maxlength="500" value="{{.TagsText}}"></label><small>{{$.T "contacts.tags_hint"}}</small>
+<input type="hidden" name="photo" id="c-photo" value="{{.PhotoURL}}">
+<label data-js-only hidden>{{$.T "contacts.photo"}}
+<input type="file" id="c-photo-file" accept="image/png,image/jpeg,image/gif,image/webp"></label>
+{{if .PhotoURL}}<p class="c-photo"><img src="{{.PhotoURL}}" alt="" width="64" height="64"> <button type="button" class="link" id="c-photo-clear" data-js-only hidden>{{$.T "contacts.photo_remove"}}</button></p>{{end}}
 <label>{{$.T "contacts.notes"}}<textarea name="notes" rows="4" maxlength="10000">{{.Edit.Notes}}</textarea></label>
 <datalist id="t-mail"><option value="home"><option value="work"><option value="other"></datalist>
 <datalist id="t-phone"><option value="cell"><option value="home"><option value="work"><option value="fax"><option value="other"></datalist>
@@ -99,3 +103,4 @@
 </section>
 {{end}}
 {{template "setclose" $}}{{end}}
+{{define "scripts"}}<script src="/static/contacts-photo.js" defer></script>{{end}}

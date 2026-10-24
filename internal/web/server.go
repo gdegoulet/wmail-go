@@ -52,6 +52,7 @@ type Server struct {
 	pages    map[string]*template.Template
 	attach   *attachStore
 	pending  pending2FA
+	avatars  avatarCache
 }
 
 // New construit le serveur et charge les modèles.
@@ -146,6 +147,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("POST /mail/clear", s.auth(s.mailClear))
 	mux.HandleFunc("POST /mail/append", s.auth(s.mailAppend))
 	mux.HandleFunc("GET /mail/image", s.auth(s.mailImage))
+	mux.HandleFunc("GET /mail/avatar", s.auth(s.mailAvatar))
 	mux.HandleFunc("POST /mail/trust", s.auth(s.trustSender))
 	mux.HandleFunc("POST /mail/mdn", s.auth(s.mailMDN))
 	mux.HandleFunc("GET /mail/source", s.auth(s.mailSource))
@@ -515,6 +517,7 @@ type PrefsView struct {
 	MarkRead                   bool
 	DraftAutosave, ReplySame   bool
 	ContactsAuto, Threads      bool
+	Avatars                    string
 	Timezone                   string
 	HideChecks, NoAnim         bool
 	NotifyDesktop, NotifySound bool

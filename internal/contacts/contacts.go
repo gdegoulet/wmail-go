@@ -4,9 +4,11 @@ package contacts
 
 import (
 	"crypto/rand"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -23,6 +25,7 @@ const (
 	MaxTags     = 20
 	MaxField    = 500 // longueur d'un champ texte simple
 	MaxNotes    = 10000
+	MaxPhoto    = 350 << 10 // image d'un contact (URI data:)
 	PageSize    = 50
 )
 
@@ -66,6 +69,7 @@ type Contact struct {
 	Title    string   `json:"ttl,omitempty"`
 	Birthday string   `json:"bd,omitempty"` // AAAA-MM-JJ
 	Notes    string   `json:"note,omitempty"`
+	Photo    string   `json:"photo,omitempty"` // image du contact en URI data: (vCard PHOTO)
 	Tags     []string `json:"tags,omitempty"`
 	Frec     int      `json:"frec,omitempty"`
 	Changed  int64    `json:"ch,omitempty"`
@@ -128,6 +132,9 @@ func (c *Contact) Normalize() error {
 	c.Prefix, c.First, c.Middle, c.Last, c.Suffix = line(c.Prefix), line(c.First), line(c.Middle), line(c.Last), line(c.Suffix)
 	c.Nick, c.Org, c.Title = line(c.Nick), line(c.Org), line(c.Title)
 	c.Notes = cut(c.Notes, MaxNotes)
+	if !photoRe.MatchString(c.Photo) || len(c.Photo) > MaxPhoto {
+		c.Photo = ""
+	}
 	if _, err := time.Parse("2006-01-02", c.Birthday); err != nil {
 		c.Birthday = ""
 	}
@@ -445,4 +452,23 @@ func FormatAddress(name, addr string) string {
 		name = `"` + strings.NewReplacer(`\`, `\\`, `"`, `\"`).Replace(name) + `"`
 	}
 	return name + " <" + addr + ">"
+}
+
+var photoRe = regexp.MustCompile(`^data:image/(png|jpeg|gif|webp);base64,[A-Za-z0-9+/=\s]+$`)
+
+// PhotoBytes décode l'image du contact ; ok est faux s'il n'y en a pas.
+func (c *Contact) PhotoBytes() (data []byte, mime string, ok bool) {
+	if c.Photo == "" {
+		return nil, "", false
+	}
+	head, b64, found := strings.Cut(c.Photo, ",")
+	if !found {
+		return nil, "", false
+	}
+	raw, err := base64.StdEncoding.DecodeString(strings.Join(strings.Fields(b64), ""))
+	if err != nil || len(raw) == 0 {
+		return nil, "", false
+	}
+	mime = strings.TrimSuffix(strings.TrimPrefix(head, "data:"), ";base64")
+	return raw, mime, true
 }

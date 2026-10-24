@@ -93,6 +93,7 @@ type ContactsView struct {
 	URLRows               []contacts.Typed
 	PostalRows            []contacts.Postal
 	TagsText              string
+	PhotoURL              string // photo actuelle du contact (URI data:)
 	Info                  string // clé de message d'information
 	Added, Skipped        int
 	PrevURL, NextURL      string
@@ -160,6 +161,7 @@ func (s *Server) contactsPage(w http.ResponseWriter, r *http.Request, sess *sess
 		v.EmailRows, v.PhoneRows, v.URLRows = padTyped(edit.Emails, 2), padTyped(edit.Phones, 2), padTyped(edit.URLs, 1)
 		v.PostalRows = append(append([]contacts.Postal(nil), edit.Postals...), contacts.Postal{})
 		v.TagsText = strings.Join(edit.Tags, ", ")
+		v.PhotoURL = edit.Photo
 	}
 	nav := url.Values{}
 	if v.Q != "" {
@@ -214,8 +216,8 @@ func contactFromForm(r *http.Request) *contacts.Contact {
 		ID: r.PostFormValue("id"), Prefix: r.PostFormValue("prefix"), First: r.PostFormValue("first"), Middle: r.PostFormValue("middle"),
 		Last: r.PostFormValue("last"), Suffix: r.PostFormValue("suffix"), Nick: r.PostFormValue("nick"),
 		Org: r.PostFormValue("org"), Title: r.PostFormValue("title"), Birthday: r.PostFormValue("birthday"),
-		Notes: strings.ReplaceAll(r.PostFormValue("notes"), "\r\n", "\n"),
-		Tags:  strings.Split(r.PostFormValue("tags"), ","),
+		Notes: strings.ReplaceAll(r.PostFormValue("notes"), "\r\n", "\n"), Photo: strings.TrimSpace(r.PostFormValue("photo")),
+		Tags: strings.Split(r.PostFormValue("tags"), ","),
 	}
 	c.Emails = zipTyped(f["email_type"], f["email"], 2*contacts.MaxValues)
 	c.Phones = zipTyped(f["phone_type"], f["phone"], 2*contacts.MaxValues)
@@ -428,4 +430,21 @@ func (s *Server) contactIDFor(sess *session.Session, email string) string {
 		}
 	})
 	return id
+}
+
+// contactPhoto renvoie la photo enregistrée dans le carnet pour cette adresse.
+func (s *Server) contactPhoto(sess *session.Session, email string) (data []byte, mime string, ok bool) {
+	_ = s.readBook(sess, func(b *contacts.Book) {
+		if c := b.ByEmail(email); c != nil {
+			data, mime, ok = c.PhotoBytes()
+		}
+	})
+	return data, mime, ok
+}
+
+// avatarsEnabled dit si une photo de correspondant peut être affichée (carnet d'adresses ou Gravatar).
+func (s *Server) avatarsEnabled(sess *session.Session) bool {
+	sess.Mu.Lock()
+	defer sess.Mu.Unlock()
+	return sess.Account.Data.Settings.Avatars == "gravatar" || len(sess.Account.Data.MailAccounts) > 0
 }

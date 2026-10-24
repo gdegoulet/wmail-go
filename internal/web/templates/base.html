@@ -259,7 +259,7 @@
 <a class="mh-close" href="{{.Back}}" title="{{$.T "mail.close"}}" aria-label="{{$.T "mail.close"}}">{{template "icon" "close"}}</a>
 </div>
 <div class="mh-from">
-<span class="avatar">{{template "icon" "avatar"}}</span>
+<span class="avatar">{{if .AvatarURL}}<img src="{{.AvatarURL}}" alt="" width="48" height="48" loading="lazy" onerror="this.remove()">{{end}}{{template "icon" "avatar"}}</span>
 <div class="mh-who">
 <div class="from"><a class="sender" href="/compose?to={{urlquery .SenderEmail}}&amp;back={{urlquery .Back}}" title="{{.SenderEmail}}">{{.SenderName}}</a> <span class="date">({{.Date}})</span>{{if .DKIM}} <span class="dkim dkim-{{.DKIM}}" title="{{$.T (printf "mail.dkim.%s" .DKIM)}}">{{if eq .DKIM "pass"}}✔{{else}}⚠{{end}}</span>{{end}}</div>
 {{if .ToShort}}<p class="to">{{$.T "mail.to_label"}} {{.ToShort}}</p>{{end}}

@@ -127,6 +127,7 @@ type MessageView struct {
 	DKIM, ReplyTo, Bcc, Size         string      // DKIM : pass, warn ou vide
 	Events                           []EventView // invitations .ics jointes
 	ReplyMode                        string      // action du bouton principal : reply, replyall ou forward (la dernière utilisée)
+	AvatarURL                        string      // photo du correspondant (carnet d'adresses ou Gravatar) ; vide : silhouette
 	ContactID                        string      // fiche du contact expéditeur (vide : inconnu)
 	UnsubscribeExternal              bool        // le lien sort de l'application
 }
@@ -923,6 +924,9 @@ func (s *Server) buildMessageView(sess *session.Session, acc userdata.MailAccoun
 	if len(m.From) > 0 {
 		mv.SenderName, mv.SenderEmail = m.From[0].Short(), m.From[0].Email
 		mv.ContactID = s.contactIDFor(sess, mv.SenderEmail)
+		if s.avatarsEnabled(sess) {
+			mv.AvatarURL = "/mail/avatar?" + url.Values{"email": {mv.SenderEmail}}.Encode()
+		}
 	}
 	for _, u := range m.ListUnsubscribe { // https d'abord : un clic suffit ; sinon un message pré-rempli
 		if strings.HasPrefix(strings.ToLower(u), "https://") {

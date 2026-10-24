@@ -696,5 +696,11 @@
   "folders.err.not_empty": "This folder holds messages: move them or empty the folder before deleting it.",
   "folders.err.has_children": "This folder has subfolders: delete them first.",
   "folders.err.system_delete": "This folder has a system role (trash, sent, drafts, junk or archive): it cannot be deleted.",
-  "mail.move_copy_hint": "Ctrl + click: copy"
+  "mail.move_copy_hint": "Ctrl + click: copy",
+  "settings.prefs.avatars": "Sender picture",
+  "settings.prefs.avatars.none": "None (silhouette)",
+  "settings.prefs.avatars.gravatar": "Address book, then Gravatar",
+  "settings.prefs.avatars_hint": "A picture stored in the address book is always used when present. With Gravatar, the server (never your browser) asks gravatar.com for the picture: the hash of your correspondents' addresses is sent to that service.",
+  "contacts.photo": "Picture",
+  "contacts.photo_remove": "Remove the picture"
 }

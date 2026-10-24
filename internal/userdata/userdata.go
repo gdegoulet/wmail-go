@@ -57,6 +57,7 @@ type Settings struct {
 	OpenFolders          map[string][]string `json:"open_folders"`         // dossiers dépliés dans l'arbre, par boîte mail
 	NoDraftAutosave      bool                `json:"no_draft_autosave"`    // désactive l'enregistrement automatique des brouillons
 	Background           int                 `json:"background"`           // version du fond d'écran personnel (0 = aucun)
+	Avatars              string              `json:"avatars"`              // none (défaut) ou gravatar : photo du correspondant demandée à gravatar.com par le serveur
 	Timezone             string              `json:"timezone"`             // fuseau d'affichage des dates (IANA, ex. Europe/Paris) ; vide : celui du serveur
 	TrustedSenders       []string            `json:"trusted_senders"`      // expéditeurs dont les images distantes s'affichent d'emblée
 	HideCheckboxes       bool                `json:"hide_checkboxes"`      // masque les cases à cocher de la liste (la sélection reste possible au clavier)

@@ -36,6 +36,12 @@
 <input type="text" name="timezone" list="tzlist" maxlength="64" value="{{.Prefs.Timezone}}" placeholder="{{.Prefs.DefaultTimezone}}" autocomplete="off"></label>
 <small>{{.T "settings.prefs.timezone_hint" .Prefs.DefaultTimezone}}</small>
 <datalist id="tzlist"><option value="Europe/Paris"><option value="Europe/London"><option value="Europe/Brussels"><option value="Europe/Berlin"><option value="Europe/Madrid"><option value="Europe/Rome"><option value="Europe/Zurich"><option value="Europe/Lisbon"><option value="Europe/Amsterdam"><option value="Europe/Dublin"><option value="Europe/Athens"><option value="Europe/Moscow"><option value="UTC"><option value="Africa/Casablanca"><option value="Africa/Algiers"><option value="Africa/Tunis"><option value="Africa/Dakar"><option value="Africa/Abidjan"><option value="Africa/Johannesburg"><option value="America/New_York"><option value="America/Chicago"><option value="America/Denver"><option value="America/Los_Angeles"><option value="America/Montreal"><option value="America/Sao_Paulo"><option value="America/Martinique"><option value="America/Guadeloupe"><option value="Asia/Dubai"><option value="Asia/Kolkata"><option value="Asia/Bangkok"><option value="Asia/Shanghai"><option value="Asia/Tokyo"><option value="Australia/Sydney"><option value="Pacific/Noumea"><option value="Pacific/Tahiti"><option value="Indian/Reunion"></datalist>
+<label>{{.T "settings.prefs.avatars"}}
+<select name="avatars">
+<option value="none"{{if ne .Prefs.Avatars "gravatar"}} selected{{end}}>{{.T "settings.prefs.avatars.none"}}</option>
+<option value="gravatar"{{if eq .Prefs.Avatars "gravatar"}} selected{{end}}>{{.T "settings.prefs.avatars.gravatar"}}</option>
+</select></label>
+<small>{{.T "settings.prefs.avatars_hint"}}</small>
 <label class="check"><input name="show_checkboxes" type="checkbox"{{if not .Prefs.HideChecks}} checked{{end}}> {{.T "settings.prefs.checkboxes"}}</label>
 <label class="check"><input name="animations" type="checkbox"{{if not .Prefs.NoAnim}} checked{{end}}> {{.T "settings.prefs.animations"}}</label>
 <label class="check"><input name="threads" type="checkbox"{{if .Prefs.Threads}} checked{{end}}> {{.T "settings.prefs.threads"}}</label>
