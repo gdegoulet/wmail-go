@@ -3,6 +3,7 @@ package web
 import (
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"slices"
 	"strconv"
@@ -395,7 +396,10 @@ func atoiIn(s string, lo, hi int) (int, bool) {
 	return n, err == nil && n >= lo && n <= hi
 }
 
+// settingsPrefs enregistre les préférences. Avec l'en-tête « X-Requested-With: fetch » (enregistrement à la volée
+// par settings-auto.js) la réponse est un petit JSON ; sans lui, la page des réglages est réaffichée comme avant.
 func (s *Server) settingsPrefs(w http.ResponseWriter, r *http.Request, sess *session.Session) {
+	ajax := r.Header.Get("X-Requested-With") == "fetch"
 	lang, theme := r.PostFormValue("language"), r.PostFormValue("theme")
 	idle, ok1 := atoiIn(r.PostFormValue("idle_minutes"), 1, s.cfg.Session.IdleMinutesMax)
 	abs, ok2 := atoiIn(r.PostFormValue("absolute_hours"), 1, s.cfg.Session.AbsoluteHoursMax)
@@ -419,6 +423,10 @@ func (s *Server) settingsPrefs(w http.ResponseWriter, r *http.Request, sess *ses
 		}
 	}
 	if !s.i18n.Has(lang) || !s.themeExists(theme) || !ok1 || !ok2 || !ok3 {
+		if ajax {
+			writeJSONOK(w, http.StatusBadRequest, false)
+			return
+		}
 		page := s.settingsPage(sess)
 		page.ErrorKey = "settings.prefs.error"
 		s.render(w, r, sess, http.StatusBadRequest, "settings", page)
@@ -463,9 +471,25 @@ func (s *Server) settingsPrefs(w http.ResponseWriter, r *http.Request, sess *ses
 		return
 	}
 	s.sessions.SetTTL(sess, s.cfg.SessionIdle(idle), s.cfg.SessionAbsolute(abs))
+	if ajax {
+		writeJSONOK(w, http.StatusOK, true)
+		return
+	}
 	page := s.settingsPage(sess)
 	page.InfoKey = "settings.prefs.done"
 	s.render(w, r, sess, http.StatusOK, "settings", page)
+}
+
+// writeJSONOK répond { "ok": true|false } aux requêtes faites en fetch.
+func writeJSONOK(w http.ResponseWriter, status int, ok bool) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-store")
+	w.WriteHeader(status)
+	if ok {
+		_, _ = io.WriteString(w, `{"ok":true}`)
+		return
+	}
+	_, _ = io.WriteString(w, `{"ok":false}`)
 }
 
 // Bornes (en pixels) des largeurs de volets enregistrées par l'utilisateur.

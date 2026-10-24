@@ -491,6 +491,8 @@
   "mail.mdn.body": "This is a read receipt for the message you sent.\n\nNote: it only states that the message was displayed on the recipient's computer. There is no guarantee that the recipient read or understood its content.",
   "quota.title": "Space used on the server",
   "quota.text": "%s (%d%%) of %s",
+  "settings.saved": "Saved",
+  "settings.save_error": "Could not save: use the “Save” button.",
   "reorder.hint": "Drag and drop rows to change the order.",
   "reorder.error": "The new order could not be saved.",
   "folders.missing": "not found on the server",

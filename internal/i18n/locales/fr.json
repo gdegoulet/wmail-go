@@ -491,6 +491,8 @@
   "mail.mdn.body": "Ceci est un accusé de lecture du message que vous avez envoyé.\n\nAttention : il indique seulement que le message a été affiché sur l'ordinateur du destinataire. Rien ne garantit que celui-ci en a lu ou compris le contenu.",
   "quota.title": "Espace utilisé sur le serveur",
   "quota.text": "%s (%d %%) sur %s",
+  "settings.saved": "Enregistré",
+  "settings.save_error": "Échec de l'enregistrement : utilisez le bouton « Enregistrer ».",
   "reorder.hint": "Glissez-déposez les lignes pour changer l'ordre.",
   "reorder.error": "Le nouvel ordre n'a pas pu être enregistré.",
   "folders.missing": "introuvable sur le serveur",

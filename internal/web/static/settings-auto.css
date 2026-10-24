@@ -1,0 +1,117 @@
+/* Page des réglages : coche d'enregistrement à la volée et vignettes de thèmes.
+   Chargée uniquement par settings.html (bloc « scripts »), en plus de app.css et mail.css. */
+
+/* --- coche verte / croix rouge affichée à côté du champ enregistré --- */
+.saved-tick {
+  color: #51a351;
+  margin-left: .4rem;
+  font-size: 1rem;
+  line-height: 1;
+  font-weight: 700;
+  pointer-events: none; /* la coche est dans l'étiquette : ne doit pas cocher la case */
+  animation: saved-tick-in .18s ease-out;
+}
+
+.saved-tick.err { color: #bd362f; }
+
+@keyframes saved-tick-in {
+  from { opacity: 0; transform: translateY(-.2rem); }
+  to { opacity: 1; transform: none; }
+}
+
+/* « animations » décoché dans les préférences, ou système réglé sur « moins d'animations » */
+.no-anim .saved-tick { animation: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .saved-tick { animation: none; }
+}
+
+/* --- vignettes de thèmes --- */
+.theme-field {
+  border: 1px solid var(--border);
+  border-radius: .4rem;
+  margin: .75rem 0;
+  padding: .25rem .75rem .75rem;
+}
+
+.theme-legend {
+  padding: 0 .35rem;
+  font-size: .9rem;
+  color: var(--muted);
+}
+
+.theme-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-top: .25rem;
+}
+
+.theme-tile {
+  display: block;
+  margin: 0;
+  padding: .35rem .35rem .25rem;
+  width: 5.5rem;
+  border: 2px solid transparent;
+  border-radius: .4rem;
+  cursor: pointer;
+  text-align: center;
+  color: var(--fg);
+}
+
+.theme-tile:hover { border-color: var(--border); }
+
+.theme-tile.on,
+.theme-tile:has(input:checked) { border-color: var(--accent); }
+
+/* Le bouton radio reste présent (accessibilité, navigation au clavier) mais discret. */
+.theme-tile input[type=radio] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+}
+
+.theme-tile:focus-within { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.theme-prev {
+  display: block;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto;
+  border: 1px solid rgba(0, 0, 0, .35);
+  border-radius: .25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .3);
+  /* thème inconnu (déposé dans data_dir/themes) : aperçu neutre */
+  background: linear-gradient(140deg, #9aa3ad 0%, #6b7682 55%, #3d454d 100%);
+}
+
+/* Les aperçus sont faits uniquement en CSS : aucune image à charger. */
+.theme-prev[data-theme-prev="rainloop"] {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, .45) 0 14px, rgba(0, 0, 0, 0) 14px),
+    linear-gradient(140deg, #f6b24a 0%, #dd5f1f 26%, #c2458f 54%, #4a1c54 78%, #121a30 100%);
+}
+
+.theme-prev[data-theme-prev="light"] {
+  background:
+    linear-gradient(180deg, #dfe3e8 0 14px, rgba(0, 0, 0, 0) 14px),
+    linear-gradient(140deg, #ffffff 0%, #f3f4f6 55%, #d9dce1 100%);
+  border-color: rgba(0, 0, 0, .2);
+}
+
+.theme-prev[data-theme-prev="dark"] {
+  background:
+    linear-gradient(180deg, #000000 0 14px, rgba(0, 0, 0, 0) 14px),
+    linear-gradient(140deg, #35383c 0%, #26282b 55%, #161719 100%);
+}
+
+.theme-name {
+  display: block;
+  margin-top: .3rem;
+  font-size: .78rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}

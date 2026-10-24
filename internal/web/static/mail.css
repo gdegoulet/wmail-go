@@ -241,11 +241,15 @@ dl.headers dd { margin: 0; overflow-wrap: anywhere; }
 .replygroup .reply { margin-left: 0; display: inline-flex; align-items: center; cursor: pointer; text-decoration: none; list-style: none; }
 .replygroup .menu a { display: block; padding: .3rem .9rem; color: var(--menu-fg); text-decoration: none; white-space: nowrap; }
 .replygroup .menu a:hover { background: var(--menu-hover-bg); color: var(--menu-hover-fg); }
-.bar { flex: none; display: flex; align-items: center; gap: .6rem; margin: 0; padding: .714rem 1.071rem; background: #eee; border-bottom: 1px solid #ddd; }
+.bar { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; margin: 0; padding: .714rem 1.071rem; background: #eee; border-bottom: 1px solid #ddd; }
 .bar.warn { background: var(--warn-bg); color: var(--warn-fg); }
 .imgbar { cursor: pointer; }
 .imgbar a { color: #333; text-decoration: none; }
 .imgbar a:hover { text-decoration: underline; }
+/* Un <form> ne peut pas vivre dans un <p> : le navigateur sort « Toujours afficher les images… » de la barre grise.
+   Tant que le gabarit garde cette structure, on rattache ce formulaire orphelin à la barre (sinon il flotte sur du blanc). */
+.imgbar .inline { display: inline; margin: 0; }
+.imgbar .inline .link { color: #333; }
 .attbar { justify-content: space-between; align-items: flex-start; padding: .714rem .714rem .429rem; position: relative; }
 .atts { list-style: none; display: flex; flex-wrap: wrap; margin: 0; padding: 0; }
 .att { position: relative; display: flex; align-items: stretch; margin: .357rem; min-width: 4.286rem; max-width: 14.286rem; overflow: hidden; line-height: 1.714; color: #333; text-decoration: none;
@@ -462,7 +466,11 @@ body:has(.authpage) { margin: 0; }
 .f[hidden] { display: none; }
 .f .caret { flex: none; width: 1.3rem; height: 1.6rem; margin: 0 .1rem 0 -.2rem; padding: 0; line-height: 1.6rem; text-align: center; color: inherit; background: none; border: 0; cursor: pointer; font-size: 1rem; }
 .f .caret.none { cursor: default; }
-.f .caret:focus-visible { outline: 2px solid var(--accent); }
+/* Repérage au clavier dans le panneau des dossiers : le liseré doit se voir sur le fond d'écran sombre. */
+.folder-list .fname:focus-visible, .folder-list .fstar:focus-visible,
+.f .caret:focus-visible, .folders-foot .tbtn:focus-visible {
+  outline: 2px solid rgba(255,255,255,.7); outline-offset: -2px; border-radius: .143rem;
+}
 .newfolder label { display: block; margin: .6rem 0; font-size: .93rem; color: #666; }
 .newfolder input[type=text], .newfolder select { width: 100%; box-sizing: border-box; margin-top: .25rem; }
 body.folders-collapsed .mailbox.three { grid-template-columns: 3.3rem .429rem var(--list-w, 35.714rem) .429rem minmax(0, 1fr); }
@@ -638,3 +646,27 @@ input[type=search]:focus, input[type=url]:focus, input[type=date]:focus, select:
 .msglist-empty { padding: 3.5rem .7rem; text-align: center; font-size: 1.714rem; line-height: 2.143rem; color: #999; }
 .msglist-empty.error { color: #da4f49; }
 .cp-text, .cp-files { padding: 0 .71rem .71rem; }
+
+/* ---------- glisser-déposer des messages (RainLoop montre un calque rayé et le nombre de messages) ---------- */
+/* Pastille collée au curseur : le JS ne pose que left/top, le décalage reste ici. */
+.dnd-count { position: fixed; z-index: 300; top: 0; left: 0; pointer-events: none; transform: translate(.9rem, .7rem);
+  min-width: 1.5rem; padding: .071rem .429rem .143rem; border-radius: .643rem; background: #bd362f; color: #fff;
+  font-size: .857rem; font-weight: 700; line-height: 1.4; text-align: center; text-shadow: 0 -1px 0 rgba(0,0,0,.25);
+  box-shadow: 0 1px 4px rgba(0,0,0,.5); }
+/* Ligne en cours de glissement : légère inclinaison, calque rayé et transparence. */
+.msgrow.dragged { opacity: .55; transform: rotate(-1.2deg); transform-origin: 0 50%;
+  background-image: repeating-linear-gradient(135deg, rgba(0,0,0,.07) 0 .357rem, rgba(0,0,0,0) .357rem .714rem); }
+
+/* ---------- animations discrètes de RainLoop ---------- */
+.tbtn:active:not(:disabled):not(.disabled) { transform: scale(.95); }
+@keyframes wm-appear { from { opacity: 0; } to { opacity: 1; } }
+.keyhelp:not([hidden]), .newfolder:not([hidden]), dialog.viewer[open] { animation: wm-appear .12s ease-out; }
+/* Le dossier qui reçoit les messages clignote brièvement avant que la page ne se recharge. */
+@keyframes wm-drop-pulse {
+  0%   { background-color: var(--folders-sel, rgba(255,255,255,.3)); }
+  50%  { background-color: rgba(255,255,255,.7); }
+  100% { background-color: var(--folders-sel, rgba(255,255,255,.3)); }
+}
+.folder-list li.drop-pulse { animation: wm-drop-pulse .26s ease-out 2; }
+/* « Pas d'animation » : la règle body.no-anim coupe déjà transitions et animations, les transformations se coupent ici. */
+body.no-anim .tbtn:active:not(:disabled):not(.disabled), body.no-anim .msgrow.dragged { transform: none; }

@@ -14,7 +14,7 @@ import (
 	"github.com/emersion/go-imap/v2"
 	"github.com/emersion/go-imap/v2/imapclient"
 	"github.com/emersion/go-message"
-	_ "wmail-go/internal/mailview" // installe le décodeur de charsets de repli (message.CharsetReader)
+	"wmail-go/internal/mailview" // décodeur de charsets de repli (message.CharsetReader) et affichage des domaines
 )
 
 var (
@@ -73,7 +73,7 @@ func (a Address) Short() string {
 	if a.Name != "" {
 		return a.Name
 	}
-	return a.Email
+	return mailview.UnicodeDomain(a.Email) // « xn--… » affiché en clair
 }
 
 // Summary est une ligne de la liste des messages.

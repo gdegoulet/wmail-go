@@ -6,10 +6,12 @@ import (
 	"errors"
 	"fmt"
 	"golang.org/x/net/idna"
+
 	"net/mail"
 	"regexp"
 	"strings"
 	"unicode"
+	"wmail-go/internal/mailview"
 )
 
 // ErrInvalidAddress signale une adresse inutilisable (syntaxe, caractère de contrôle).
@@ -127,6 +129,9 @@ func ToASCIIDomain(addr string) string {
 	}
 	return addr[:at+1] + ascii
 }
+
+// ToUnicodeDomain rend lisible un domaine en punycode (affichage seulement) ; voir mailview.UnicodeDomain.
+func ToUnicodeDomain(addr string) string { return mailview.UnicodeDomain(addr) }
 
 func isASCII(s string) bool {
 	for i := 0; i < len(s); i++ {

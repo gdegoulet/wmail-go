@@ -8,10 +8,40 @@
   var targets = document.querySelectorAll("[data-drop]");
   if (!targets.length) return;
 
-  var dragging = false;
+  var dragging = false, badge = null, dragged = null;
 
   function rows() { return form.querySelectorAll(".msgrow"); }
   rows().forEach(function (r) { r.setAttribute("draggable", "true"); });
+
+  // Pastille du nombre de messages glissés, collée au curseur (RainLoop affiche un calque rayé avec le compte).
+  function showBadge(n, x, y) {
+    if (!badge) {
+      badge = document.createElement("div");
+      badge.className = "dnd-count";
+      badge.setAttribute("aria-hidden", "true");
+      document.body.appendChild(badge);
+    }
+    badge.textContent = String(n);
+    moveBadge(x, y);
+  }
+  function moveBadge(x, y) {
+    if (!badge) return;
+    badge.style.left = (x || 0) + "px";
+    badge.style.top = (y || 0) + "px";
+  }
+  function hideBadge() {
+    if (badge && badge.parentNode) badge.parentNode.removeChild(badge);
+    badge = null;
+  }
+  document.addEventListener("dragover", function (e) { if (dragging) moveBadge(e.clientX, e.clientY); });
+
+  function stop() {
+    dragging = false;
+    document.body.classList.remove("dnd");
+    if (dragged) { dragged.classList.remove("dragged"); dragged = null; }
+    hideBadge();
+    targets.forEach(function (t) { t.classList.remove("drop-over"); });
+  }
 
   form.addEventListener("dragstart", function (e) {
     var row = e.target && e.target.closest ? e.target.closest(".msgrow") : null;
@@ -26,16 +56,15 @@
     var n = form.querySelectorAll("input[name=uid]:checked").length;
     dragging = true;
     document.body.classList.add("dnd");
+    dragged = row;
+    row.classList.add("dragged");
+    showBadge(n, e.clientX, e.clientY);
     if (e.dataTransfer) {
       e.dataTransfer.effectAllowed = "copyMove";
       try { e.dataTransfer.setData("text/plain", String(n)); } catch (err) { /* ignoré */ }
     }
   });
-  form.addEventListener("dragend", function () {
-    dragging = false;
-    document.body.classList.remove("dnd");
-    targets.forEach(function (t) { t.classList.remove("drop-over"); });
-  });
+  form.addEventListener("dragend", stop);
 
   targets.forEach(function (t) {
     var timer = null;
@@ -67,6 +96,8 @@
       var h = document.createElement("input");
       h.type = "hidden"; h.name = copy ? "copy_to" : "move_to"; h.value = folder;
       form.appendChild(h);
+      stop();
+      t.classList.add("drop-pulse"); // courte pulsation du dossier, visible le temps du rechargement
       form.submit();
     });
   });

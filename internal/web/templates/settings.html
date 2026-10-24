@@ -4,12 +4,18 @@
 {{if ne .Section "security"}}
 <section>
 <h2>{{.T "settings.prefs.title"}}</h2>
-<form method="post" action="/settings/preferences">
+<form method="post" action="/settings/preferences" data-autosave data-saved="{{.T "settings.saved"}}" data-save-error="{{.T "settings.save_error"}}">
 <input type="hidden" name="csrf" value="{{.CSRF}}">
 <label>{{.T "settings.prefs.language"}}
 <select name="language">{{range .Languages}}<option value="{{.}}"{{if eq . $.Prefs.Language}} selected{{end}}>{{$.T (printf "lang.%s" .)}}</option>{{end}}</select></label>
-<label>{{.T "settings.prefs.theme"}}
-<select name="theme">{{range .Themes}}<option value="{{.}}"{{if eq . $.Prefs.Theme}} selected{{end}}>{{$.ThemeLabel .}}</option>{{end}}</select></label>
+<fieldset class="theme-field">
+<legend class="theme-legend">{{.T "settings.prefs.theme"}}</legend>
+<div class="theme-grid">{{range .Themes}}<label class="theme-tile{{if eq . $.Prefs.Theme}} on{{end}}">
+<input type="radio" name="theme" value="{{.}}"{{if eq . $.Prefs.Theme}} checked{{end}}>
+<span class="theme-prev" data-theme-prev="{{.}}" aria-hidden="true"></span>
+<span class="theme-name">{{$.ThemeLabel .}}</span>
+</label>{{end}}</div>
+</fieldset>
 <label>{{.T "settings.prefs.idle" .IdleMax}}
 <input name="idle_minutes" type="number" min="1" max="{{.IdleMax}}" value="{{.Prefs.IdleMinutes}}" required></label>
 <label>{{.T "settings.prefs.absolute" .AbsMax}}
@@ -105,4 +111,4 @@
 </section>
 {{end}}
 {{template "setclose" .}}{{end}}
-{{define "scripts"}}<script src="/static/mailto.js" defer></script><script src="/static/notify-setting.js" defer></script>{{end}}
+{{define "scripts"}}<link rel="stylesheet" href="/static/settings-auto.css"><script src="/static/mailto.js" defer></script><script src="/static/notify-setting.js" defer></script><script src="/static/settings-auto.js" defer></script>{{end}}

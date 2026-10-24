@@ -585,3 +585,20 @@ func TestContentLocationInlineImage(t *testing.T) {
 		t.Errorf("l'URL distante doit disparaître :\n%s", html)
 	}
 }
+
+func TestUnicodeDomainDisplay(t *testing.T) {
+	for in, want := range map[string]string{
+		"bob@xn--dnr-bma.fr": "bob@dénr.fr",
+		"bob@exemple.fr":     "bob@exemple.fr",
+		"bob@xn--invalide--": "bob@xn--invalide--",
+		"sans-arobase":       "sans-arobase",
+	} {
+		if got := UnicodeDomain(in); got != want {
+			t.Errorf("UnicodeDomain(%q) = %q, attendu %q", in, got, want)
+		}
+	}
+	a := Address{Email: "bob@xn--dnr-bma.fr"}
+	if a.Short() != "bob@dénr.fr" {
+		t.Errorf("Short() = %q", a.Short())
+	}
+}

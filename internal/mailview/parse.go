@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"golang.org/x/net/idna"
 	"io"
 	"mime"
 	"regexp"
@@ -44,7 +45,25 @@ func (a Address) Short() string {
 	if a.Name != "" {
 		return a.Name
 	}
-	return a.Email
+	return UnicodeDomain(a.Email)
+}
+
+// UnicodeDomain rend lisible un domaine en punycode : « bob@xn--dinr-5qa.fr » devient « bob@dînr.fr ».
+// La conversion n'a lieu que si le domaine repasse à l'identique en punycode : un nom trompeur reste en ASCII.
+func UnicodeDomain(addr string) string {
+	at := strings.LastIndexByte(addr, '@')
+	if at < 0 || !strings.Contains(strings.ToLower(addr[at+1:]), "xn--") {
+		return addr
+	}
+	domain := addr[at+1:]
+	uni, err := idna.Lookup.ToUnicode(domain)
+	if err != nil || uni == "" || uni == domain {
+		return addr
+	}
+	if back, err := idna.Lookup.ToASCII(uni); err != nil || !strings.EqualFold(back, domain) {
+		return addr
+	}
+	return addr[:at+1] + uni
 }
 
 // Attachment est une pièce jointe.
