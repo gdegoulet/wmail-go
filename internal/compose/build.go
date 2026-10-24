@@ -3,6 +3,7 @@ package compose
 import (
 	"bytes"
 	"crypto/rand"
+	"encoding/base64"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -269,8 +270,13 @@ func EncodeDraftInfo(d DraftInfo) string {
 }
 
 // ParseDraftInfo relit l'en-tête X-Wmail-Draft-Info ; ok est faux s'il est absent ou invalide.
+// Il accepte aussi la forme de RainLoop : « type=reply; uid=123; folder=<base64> ».
 func ParseDraftInfo(v string) (DraftInfo, bool) {
-	kind, params, err := mime.ParseMediaType(strings.TrimSpace(v))
+	v = strings.TrimSpace(v)
+	if d, ok := parseRainLoopDraftInfo(v); ok {
+		return d, true
+	}
+	kind, params, err := mime.ParseMediaType(v)
 	if err != nil || (kind != "reply" && kind != "forward") {
 		return DraftInfo{}, false
 	}
@@ -279,6 +285,31 @@ func ParseDraftInfo(v string) (DraftInfo, bool) {
 		return DraftInfo{}, false
 	}
 	b, err := hex.DecodeString(params["folder"])
+	if err != nil || len(b) == 0 || hasControl(string(b)) {
+		return DraftInfo{}, false
+	}
+	return DraftInfo{Kind: kind, UID: uid, Folder: string(b)}, true
+}
+
+// parseRainLoopDraftInfo lit « type=reply; uid=123; folder=<base64> » (le dossier est codé en base64).
+func parseRainLoopDraftInfo(v string) (DraftInfo, bool) {
+	params := map[string]string{}
+	for _, part := range strings.Split(v, ";") {
+		k, val, ok := strings.Cut(strings.TrimSpace(part), "=")
+		if !ok {
+			continue
+		}
+		params[strings.ToLower(strings.TrimSpace(k))] = strings.Trim(strings.TrimSpace(val), `"`)
+	}
+	kind := strings.ToLower(params["type"])
+	if kind != "reply" && kind != "forward" {
+		return DraftInfo{}, false
+	}
+	var uid uint32
+	if _, err := fmt.Sscanf(params["uid"], "%d", &uid); err != nil || uid == 0 {
+		return DraftInfo{}, false
+	}
+	b, err := base64.StdEncoding.DecodeString(params["folder"])
 	if err != nil || len(b) == 0 || hasControl(string(b)) {
 		return DraftInfo{}, false
 	}

@@ -66,7 +66,7 @@ type Message struct {
 	InReplyTo                  string    // sans chevrons
 	References                 []string  // sans chevrons
 	ReadReceiptTo              []Address // Disposition-Notification-To : l'expéditeur demande une confirmation de lecture
-	DraftInfo                  string    // en-tête privé X-Wmail-Draft-Info (brouillons)
+	DraftInfo                  string    // en-tête X-Wmail-Draft-Info, ou X-Draft-Info écrit par RainLoop (brouillons)
 	DKIM                       string    // pass (signature valide du domaine de l'expéditeur), warn (autre résultat) ou vide : lu dans Authentication-Results
 	ListUnsubscribe            []string  // adresses de List-Unsubscribe (https:// ou mailto:), sans chevrons
 
@@ -160,7 +160,19 @@ func Parse(raw []byte) (*Message, error) {
 	m.Bcc = addresses(mr.Header, "Bcc")
 	m.DeliveredTo = append(addresses(mr.Header, "Delivered-To"), addresses(mr.Header, "X-Original-To")...)
 	m.ReadReceiptTo = addresses(mr.Header, "Disposition-Notification-To")
+	if len(m.ReadReceiptTo) == 0 {
+		// Anciens clients (Outlook, Eudora) : mêmes demandes sous d'autres noms.
+		for _, k := range []string{"X-Confirm-Reading-To", "Return-Receipt-To"} {
+			if a := addresses(mr.Header, k); len(a) > 0 {
+				m.ReadReceiptTo = a
+				break
+			}
+		}
+	}
 	m.DraftInfo = mr.Header.Get("X-Wmail-Draft-Info")
+	if m.DraftInfo == "" {
+		m.DraftInfo = mr.Header.Get("X-Draft-Info") // brouillon écrit par RainLoop
+	}
 	for _, part := range strings.Split(mr.Header.Get("List-Unsubscribe"), ",") {
 		if u := strings.TrimSpace(part); strings.HasPrefix(u, "<") && strings.HasSuffix(u, ">") && len(u) < 2000 {
 			u = u[1 : len(u)-1]

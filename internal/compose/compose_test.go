@@ -346,3 +346,16 @@ func TestIDNInEnvelopeAndHeaders(t *testing.T) {
 		t.Errorf("en-têtes sans punycode :\n%s", raw)
 	}
 }
+
+func TestParseRainLoopDraftInfo(t *testing.T) {
+	d, ok := ParseDraftInfo(`type=reply; uid=42; folder=SU5CT1g=`)
+	if !ok || d.Kind != "reply" || d.UID != 42 || d.Folder != "INBOX" {
+		t.Fatalf("brouillon RainLoop : %+v %v", d, ok)
+	}
+	if _, ok := ParseDraftInfo(`type=other; uid=1; folder=SU5CT1g=`); ok {
+		t.Error("type inconnu accepté")
+	}
+	if _, ok := ParseDraftInfo(`type=reply; uid=0; folder=SU5CT1g=`); ok {
+		t.Error("uid nul accepté")
+	}
+}

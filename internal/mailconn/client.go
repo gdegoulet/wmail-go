@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"os"
 	"net/netip"
 	"slices"
 	"sort"
@@ -223,6 +224,22 @@ func (g *Guard) legacyHint(err error, e Endpoint, retry func(Endpoint) error) er
 	return err
 }
 
+// ehloName est le nom annoncé dans EHLO : le nom de la machine s'il est qualifié, sinon le littéral d'adresse
+// de l'IP locale (RFC 5321). « localhost » fait refuser le message par certains serveurs.
+func ehloName(conn net.Conn) string {
+	if h, err := os.Hostname(); err == nil && strings.Contains(h, ".") && !strings.EqualFold(h, "localhost") {
+		return h
+	}
+	if a, ok := conn.LocalAddr().(*net.TCPAddr); ok && a.IP != nil {
+		if ip := a.IP.String(); strings.Contains(ip, ":") {
+			return "[IPv6:" + ip + "]"
+		} else {
+			return "[" + ip + "]"
+		}
+	}
+	return "localhost"
+}
+
 // DialSMTP se connecte au serveur SMTP, négocie le chiffrement et envoie EHLO, sans s'authentifier.
 func (g *Guard) DialSMTP(ctx context.Context, e Endpoint) (*smtp.Client, error) {
 	switch e.Security {
@@ -232,7 +249,7 @@ func (g *Guard) DialSMTP(ctx context.Context, e Endpoint) (*smtp.Client, error) 
 			return nil, err
 		}
 		c := smtp.NewClient(conn)
-		if err := c.Hello("localhost"); err != nil {
+		if err := c.Hello(ehloName(conn)); err != nil {
 			c.Close()
 			return nil, err
 		}
@@ -242,14 +259,23 @@ func (g *Guard) DialSMTP(ctx context.Context, e Endpoint) (*smtp.Client, error) 
 		if err != nil {
 			return nil, err
 		}
-		return smtp.NewClientStartTLS(conn, e.tlsConfig())
+		c, err := smtp.NewClientStartTLS(conn, e.tlsConfig())
+		if err != nil {
+			return nil, err
+		}
+		// Après STARTTLS, go-smtp renvoie EHLO : c'est celui-là que le serveur retient.
+		if err := c.Hello(ehloName(conn)); err != nil {
+			c.Close()
+			return nil, err
+		}
+		return c, nil
 	case SecurityNone:
 		conn, _, err := g.connect(ctx, e, false)
 		if err != nil {
 			return nil, err
 		}
 		c := smtp.NewClient(conn)
-		if err := c.Hello("localhost"); err != nil {
+		if err := c.Hello(ehloName(conn)); err != nil {
 			c.Close()
 			return nil, err
 		}
