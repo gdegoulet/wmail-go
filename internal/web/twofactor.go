@@ -138,7 +138,7 @@ func newTrustKey() string {
 // --- connexion : second facteur ---
 
 // needSecondFactor démarre l'étape du code après un mot de passe correct ; renvoie vrai si la réponse a été écrite.
-func (s *Server) needSecondFactor(w http.ResponseWriter, r *http.Request, acc *store.Account) bool {
+func (s *Server) needSecondFactor(w http.ResponseWriter, r *http.Request, acc *store.Account, next string) bool {
 	tf := acc.Data.TwoFactor
 	if !tf.Enabled || s.trusted(r, acc) {
 		return false
@@ -151,7 +151,7 @@ func (s *Server) needSecondFactor(w http.ResponseWriter, r *http.Request, acc *s
 	}
 	http.SetCookie(w, &http.Cookie{Name: pendingCookie, Value: id, Path: "/login", MaxAge: int(pendingTTL.Seconds()),
 		HttpOnly: true, SameSite: http.SameSiteStrictMode, Secure: s.isHTTPS(r)})
-	s.render(w, r, nil, http.StatusOK, "login_2fa", &Page{TitleKey: "twofactor.login_title"})
+	s.render(w, r, nil, http.StatusOK, "login_2fa", &Page{TitleKey: "twofactor.login_title", Next: next})
 	return true
 }
 
@@ -200,7 +200,7 @@ func (s *Server) login2FAPost(w http.ResponseWriter, r *http.Request) {
 	if !s.checkSecondFactor(acc, r.PostFormValue("code")) {
 		s.limiter.Add(ipKey, rule.PerIP)
 		s.log.Warn("échec du second facteur", "login", store.ReduceLogin(acc.Login), "ip", s.clientIP(r))
-		s.render(w, r, nil, http.StatusUnauthorized, "login_2fa", &Page{TitleKey: "twofactor.login_title", ErrorKey: "twofactor.bad_code"})
+		s.render(w, r, nil, http.StatusUnauthorized, "login_2fa", &Page{TitleKey: "twofactor.login_title", ErrorKey: "twofactor.bad_code", Next: safeNext(r.PostFormValue("next"))})
 		return
 	}
 	s.pending.done(c.Value)
@@ -214,7 +214,7 @@ func (s *Server) login2FAPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.log.Info("connexion (second facteur)", "login", store.ReduceLogin(acc.Login), "ip", s.clientIP(r))
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, safeNext(r.PostFormValue("next")), http.StatusSeeOther)
 }
 
 // --- réglages ---

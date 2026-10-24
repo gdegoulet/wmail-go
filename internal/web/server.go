@@ -4,8 +4,10 @@ package web
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"crypto/subtle"
 	"embed"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"html/template"
@@ -19,6 +21,7 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+	"sync"
 	"time"
 
 	"wmail-go/internal/config"
@@ -113,7 +116,10 @@ func (s *Server) Handler() http.Handler {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		fmt.Fprintln(w, "ok")
 	})
-	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServerFS(static)))
+	mux.Handle("GET /static/", http.StripPrefix("/static/", staticCache(http.FileServerFS(static))))
+	mux.HandleFunc("GET /favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/static/favicon.svg", http.StatusMovedPermanently)
+	})
 	mux.HandleFunc("GET /themes/{name}/{file}", s.themeFile)
 
 	mux.HandleFunc("GET /{$}", s.auth(s.home))
@@ -255,6 +261,10 @@ func (s *Server) secure(next http.Handler) http.Handler {
 		h.Set("X-Content-Type-Options", "nosniff")
 		h.Set("X-Frame-Options", "DENY")
 		h.Set("Referrer-Policy", "no-referrer")
+		if s.isHTTPS(r) {
+			// Le proxy termine TLS : demander au navigateur de ne plus jamais tenter le HTTP en clair.
+			h.Set("Strict-Transport-Security", "max-age=31536000")
+		}
 		if r.Method == http.MethodPost {
 			r.Body = http.MaxBytesReader(w, r.Body, s.postLimit(r.URL.Path))
 			if !s.sameOrigin(r) {
@@ -273,7 +283,14 @@ func (s *Server) auth(h func(http.ResponseWriter, *http.Request, *session.Sessio
 	return func(w http.ResponseWriter, r *http.Request) {
 		sess := s.currentSession(r)
 		if sess == nil {
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			to := "/login"
+			if r.Method == http.MethodGet {
+				// La session a expiré : revenir où l'utilisateur était après la reconnexion.
+				if n := safeNext(r.URL.RequestURI()); n != "/" {
+					to += "?next=" + url.QueryEscape(n)
+				}
+			}
+			http.Redirect(w, r, to, http.StatusSeeOther)
 			return
 		}
 		sess.Mu.Lock()
@@ -466,6 +483,7 @@ type Page struct {
 	ErrorArg                          any
 	InfoKey                           string
 	Login                             string
+	Next                              string // page demandée avant la reconnexion
 	MinPassword                       int
 	RecoveryKey                       string
 	Prefs                             PrefsView
@@ -590,6 +608,44 @@ func (s *Server) langChoices(current string) []LangChoice {
 }
 
 // setLang mémorise la langue choisie avant la connexion, puis revient à la page d'accueil demandée.
+// safeNext ne garde qu'un chemin local (« /mail?… ») : jamais d'URL absolue ni de « // » qui mènerait ailleurs.
+func safeNext(v string) string {
+	if v == "" || !strings.HasPrefix(v, "/") || strings.HasPrefix(v, "//") || strings.Contains(v, "\\") {
+		return "/"
+	}
+	if u, err := url.Parse(v); err != nil || u.Scheme != "" || u.Host != "" {
+		return "/"
+	}
+	switch {
+	case v == "/login", strings.HasPrefix(v, "/login/"), strings.HasPrefix(v, "/logout"),
+		strings.HasPrefix(v, "/static/"), strings.HasPrefix(v, "/themes/"):
+		return "/"
+	}
+	return v
+}
+
+// staticCache ajoute un ETag (empreinte du contenu) et autorise la mise en cache des fichiers embarqués :
+// ils ne changent qu'avec le binaire, et le navigateur revalide avec If-None-Match.
+func staticCache(next http.Handler) http.Handler {
+	var tags sync.Map
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		name := strings.TrimPrefix(r.URL.Path, "/")
+		tag, ok := tags.Load(name)
+		if !ok {
+			if b, err := fs.ReadFile(staticFS, "static/"+name); err == nil {
+				sum := sha256.Sum256(b)
+				tag = `"` + hex.EncodeToString(sum[:8]) + `"`
+				tags.Store(name, tag)
+			}
+		}
+		if t, _ := tag.(string); t != "" {
+			w.Header().Set("ETag", t)
+			w.Header().Set("Cache-Control", "public, max-age=600, must-revalidate")
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 func (s *Server) setLang(w http.ResponseWriter, r *http.Request) {
 	l := r.URL.Query().Get("l")
 	if s.i18n.Has(l) {

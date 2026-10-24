@@ -65,7 +65,7 @@ func (s *Server) loginForm(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
-	s.render(w, r, nil, http.StatusOK, "login", &Page{TitleKey: "login.title"})
+	s.render(w, r, nil, http.StatusOK, "login", &Page{TitleKey: "login.title", Next: safeNext(r.URL.Query().Get("next"))})
 }
 
 func (s *Server) loginPost(w http.ResponseWriter, r *http.Request) {
@@ -83,7 +83,7 @@ func (s *Server) loginPost(w http.ResponseWriter, r *http.Request) {
 			s.addFailure(rule, ipKey, userKey)
 			s.log.Warn("échec de connexion", "login", store.ReduceLogin(login), "ip", s.clientIP(r))
 			s.render(w, r, nil, http.StatusUnauthorized, "login",
-				&Page{TitleKey: "login.title", ErrorKey: "login.error.invalid", Login: login})
+				&Page{TitleKey: "login.title", ErrorKey: "login.error.invalid", Login: login, Next: safeNext(r.PostFormValue("next"))})
 			return
 		}
 		s.serverError(w, r, nil, err)
@@ -92,7 +92,8 @@ func (s *Server) loginPost(w http.ResponseWriter, r *http.Request) {
 	if userKey != "" {
 		s.limiter.Reset(userKey)
 	}
-	if s.needSecondFactor(w, r, acc) {
+	next := safeNext(r.PostFormValue("next"))
+	if s.needSecondFactor(w, r, acc, next) {
 		return
 	}
 	if err := s.startSession(w, r, acc, ""); err != nil {
@@ -101,7 +102,7 @@ func (s *Server) loginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.log.Info("connexion", "login", store.ReduceLogin(login), "ip", s.clientIP(r))
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, next, http.StatusSeeOther)
 }
 
 func (s *Server) logout(w http.ResponseWriter, r *http.Request, sess *session.Session) {

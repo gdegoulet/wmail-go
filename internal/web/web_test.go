@@ -90,8 +90,9 @@ func (e *env) expect(resp *http.Response, status int, loc string) {
 	if resp.StatusCode != status {
 		e.t.Fatalf("statut %d, attendu %d (%s %s)", resp.StatusCode, status, resp.Request.Method, resp.Request.URL.Path)
 	}
-	if loc != "" && resp.Header.Get("Location") != loc {
-		e.t.Fatalf("redirection vers %q, attendu %q", resp.Header.Get("Location"), loc)
+	// « /login » accepte « /login?next=… » : la redirection garde la page demandée.
+	if got := resp.Header.Get("Location"); loc != "" && got != loc && !(loc == "/login" && strings.HasPrefix(got, "/login?next=")) {
+		e.t.Fatalf("redirection vers %q, attendu %q", got, loc)
 	}
 }
 
@@ -563,5 +564,22 @@ func TestLanguageChoiceOnLoginPage(t *testing.T) {
 	_, page = e.do(c, "GET", "/login", nil, nil)
 	if !strings.Contains(page, `lang="en"`) {
 		t.Error("une langue inconnue ne doit pas effacer le choix")
+	}
+}
+
+func TestSafeNext(t *testing.T) {
+	for in, want := range map[string]string{
+		"/mail?folder=INBOX": "/mail?folder=INBOX",
+		"":                   "/",
+		"//evil.example":     "/",
+		"https://evil":       "/",
+		"/login":             "/",
+		"/logout":            "/",
+		"/static/app.css":    "/",
+		"mail":               "/",
+	} {
+		if got := safeNext(in); got != want {
+			t.Errorf("safeNext(%q) = %q, attendu %q", in, got, want)
+		}
 	}
 }

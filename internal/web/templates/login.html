@@ -4,6 +4,7 @@
 <h2 class="authtitle">{{.T "login.title"}}</h2>
 {{template "messages" .}}
 <form class="authbox" method="post" action="/login">
+<input type="hidden" name="next" value="{{.Next}}">
 <label><span class="sr">{{.T "login.login"}}</span>
 <input placeholder="{{.T "login.login"}}" name="login" type="text" autocomplete="username" required autofocus value="{{.Login}}"></label>
 <label><span class="sr">{{.T "login.password"}}</span>
