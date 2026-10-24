@@ -483,3 +483,26 @@ func TestMailtoLinksAndAutoLinksInHTML(t *testing.T) {
 		t.Errorf("mailto inchangé : %s", out)
 	}
 }
+
+func TestHTMLToTextQuotesListsLinksAndWrapping(t *testing.T) {
+	got := HTMLToText(`<p>Bonjour,</p><blockquote><p>Question&nbsp;?</p><blockquote>Citation imbriquée</blockquote></blockquote>` +
+		`<ul><li>un</li><li>deux</li></ul><hr><p>Voir <a href="https://exemple.fr/page">la page</a> et <a href="mailto:a@b.fr">a@b.fr</a>.</p>` +
+		`<table><tr><td>A</td><td>B</td></tr></table>`)
+	for _, want := range []string{"Bonjour,", "> Question ?", ">> Citation imbriquée", "* un", "* deux", "_______________________________", "la page (https://exemple.fr/page)", "a@b.fr", "A  B"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("%q absent de :\n%s", want, got)
+		}
+	}
+	if strings.Contains(got, "mailto:a@b.fr (") {
+		t.Errorf("une adresse identique au texte ne doit pas être répétée :\n%s", got)
+	}
+	long := HTMLToText("<p>" + strings.Repeat("mot ", 60) + "</p>")
+	for _, line := range strings.Split(long, "\n") {
+		if len([]rune(line)) > 100 {
+			t.Errorf("ligne de %d caractères : %q", len([]rune(line)), line)
+		}
+	}
+	if q := HTMLToText("<blockquote>" + strings.Repeat("long ", 40) + "</blockquote>"); !strings.HasPrefix(strings.Split(q, "\n")[1], "> ") {
+		t.Errorf("le préfixe de citation doit être repris sur les lignes coupées :\n%s", q)
+	}
+}

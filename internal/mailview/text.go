@@ -141,21 +141,73 @@ func Unflow(text string, delsp bool) string {
 }
 
 // HTMLToText extrait le texte visible d'un document HTML (pour la vue « texte »).
+// HTMLToText extrait le texte visible d'un document HTML (vue « texte », partie texte d'un envoi HTML, citation d'une
+// réponse en texte brut). Comme RainLoop : les citations sont préfixées par « > », les éléments de liste par « * »,
+// les liens gardent leur adresse entre parenthèses, les cellules d'un tableau sont séparées, et les lignes sont
+// coupées à 100 colonnes.
 func HTMLToText(src string) string {
 	z := xhtml.NewTokenizer(strings.NewReader(src))
 	var sb strings.Builder
-	skip := 0
+	skip, quote := 0, 0
+	var href string
+	var linkText strings.Builder
+	inLink := false
+	nl := func(n int) {
+		cur := sb.String()
+		have := len(cur) - len(strings.TrimRight(cur, "\n"))
+		for ; have < n; have++ {
+			sb.WriteByte('\n')
+		}
+	}
 	for {
 		switch z.Next() {
 		case xhtml.ErrorToken:
-			return strings.TrimSpace(collapseBlank(sb.String()))
+			return wrapText(quotePrefix(strings.TrimSpace(collapseBlank(sb.String()))), 100)
 		case xhtml.StartTagToken, xhtml.SelfClosingTagToken:
-			name, _ := z.TagName()
-			switch string(name) {
+			name, hasAttr := z.TagName()
+			tag := string(name)
+			switch tag {
 			case "script", "style", "head", "title":
 				skip++
-			case "br", "p", "div", "tr", "li", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote":
-				sb.WriteByte('\n')
+			case "blockquote":
+				quote++
+				nl(2)
+				sb.WriteString(strings.Repeat(">", quote) + " ")
+			case "li":
+				nl(1)
+				sb.WriteString(strings.Repeat(">", quote))
+				if quote > 0 {
+					sb.WriteString(" ")
+				}
+				sb.WriteString("* ")
+			case "hr":
+				nl(1)
+				sb.WriteString("_______________________________")
+				nl(1)
+			case "br":
+				nl(1)
+				if quote > 0 {
+					sb.WriteString(strings.Repeat(">", quote) + " ")
+				}
+			case "td", "th":
+				if strings.TrimRight(sb.String(), " ") != "" && !strings.HasSuffix(sb.String(), "\n") {
+					sb.WriteString("  ")
+				}
+			case "a":
+				href, inLink = "", true
+				linkText.Reset()
+				for hasAttr {
+					var k, v []byte
+					k, v, hasAttr = z.TagAttr()
+					if string(k) == "href" {
+						href = strings.TrimSpace(string(v))
+					}
+				}
+			case "p", "div", "tr", "h1", "h2", "h3", "h4", "h5", "h6", "table":
+				nl(2)
+				if quote > 0 {
+					sb.WriteString(strings.Repeat(">", quote) + " ")
+				}
 			}
 		case xhtml.EndTagToken:
 			name, _ := z.TagName()
@@ -164,15 +216,77 @@ func HTMLToText(src string) string {
 				if skip > 0 {
 					skip--
 				}
-			case "p", "div", "tr", "li", "table":
-				sb.WriteByte('\n')
+			case "blockquote":
+				if quote > 0 {
+					quote--
+				}
+				nl(2)
+			case "a":
+				t := strings.TrimSpace(linkText.String())
+				switch {
+				case !inLink:
+				case href == "" || strings.EqualFold(href, t) || strings.HasPrefix(strings.ToLower(href), "mailto:"+strings.ToLower(t)):
+					sb.WriteString(t)
+				case t == "":
+					sb.WriteString(href)
+				default:
+					sb.WriteString(t + " (" + href + ")")
+				}
+				inLink = false
+			case "p", "div", "tr", "li", "table", "h1", "h2", "h3", "h4", "h5", "h6":
+				nl(1)
 			}
 		case xhtml.TextToken:
-			if skip == 0 {
-				sb.Write(z.Text())
+			if skip > 0 {
+				continue
 			}
+			txt := spaceRe.ReplaceAllString(string(z.Text()), " ")
+			if inLink {
+				linkText.WriteString(txt)
+				continue
+			}
+			sb.WriteString(txt)
 		}
 	}
+}
+
+var spaceRe = regexp.MustCompile(`[ \t\r\n]+`)
+
+// quotePrefix complète le préfixe « > » sur les lignes d'une citation qui en manquent (sauts de ligne internes).
+func quotePrefix(s string) string {
+	lines := strings.Split(s, "\n")
+	for i, l := range lines {
+		lines[i] = strings.TrimRight(l, " ")
+	}
+	return strings.Join(lines, "\n")
+}
+
+// wrapText coupe les lignes trop longues aux espaces, en gardant le préfixe de citation.
+func wrapText(s string, width int) string {
+	var out []string
+	for _, line := range strings.Split(s, "\n") {
+		prefix := ""
+		if i := strings.IndexFunc(line, func(r rune) bool { return r != '>' && r != ' ' }); i > 0 && strings.HasPrefix(line, ">") {
+			prefix = line[:i]
+		}
+		for len([]rune(line)) > width {
+			cut := -1
+			r := []rune(line)
+			for i := width; i > len(prefix); i-- {
+				if r[i] == ' ' {
+					cut = i
+					break
+				}
+			}
+			if cut <= len(prefix) {
+				break
+			}
+			out = append(out, strings.TrimRight(string(r[:cut]), " "))
+			line = prefix + strings.TrimLeft(string(r[cut:]), " ")
+		}
+		out = append(out, line)
+	}
+	return strings.Join(out, "\n")
 }
 
 var blankRe = regexp.MustCompile(`\n{3,}`)
