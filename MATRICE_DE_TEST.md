@@ -124,6 +124,11 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
   attendu : en-têtes Reply-To et Bcc présents dans le message reçu
   réponse :
 
+[B-11] Serveur refusant LOGIN (LOGINDISABLED)
+  tester  : boîte dont le serveur annonce LOGINDISABLED
+  attendu : connexion par AUTHENTICATE PLAIN, sans erreur
+  réponse :
+
 [B-10] Test ManageSieve inclus
   tester  : bouton « Test » d'une boîte dont les filtres sont actifs
   attendu : trois résultats — IMAP, SMTP, ManageSieve
@@ -344,6 +349,11 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 
 [D-09] Aperçu d'une image jointe
   attendu : vignette avec œil en surimpression, aperçu plein écran sans téléchargement
+  réponse :
+
+[D-25] Photo verticale en pièce jointe
+  tester  : joindre une photo prise à la verticale (orientation EXIF 6 ou 8)
+  attendu : la vignette est redressée, pas couchée
   réponse :
 
 [D-10] Icônes par type de pièce jointe
@@ -762,4 +772,4 @@ Je remplis ce tableau à partir de vos réponses : un retour `KO` y reste jusqu'
 ## Points livrés depuis la dernière session de test
 
 Ajoutés aux points ci-dessus, à valider en priorité : `C-12`, `C-13`, `C-14`, `C-15`, `C-30`, `C-31`, `D-10`, `D-15`, `D-16`,
-`D-21`, `D-22`, `E-03`, `F-01`, `F-05`, `G-02`, `G-07`, `I-01`, `I-05`, `I-09`, `I-11`, `A-08`, `C-24`, `B-08`, `B-09`, `C-32`, `I-12`, `I-13`, `D-23`, `A-11`, `B-10`, `A-12`, `D-24`, `C-33`.
+`D-21`, `D-22`, `E-03`, `F-01`, `F-05`, `G-02`, `G-07`, `I-01`, `I-05`, `I-09`, `I-11`, `A-08`, `C-24`, `B-08`, `B-09`, `C-32`, `I-12`, `I-13`, `D-23`, `A-11`, `B-10`, `A-12`, `D-24`, `C-33`, `B-11`, `D-25`, `I-01`.

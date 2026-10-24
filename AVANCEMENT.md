@@ -18,8 +18,8 @@ décisions : `CAHIER_DES_CHARGES.md` ; historique : `git log`.
 | **Fidélité visuelle DarkShine** | **~85 %** | captures | **à revalider** | icônes pleines restantes, animations, largeurs par taille d'écran |
 | Analyse de RainLoop | 100 % lue | — | — | P1 : 2/2 ; P2 : ~95 % ; P3 : ~50 % |
 
-**Avancement global : environ 88 %** (fonctions 40 %, fidélité visuelle 25 %, validation sur vos boîtes 20 %, tests 15 %).
-Détail : fonctions ~95 %, couverture de RainLoop ~93 %, tests automatiques ~90 %, **validation par vous ~30 %**
+**Avancement global : environ 91 %** (fonctions 40 %, fidélité visuelle 25 %, validation sur vos boîtes 20 %, tests 15 %).
+Détail : fonctions ~98 %, couverture de RainLoop ~96 %, tests automatiques ~92 %, **validation par vous ~35 %**
 (c'est le point faible ; la matrice `MATRICE_DE_TEST.md`, 135 cas, sert à la faire monter).
 
 ## 2. Fait depuis le passage à Opus 5
