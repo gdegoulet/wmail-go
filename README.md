@@ -19,6 +19,17 @@ interface.
 
 État : **utilisable au quotidien**, en validation ; voir [`AVANCEMENT.md`](AVANCEMENT.md) et la trame de test.
 
+![Liste et lecture d'un message](docs/images/lecture.png)
+
+<details>
+<summary>Autres captures : composition, réglages</summary>
+
+![Fenêtre de composition](docs/images/composition.png)
+
+![Réglages généraux](docs/images/reglages.png)
+
+</details>
+
 | Document | Contenu |
 |---|---|
 | [`SECURITY.md`](SECURITY.md) | modèle de menace, chiffrement, sessions, affichage des messages, signalement |
