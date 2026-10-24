@@ -90,7 +90,7 @@
 <span class="checkedParent"><label class="chk"><input type="checkbox" name="uid" value="{{.UID}}" aria-label="{{$.T "mail.select"}}">{{if gt .ThreadCount 1}}<input type="hidden" name="th_{{.UID}}" value="{{.ThreadUIDs}}">{{end}}</label></span>
 <a class="rowlink" href="{{.ReadURL}}"{{if .Selected}} aria-current="true"{{end}}>
 <span class="senderParent">{{if .Answered}}<span class="ans" title="{{$.T "mail.answered"}}">{{template "icon" "reply"}}</span>{{end}}{{if .Forwarded}}<span class="ans" title="{{$.T "mail.forwarded"}}">{{template "icon" "forward"}}</span>{{end}}<span class="from">{{.From}}</span></span>
-{{if .HasAttachment}}<span class="attachmentParent clip{{if .AttachKind}} kind-{{.AttachKind}}{{end}}" title="{{$.T "mail.attachments"}}{{if .AttachKind}} ({{$.T (printf "mail.attkind.%s" .AttachKind)}}){{end}}">{{if eq .AttachKind "image"}}{{template "icon" "image"}}{{else}}{{template "icon" "doc"}}{{end}}</span>{{end}}
+{{if .HasAttachment}}<span class="attachmentParent clip{{if .AttachKind}} kind-{{.AttachKind}}{{end}}" title="{{$.T "mail.attachments"}}{{if .AttachKind}} ({{$.T (printf "mail.attkind.%s" .AttachKind)}}){{end}}">{{template "icon" "attach"}}</span>{{end}}
 <span class="subjectParent">{{if gt .ThreadCount 1}}<a class="threads" href="{{.ThreadURL}}" title="{{$.T "mail.thread_open"}}">{{.ThreadCount}}</a>{{end}}<span class="subj">{{if .Important}}<b class="imp" title="{{$.T "mail.important"}}">!</b> {{end}}{{if .Subject}}{{if .SubjectPrefix}}<span class="pfx">{{.SubjectPrefix}}</span>{{end}}{{.SubjectRest}}{{else}}<i>{{$.T "mail.no_subject"}}</i>{{end}}</span></span>
 </a>
 </div>

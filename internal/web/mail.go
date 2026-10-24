@@ -99,6 +99,7 @@ type AttachmentView struct {
 	Thumb                   template.URL // URI data: d'une miniature (images), produite par le serveur donc de confiance
 	Ext                     string       // extension en capitales (autres fichiers)
 	Name, Type, Size, URL   string
+	Icon                    string // symbole du sprite, selon le type de fichier
 	PreviewURL, PreviewKind string // aperçu dans le navigateur : « image » ou « text » ; vide : téléchargement seulement
 }
 
@@ -880,6 +881,59 @@ func (s *Server) messageParams(w http.ResponseWriter, r *http.Request, sess *ses
 }
 
 // attachmentExt renvoie l'extension d'un nom de fichier en capitales (4 caractères au plus).
+// attachmentIcon choisit le symbole du sprite selon le type MIME, et à défaut l'extension du nom.
+func attachmentIcon(ct, name string) string {
+	mt, _, _ := strings.Cut(strings.ToLower(ct), ";")
+	mt = strings.TrimSpace(mt)
+	main, _, _ := strings.Cut(mt, "/")
+	switch main {
+	case "image":
+		return "image"
+	case "audio":
+		return "file-audio"
+	case "video":
+		return "file-video"
+	}
+	switch mt {
+	case "application/pdf":
+		return "file-pdf"
+	case "text/calendar":
+		return "calendar"
+	case "application/zip", "application/x-7z-compressed", "application/x-rar-compressed", "application/vnd.rar",
+		"application/gzip", "application/x-tar", "application/x-bzip2":
+		return "file-zip"
+	}
+	switch strings.ToLower(attachmentExt(name)) {
+	case "pdf":
+		return "file-pdf"
+	case "zip", "rar", "7z", "gz", "tgz", "bz2", "xz":
+		return "file-zip"
+	case "xls", "xlsx", "ods", "csv", "tsv":
+		return "file-sheet"
+	case "ppt", "pptx", "odp":
+		return "file-slides"
+	case "mp3", "ogg", "wav", "flac", "m4a":
+		return "file-audio"
+	case "mp4", "mkv", "avi", "mov", "webm":
+		return "file-video"
+	case "txt", "md", "log":
+		return "file-text"
+	case "ics":
+		return "calendar"
+	case "png", "jpg", "jpeg", "gif", "webp", "bmp", "svg":
+		return "image"
+	}
+	switch {
+	case strings.Contains(mt, "spreadsheet"), strings.Contains(mt, "ms-excel"):
+		return "file-sheet"
+	case strings.Contains(mt, "presentation"), strings.Contains(mt, "powerpoint"):
+		return "file-slides"
+	case main == "text":
+		return "file-text"
+	}
+	return "doc"
+}
+
 func attachmentExt(name string) string {
 	i := strings.LastIndexByte(name, '.')
 	if i < 0 || i == len(name)-1 {
@@ -985,7 +1039,7 @@ func (s *Server) buildMessageView(sess *session.Session, acc userdata.MailAccoun
 	seenEvents := map[string]bool{}
 	for _, a := range m.Attachments {
 		aq := url.Values{"folder": {folder}, "uid": {uidStr}, "index": {strconv.Itoa(a.Index)}}
-		av := AttachmentView{Name: a.Name, Type: a.ContentType, Size: humanSize(int64(a.Size), lang), URL: "/mail/attachment?" + aq.Encode(), Ext: attachmentExt(a.Name)}
+		av := AttachmentView{Name: a.Name, Type: a.ContentType, Size: humanSize(int64(a.Size), lang), URL: "/mail/attachment?" + aq.Encode(), Ext: attachmentExt(a.Name), Icon: attachmentIcon(a.ContentType, a.Name)}
 		if kind := previewKind(a.ContentType, a.Data()); kind != "" {
 			av.PreviewURL, av.PreviewKind = av.URL+"&inline=1", kind
 		}

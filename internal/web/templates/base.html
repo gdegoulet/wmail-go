@@ -44,6 +44,13 @@
 <symbol id="i-al-right" viewBox="0 0 24 24"><path d="M4 6h16M10 10h10M4 14h16M10 18h10"/></symbol>
 <symbol id="i-al-justify" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></symbol>
 <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="1"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></symbol>
+<symbol id="i-file-pdf" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><text x="12" y="18" font-size="7" text-anchor="middle" fill="currentColor" stroke="none">PDF</text></symbol>
+<symbol id="i-file-zip" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M11 5h2M11 8h2M11 11h2M11 14h2"/><rect x="10.2" y="16" width="3.6" height="4" rx="1"/></symbol>
+<symbol id="i-file-sheet" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M8 12h11M8 16h11M12 10v10"/></symbol>
+<symbol id="i-file-slides" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="12" rx="1"/><path d="M12 17v3M9 20h6"/></symbol>
+<symbol id="i-file-audio" viewBox="0 0 24 24"><path d="M10 9v8a2.5 2.5 0 1 1-2-2.45"/><path d="M10 9l8-2v8a2.5 2.5 0 1 1-2-2.45"/></symbol>
+<symbol id="i-file-video" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="1"/><path d="m16 11 5-3v8l-5-3z"/></symbol>
+<symbol id="i-file-text" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 11h7M9 14h7M9 17h4"/></symbol>
 <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 16h7"/></symbol>
 <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.500v3M12 18.500v3M2.5 12h3M18.5 12h3M5.3 5.300l2.1 2.100M16.6 16.600l2.1 2.100M5.3 18.700l2.1-2.100M16.6 7.400l2.1-2.1"/></symbol>
 <symbol id="i-eye" viewBox="0 0 24 24"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3.2"/></symbol>
@@ -86,15 +93,16 @@
 <a class="e-item{{if eq .Section "contacts"}} selected{{end}}" href="/contacts">{{.T "set.contacts"}}</a>
 <a class="e-item{{if eq .Section "security"}} selected{{end}}" href="/settings/security">{{.T "set.security"}}</a>
 </nav>
-<section class="setpane">
+<div class="setright">
 <div class="settb">
 <a class="btn-back" href="/">{{template "icon" "back"}} {{.T "set.back"}}</a>
 <span class="who">{{.User}}</span>
 <form method="post" action="/logout" class="inline"><input type="hidden" name="csrf" value="{{.CSRF}}"><button type="submit" class="link">{{.T "nav.logout"}}</button></form>
 </div>
+<section class="setpane">
 <div class="setcontent">
 {{end}}
-{{define "setclose"}}</div></section></div>{{end}}
+{{define "setclose"}}</div></section></div></div>{{end}}
 
 {{define "mailbar"}}<header class="mailbar">
 <div class="mb-left">
@@ -313,7 +321,7 @@
 {{if .Attachments}}
 <div class="bar attbar">
 <ul class="atts">{{range .Attachments}}<li><a class="att" href="{{.URL}}" title="{{.Name}} ({{.Size}})">
-<span class="thumb">{{if .Thumb}}<img src="{{.Thumb}}" alt="" width="36" height="36">{{else}}<span class="ext">{{template "icon" "doc"}}</span>{{end}}</span>
+<span class="thumb">{{if .Thumb}}<img src="{{.Thumb}}" alt="" width="36" height="36">{{else}}<span class="ext">{{template "icon" .Icon}}</span>{{end}}</span>
 <span class="meta"><span class="name">{{.Name}}</span><span class="size">{{.Size}}</span></span>
 </a>{{if .PreviewURL}}<a class="preview" href="{{.PreviewURL}}" data-kind="{{.PreviewKind}}" data-name="{{.Name}}" target="_blank" rel="noopener" title="{{$.T "mail.att.preview"}}" aria-label="{{$.T "mail.att.preview"}}">{{template "icon" "eye"}}</a>{{end}}</li>{{end}}</ul>
 {{if .ZipURL}}<details class="dropdown right gear" data-dropdown><summary title="{{$.T "mail.att.options"}}" aria-label="{{$.T "mail.att.options"}}">{{template "icon" "gear"}}</summary>

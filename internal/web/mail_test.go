@@ -1531,3 +1531,22 @@ func TestAttachmentSupportsRangeRequests(t *testing.T) {
 		t.Errorf("requête partielle : %d %q %s", resp.StatusCode, part, resp.Header.Get("Content-Range"))
 	}
 }
+
+func TestAttachmentIcon(t *testing.T) {
+	for _, c := range []struct{ ct, name, want string }{
+		{"application/pdf", "a.bin", "file-pdf"},
+		{"application/octet-stream", "Devis.PDF", "file-pdf"},
+		{"image/png", "a.png", "image"},
+		{"application/zip", "a.zip", "file-zip"},
+		{"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "t.xlsx", "file-sheet"},
+		{"application/vnd.ms-powerpoint", "p.ppt", "file-slides"},
+		{"text/calendar; charset=utf-8", "invite.ics", "calendar"},
+		{"audio/mpeg", "a.mp3", "file-audio"},
+		{"text/plain", "notes.txt", "file-text"},
+		{"application/octet-stream", "inconnu.xyz", "doc"},
+	} {
+		if got := attachmentIcon(c.ct, c.name); got != c.want {
+			t.Errorf("%s %s : %q, attendu %q", c.ct, c.name, got, c.want)
+		}
+	}
+}
