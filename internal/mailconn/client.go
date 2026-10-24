@@ -438,6 +438,44 @@ func folderRank(f Folder) int {
 	return len(specialOrder) + 1
 }
 
+// NaturalLess compare deux noms sans tenir compte de la casse, les suites de chiffres comparées comme des nombres :
+// « Dossier 2 » vient avant « Dossier 10 ».
+func NaturalLess(a, b string) bool {
+	la, lb := strings.ToLower(a), strings.ToLower(b)
+	i, j := 0, 0
+	for i < len(la) && j < len(lb) {
+		ca, cb := la[i], lb[j]
+		if isDigit(ca) && isDigit(cb) {
+			si, sj := i, j
+			for i < len(la) && isDigit(la[i]) {
+				i++
+			}
+			for j < len(lb) && isDigit(lb[j]) {
+				j++
+			}
+			na, nb := strings.TrimLeft(la[si:i], "0"), strings.TrimLeft(lb[sj:j], "0")
+			if len(na) != len(nb) {
+				return len(na) < len(nb)
+			}
+			if na != nb {
+				return na < nb
+			}
+			continue
+		}
+		if ca != cb {
+			return ca < cb
+		}
+		i++
+		j++
+	}
+	if len(la)-i != len(lb)-j {
+		return len(la)-i < len(lb)-j
+	}
+	return a < b
+}
+
+func isDigit(c byte) bool { return c >= '0' && c <= '9' }
+
 // SortFolders place INBOX en premier, puis les dossiers spéciaux, puis les autres par nom.
 // Les sous-dossiers restent groupés sous leur parent.
 func SortFolders(fs []Folder) {
@@ -467,10 +505,10 @@ func SortFolders(fs []Folder) {
 		if ra != rb {
 			return ra < rb
 		}
-		if ta, tb := strings.ToLower(top(a)), strings.ToLower(top(b)); ta != tb {
-			return ta < tb
+		if ta, tb := top(a), top(b); !strings.EqualFold(ta, tb) {
+			return NaturalLess(ta, tb)
 		}
-		return strings.ToLower(a.Name) < strings.ToLower(b.Name)
+		return NaturalLess(a.Name, b.Name)
 	})
 }
 

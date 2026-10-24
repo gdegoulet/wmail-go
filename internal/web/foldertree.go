@@ -112,8 +112,8 @@ func folderPanel(folders []mailconn.Folder, cfg userdata.Folders, active, filter
 	sort.SliceStable(nodes, func(i, j int) bool {
 		a, b := nodes[i].path, nodes[j].path
 		for k := 0; k < len(a) && k < len(b); k++ {
-			if x, y := strings.ToLower(a[k]), strings.ToLower(b[k]); x != y {
-				return x < y
+			if !strings.EqualFold(a[k], b[k]) {
+				return mailconn.NaturalLess(a[k], b[k]) // « Projet 2 » avant « Projet 10 »
 			}
 		}
 		return len(a) < len(b)

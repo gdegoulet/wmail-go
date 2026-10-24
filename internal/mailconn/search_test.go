@@ -1,6 +1,7 @@
 package mailconn
 
 import (
+	"sort"
 	"testing"
 	"time"
 
@@ -66,6 +67,17 @@ func TestAttachmentKind(t *testing.T) {
 	} {
 		if got := attachmentKind(c.mime, c.name); got != c.want {
 			t.Errorf("%s %s : %q, attendu %q", c.mime, c.name, got, c.want)
+		}
+	}
+}
+
+func TestNaturalLess(t *testing.T) {
+	in := []string{"Projet 10", "projet 2", "Projet", "Archive 2026", "archive 9", "A1b", "A10b"}
+	want := []string{"A1b", "A10b", "archive 9", "Archive 2026", "Projet", "projet 2", "Projet 10"}
+	sort.SliceStable(in, func(i, j int) bool { return NaturalLess(in[i], in[j]) })
+	for i := range want {
+		if in[i] != want[i] {
+			t.Fatalf("ordre : %v", in)
 		}
 	}
 }

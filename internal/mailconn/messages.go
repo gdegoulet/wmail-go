@@ -627,10 +627,37 @@ func (c *Conn) StoreFlags(folder string, uids []uint32, op imap.StoreFlagsOp, fl
 		return nil
 	}
 	defer c.trace("drapeaux", true, "dossier", folder, "messages", len(uids), "drapeaux", flags)(&err)
-	if _, err := c.Select(folder, false); err != nil {
+	sel, err := c.Select(folder, false)
+	if err != nil {
 		return err
 	}
+	flags = permittedFlags(sel, flags)
+	if len(flags) == 0 {
+		return nil // le serveur ne garde aucun de ces drapeaux dans ce dossier
+	}
 	return c.Client.Store(uidSet(uids), &imap.StoreFlags{Op: op, Silent: true, Flags: flags}, nil).Close()
+}
+
+// permittedFlags ne garde que les drapeaux que le dossier accepte durablement (PERMANENTFLAGS).
+// Un serveur qui annonce \* accepte tout ; un serveur muet est supposé tout accepter.
+func permittedFlags(sel *imap.SelectData, flags []imap.Flag) []imap.Flag {
+	if sel == nil || len(sel.PermanentFlags) == 0 {
+		return flags
+	}
+	allowed := map[imap.Flag]bool{}
+	for _, f := range sel.PermanentFlags {
+		if f == imap.FlagWildcard {
+			return flags
+		}
+		allowed[imap.Flag(strings.ToLower(string(f)))] = true
+	}
+	out := flags[:0:0]
+	for _, f := range flags {
+		if allowed[imap.Flag(strings.ToLower(string(f)))] {
+			out = append(out, f)
+		}
+	}
+	return out
 }
 
 // Move déplace des messages vers un autre dossier (MOVE, ou COPY + suppression si le serveur n'a pas MOVE).
@@ -644,16 +671,41 @@ func (c *Conn) Move(folder string, uids []uint32, dest string) (err error) {
 	}
 	set := uidSet(uids)
 	if c.Client.Caps().Has(imap.CapMove) {
-		_, err = c.Client.Move(set, dest).Wait()
+		if _, err = c.Client.Move(set, dest).Wait(); err != nil && c.createMissing(dest, err) {
+			_, err = c.Client.Move(set, dest).Wait()
+		}
 		return err
 	}
 	// Sans MOVE, on enchaîne COPY, STORE puis EXPUNGE en attendant chaque réponse. Le repli de la bibliothèque
 	// envoie les trois commandes d'un coup : au-delà de 128 messages, les réponses EXPUNGE remplissent un canal
 	// que personne ne vide avant la fin du COPY, la lecture réseau reste bloquée et la connexion ne se ferme plus.
 	if _, err = c.Client.Copy(set, dest).Wait(); err != nil {
-		return err
+		if !c.createMissing(dest, err) {
+			return err
+		}
+		if _, err = c.Client.Copy(set, dest).Wait(); err != nil {
+			return err
+		}
 	}
 	return c.deleteAndExpunge(set)
+}
+
+// createMissing crée le dossier quand le serveur signale qu'il n'existe pas (TRYCREATE ou NONEXISTENT) :
+// la corbeille, les archives ou les indésirables peuvent manquer à la première utilisation.
+// Il renvoie vrai si le dossier a été créé et que l'opération peut être retentée.
+func (c *Conn) createMissing(name string, err error) bool {
+	var ie *imap.Error
+	if !errors.As(err, &ie) || (ie.Code != imap.ResponseCodeTryCreate && ie.Code != imap.ResponseCodeNonExistent) {
+		return false
+	}
+	if !ValidFolderName(name) || c.Client.Create(name, nil).Wait() != nil {
+		return false
+	}
+	_ = c.Client.Subscribe(name).Wait()
+	if c.log != nil {
+		c.log.Info("dossier créé automatiquement", "dossier", name)
+	}
+	return true
 }
 
 // deleteAndExpunge marque les messages \Deleted puis les supprime (avec UIDPLUS, seulement ceux-là).
@@ -748,7 +800,10 @@ func (c *Conn) Append(folder string, raw []byte, messageID string, flags ...imap
 	}
 	data, err := cmd.Wait()
 	if err != nil {
-		return 0, err
+		if !c.createMissing(folder, err) {
+			return 0, err
+		}
+		return c.Append(folder, raw, messageID, flags...)
 	}
 	if data != nil && data.UID != 0 {
 		return uint32(data.UID), nil
