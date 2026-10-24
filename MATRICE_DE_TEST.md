@@ -352,6 +352,11 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
   attendu : bascule correcte, la liste réapparaît
   réponse :
 
+[D-22] Aperçu PDF intégré
+  tester  : cliquer sur l'œil d'une pièce jointe PDF
+  attendu : le PDF s'affiche dans la visionneuse (pas de téléchargement, pas de nouvel onglet)
+  réponse :
+
 [D-21] Bouton « haut de page »
   tester  : ouvrir un long message et faire défiler
   attendu : bouton rond en bas à droite, retour en haut au clic
@@ -696,4 +701,4 @@ Je remplis ce tableau à partir de vos réponses : un retour `KO` y reste jusqu'
 ## Points livrés depuis la dernière session de test
 
 Ajoutés aux points ci-dessus, à valider en priorité : `C-12`, `C-13`, `C-14`, `C-15`, `C-30`, `D-10`, `D-15`, `D-16`,
-`D-21`, `E-03`, `F-01`, `F-05`, `G-02`, `G-07`, `I-01`, `I-05`, `I-09`, `I-11`, `A-08`, `C-24`.
+`D-21`, `D-22`, `E-03`, `F-01`, `F-05`, `G-02`, `G-07`, `I-01`, `I-05`, `I-09`, `I-11`, `A-08`, `C-24`.

@@ -551,6 +551,9 @@ dialog.viewer { width: 100vw; height: 100vh; max-width: none; max-height: none; 
 dialog.viewer:not([open]) { display: none; }
 dialog.viewer img { max-width: 94vw; max-height: 88vh; }
 dialog.viewer p { margin: .6rem 0 0; }
+dialog.viewer .v-pdf { width: 92vw; height: 88vh; border: 0; background: #fff; }
+dialog.viewer .v-pdf[hidden] { display: none; }
+dialog.viewer img[hidden] { display: none; }
 
 /* Aperçu d'une invitation .ics */
 .evbar { display: flex; gap: .8rem; align-items: flex-start; background: #fff; color: #1a202c; border: 1px solid #e0e6ed; border-radius: .6rem; margin: .5rem; padding: .6rem .9rem; box-shadow: 0 1px 4px rgba(0,0,0,.05); }
