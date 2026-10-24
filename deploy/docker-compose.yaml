@@ -30,6 +30,12 @@ services:
     security_opt:
       - no-new-privileges:true
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/wmail-go", "healthcheck"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
 
   nginx:
     # Image « unprivileged » : nginx tourne en uid 101, sans aucune capacité (l'image standard veut chown son cache).

@@ -107,6 +107,22 @@ user-delete:
 theme-background-reset:
 	podman run --rm -v wmail-go_wmail-go-data:/data --user 0 docker.io/library/alpine:3 sh -c 'rm -f /data/themes/rainloop/background.jpg /data/themes/rainloop/background.png'
 
+# --- sauvegarde et restauration du volume de données ---
+BACKUP_DIR ?= .
+VOLUME ?= wmail-go_wmail-go-data
+
+# Archive datée du volume (comptes chiffrés, carnets, thèmes). Serveur arrêté ou non : les fichiers sont
+# écrits de façon atomique, mais une sauvegarde à l'arrêt reste la plus sûre.
+backup:
+	docker run --rm -v $(VOLUME):/data:ro -v "$(abspath $(BACKUP_DIR))":/sauvegarde --user 0 docker.io/library/alpine:3 		sh -c 'tar czf /sauvegarde/wmail-go-$$(date +%Y%m%d-%H%M%S).tar.gz -C /data .'
+	@ls -1t $(BACKUP_DIR)/wmail-go-*.tar.gz | head -1
+
+# Restauration : make restore FILE=wmail-go-20261024-220000.tar.gz (le serveur doit être arrêté).
+restore:
+	@test -f "$(FILE)" || { echo "usage : make restore FILE=archive.tar.gz"; exit 1; }
+	docker run --rm -v $(VOLUME):/data -v "$(abspath $(FILE))":/archive.tar.gz:ro --user 0 docker.io/library/alpine:3 		sh -c 'rm -rf /data/* && tar xzf /archive.tar.gz -C /data && chown -R 65532:65532 /data'
+	@echo "volume $(VOLUME) restauré depuis $(FILE)"
+
 # --- déploiement derrière nginx (terminaison TLS, certificat auto-signé) ---
 TLS := docker compose -f deploy/docker-compose.yaml
 TLS_HOST ?= localhost

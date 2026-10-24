@@ -95,3 +95,33 @@
     open(all[to]);
   });
 })();
+
+// Flèches « message précédent / suivant » de l'en-tête du volet de lecture.
+// /mail/pane ne connaît pas la liste (il ne la recharge pas) : le serveur ne peut pas remplir les deux adresses et les
+// flèches restaient grisées dès que le volet était injecté. On les renseigne ici d'après la liste affichée.
+(function () {
+  "use strict";
+  var list = document.querySelector("ul.msgrows");
+  var readpane = document.querySelector(".readpane");
+  if (!list || !readpane) return;
+
+  function neighbour(row, dir) {
+    var n = dir === "prev" ? row.previousElementSibling : row.nextElementSibling;
+    while (n && !n.classList.contains("msgrow")) n = dir === "prev" ? n.previousElementSibling : n.nextElementSibling;
+    return n;
+  }
+  function refresh() {
+    var view = readpane.querySelector(".msgview");
+    var uid = view ? view.getAttribute("data-uid") : "";
+    var row = uid ? document.getElementById("m" + uid) : null;
+    if (!row) return; // message absent de la liste affichée (autre page, liste filtrée) : on garde l'état du serveur
+    readpane.querySelectorAll("a.mh-nav[data-msgnav]").forEach(function (a) {
+      var n = neighbour(row, a.getAttribute("data-msgnav"));
+      var link = n ? n.querySelector("a.rowlink") : null;
+      if (link) { a.setAttribute("href", link.getAttribute("href")); a.classList.remove("off"); }
+      else { a.removeAttribute("href"); a.classList.add("off"); } // en tête ou en fin de liste
+    });
+  }
+  document.addEventListener("wmail:pane", refresh);
+  refresh();
+})();

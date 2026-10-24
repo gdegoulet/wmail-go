@@ -56,14 +56,32 @@ make tls-logs / make tls-ps / make tls-down
 ## Sauvegarde
 
 Toutes les données tiennent dans le volume `wmail-go-data` (`/data` dans le conteneur) : comptes chiffrés, carnets
-d'adresses, thèmes personnels. Exemple de sauvegarde :
+d'adresses, thèmes personnels. **Les messages, eux, restent sur votre serveur IMAP** : une perte du volume coûte les
+comptes et les carnets, jamais le courrier.
 
 ```
-podman run --rm -v wmail-go_wmail-go-data:/data:ro -v "$PWD":/sauvegarde docker.io/library/alpine:3 \
-  tar czf /sauvegarde/wmail-go-$(date +%F).tar.gz -C /data .
+make backup                     # archive datée dans le dossier courant
+make backup BACKUP_DIR=/sauvegardes
+make restore FILE=wmail-go-20261024-220000.tar.gz   # serveur arrêté
 ```
 
-Restauration : le même conteneur avec `tar xzf` dans `/data`, serveur arrêté.
+Une ligne de crontab suffit pour une sauvegarde quotidienne :
+
+```
+15 3 * * * cd /chemin/vers/wmail-go && make backup BACKUP_DIR=/sauvegardes >/dev/null
+```
+
+## Usage quotidien, mise à jour
+
+```
+make tls-up            # reconstruit l'image et redémarre (les sessions ouvertes sont perdues)
+make tls-logs          # journaux (format JSON en déploiement)
+make backup            # avant toute mise à jour
+```
+
+`config/config.https.json` ferme l'inscription (`allow_registration: false`) : créez votre compte une fois avec
+`make user-add LOGIN=…`, puis gardez-la fermée. Les sessions vivent en mémoire : un redémarrage déconnecte, sans
+perte de données.
 
 ## Tests
 

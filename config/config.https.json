@@ -1,5 +1,5 @@
 {
-  "allow_registration": true,
+  "allow_registration": false,
   "listen": "0.0.0.0:8080",
   "data_dir": "/data",
   "trusted_proxy": true,
@@ -55,7 +55,7 @@
   "default_theme": "rainloop",
   "timezone": "Europe/Paris",
   "log_level": "info",
-  "log_format": "text",
+  "log_format": "json",
   "timeouts": {
     "mail_seconds": 30,
     "send_seconds": 90,

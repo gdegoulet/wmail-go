@@ -98,7 +98,9 @@ const badgeNums = d => [...d.querySelectorAll(".folder-list li.active .badge, .f
   {
     const { w, d, calls } = boot();
     click(w, d.querySelector(".msgrow a.rowlink")); await tick(20);
-    const sw = d.querySelector(".readpane a[data-pane]");
+    // (les flèches « précédent / suivant » portent aussi data-pane : elles n'ont pas d'adresse tant que listnav.js
+    //  ne les a pas renseignées d'après la liste — voir test_pane_reveal.js)
+    const sw = d.querySelector(".readpane a[data-pane][href]:not(.mh-nav)");
     if (!sw) { ok(false, "aucun lien data-pane dans le fragment testé"); }
     else {
       const e = click(w, sw); await tick(20);

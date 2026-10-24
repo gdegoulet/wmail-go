@@ -295,6 +295,7 @@
     var inList = listpane.contains(a) && a.classList.contains("rowlink");
     var inPane = readpane.contains(a) && a.hasAttribute("data-pane");
     if (!inList && !inPane) return;
+    if (!a.getAttribute("href")) return; // flèche désactivée (première ou dernière ligne) : rien à charger
     e.preventDefault();
     openPane(a.getAttribute("href"));
   });

@@ -162,10 +162,18 @@ form.search details.adv { position: absolute; right: 0; top: 0; bottom: 0; }
 .ct-count { margin: 0 0 .7rem; font-size: .857rem; }
 .ct-right .pane-empty { margin: 3rem auto; }
 @media (max-width: 60rem) { .ct-two { flex-direction: column; } .ct-left { width: 100%; } }
-.menu .acc-badge { float: right; margin-left: .6rem; }
+/* Sélecteur de comptes : l'adresse et la pastille tiennent sur une ligne (l'adresse se tronque si besoin). */
+.mb-right .menu { min-width: 17rem; max-width: min(26rem, calc(100vw - 2rem)); }
+.acc-list button { display: flex; align-items: center; gap: .4rem; }
+.acc-list .acc-mail { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.menu .acc-badge { flex: none; float: none; margin-left: .4rem; }
 .atts li { position: relative; }
-.att-pick { position: absolute; left: .15rem; top: .15rem; z-index: 2; margin: 0; padding: 0; }
-.att-pick input { margin: 0; }
+/* Case de sélection d'une pièce jointe : posée sur la vignette, elle doit rester lisible sur une image sombre. */
+.att-pick { position: absolute; left: .5rem; top: .5rem; z-index: 3; display: flex; align-items: center; justify-content: center;
+  width: 1.3rem; height: 1.3rem; margin: 0; padding: 0; cursor: pointer;
+  background: rgba(255,255,255,.92); border: 1px solid #9a9a9a; border-radius: .2rem; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+.att-pick:hover { background: #fff; border-color: #555; }
+.att-pick input { margin: 0; width: .9rem; height: .9rem; cursor: pointer; }
 .att-src { position: absolute; right: .2rem; bottom: .2rem; z-index: 2; color: #888; line-height: 1; }
 .att-src:hover { color: #333; }
 .att-src .i { width: .9rem; height: .9rem; }
@@ -175,7 +183,7 @@ form.search details.adv { position: absolute; right: 0; top: 0; bottom: 0; }
 .backtop .i { width: 1.2rem; height: 1.2rem; }
 .mh-nav { display: inline-flex; align-items: center; color: #777; text-decoration: none; padding: 0 .2rem; }
 .mh-nav:hover { color: #333; }
-.mh-nav.off { opacity: .3; cursor: default; }
+.mh-nav.off { opacity: .3; cursor: default; pointer-events: none; }
 .mh-nav .i { width: 1.1rem; height: 1.1rem; }
 .msgrow.subunread { background: var(--subunread-bg, #ffffd9); }
 .msgrow.subunread .sidebar { background: var(--subunread-bar, #ffdb99); }
@@ -510,9 +518,13 @@ dialog.picker input[type=search] { width: 100%; box-sizing: border-box; }
 .contacts-search { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: .8rem; }
 .adv-fields { border: 0; padding: .4rem 0 0; margin: .4rem 0 0; border-top: 1px solid #ddd; display: grid; gap: .3rem; }
 .adv-fields legend { font-weight: bold; padding: 0 .3rem 0 0; }
-.msgrow.focused { background: var(--row-hover); }
-.msgrow.focused .sidebar { background: #ccc; }
-.msgrow.focused.unread .sidebar { background: #cc8400; }
+/* Curseur de navigation au clavier (↑ ↓) : il doit rester visible par-dessus l'état de la ligne (lue, non lue sur
+   fond jaune, ouverte sur fond bleu, cochée). On garde donc le fond de l'état et on ajoute deux repères francs :
+   un liseré intérieur et la barre latérale repeinte. Le second liseré (très large) teinte le fond sans le remplacer. */
+.msgrow.focused { --wm-focus: var(--focus-ring, #cc2f26); z-index: 2;
+  box-shadow: inset 0 0 0 2px var(--wm-focus), inset 0 0 0 100vw var(--focus-tint, rgba(204,47,38,.08)); }
+.msgrow.focused .sidebar { background: var(--wm-focus); }
+.msgrow.focused .delimiter { background: var(--wm-focus); opacity: 1; }
 .folder-list li.drop-over { background: var(--folders-sel, rgba(255,255,255,.3)); }
 body.dnd .msgrow { cursor: grabbing; }
 .dkim { font-size: .85em; }
@@ -538,7 +550,11 @@ dialog.viewer .v-prev { left: .3rem; top: 45%; } dialog.viewer .v-next { right: 
 .cp-value .chips-box { width: auto; }
 
 /* Lecture en plein écran */
-.mh-full { border: 0; background: transparent; cursor: pointer; padding: 0 .3rem; color: inherit; }
+.mh-full { display: inline-flex; align-items: center; justify-content: center; width: 1.7rem; height: 1.7rem; margin: 0 .1rem;
+  border: 1px solid transparent; border-radius: .2rem; background: transparent; cursor: pointer; padding: 0; color: #777; vertical-align: middle; }
+.mh-full .i { width: 1.1rem; height: 1.1rem; }
+.mh-full:hover { color: #333; background: rgba(0,0,0,.07); border-color: #c3c3c3; }
+body.msg-fullscreen .mh-full { color: #bd362f; background: rgba(189,54,47,.1); border-color: #e0a09a; }
 body.msg-fullscreen .mailbox > .folders, body.msg-fullscreen .mailbox > .listpane, body.msg-fullscreen .mailbox > .splitter { display: none; }
 body.msg-fullscreen .mailbox > .readpane { grid-column: 1 / -1; }
 body.msg-fullscreen .mailbar { display: none; }
@@ -579,6 +595,10 @@ dialog.viewer p { margin: .6rem 0 0; }
 dialog.viewer .v-pdf { width: 92vw; height: 88vh; border: 0; background: #fff; }
 dialog.viewer .v-pdf[hidden] { display: none; }
 dialog.viewer img[hidden] { display: none; }
+/* Chargement d'une image : l'ancienne disparaît tout de suite ; le sablier n'apparaît qu'au bout de 150 ms
+   (preview.js) pour ne pas clignoter sur les petites images. */
+dialog.viewer .v-wait { width: 2.6rem; height: 2.6rem; border: .25rem solid rgba(255,255,255,.25); border-top-color: #fff; border-radius: 50%; animation: wm-spin .8s linear infinite; }
+dialog.viewer .v-wait[hidden] { display: none; }
 
 /* Aperçu d'une invitation .ics */
 .evbar { display: flex; gap: .8rem; align-items: flex-start; background: #fff; color: #1a202c; border: 1px solid #e0e6ed; border-radius: .6rem; margin: .5rem; padding: .6rem .9rem; box-shadow: 0 1px 4px rgba(0,0,0,.05); }
@@ -597,8 +617,20 @@ a.spinning svg { animation: wm-spin .8s linear infinite; }
 .menu hr { margin: .3rem 0; border: 0; border-top: 1px solid #ddd; }
 
 form.search { position: relative; }
-.search-clear { position: absolute; right: 2.6rem; top: 50%; transform: translateY(-50%); color: #999; text-decoration: none; font-size: 1.3rem; line-height: 1; padding: 0 .3rem; }
-.search-clear:hover { color: #333; }
+/* Le navigateur dessine sa propre croix dans un champ « search » : elle doublait la nôtre (.search-clear) et
+   tombait à côté. On la supprime ; notre croix est seule, centrée, juste à gauche du bouton des options. */
+form.search input[type=search]::-webkit-search-cancel-button,
+form.search input[type=search]::-webkit-search-decoration,
+form.search input[type=search]::-webkit-search-results-button,
+form.search input[type=search]::-webkit-search-results-decoration { -webkit-appearance: none; appearance: none; display: none; }
+form.search input[type=search]::-ms-clear,
+form.search input[type=search]::-ms-reveal { display: none; width: 0; height: 0; }
+/* Champ rempli : on réserve la place de la croix pour que le texte ne passe pas dessous. */
+form.search:has(.search-clear) input[type=search] { padding-right: 4rem; }
+.search-clear { position: absolute; right: 2.45rem; top: 50%; transform: translateY(-50%); z-index: 2;
+  display: flex; align-items: center; justify-content: center; width: 1.4rem; height: 1.4rem;
+  margin: 0; padding: 0; color: #999; text-decoration: none; font-size: 1.15rem; line-height: 1; border-radius: 50%; }
+.search-clear:hover { color: #333; background: rgba(0,0,0,.08); }
 .searchdesc { margin: 0; padding: .6rem 1rem; font-size: 1.286rem; color: #333; background: #fff; border-bottom: 1px solid #eee; }
 .menu form { margin: 0; } .menu form button { display: block; width: 100%; text-align: left; }
 .thumb .ext svg { width: 2.2rem; height: 2.2rem; color: #999; fill: none; }

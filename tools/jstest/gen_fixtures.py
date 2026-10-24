@@ -42,6 +42,10 @@ rows = re.findall(r'<a class="rowlink" href="([^"]+)"[^>]*>[\s\S]*?<span class="
 link = [html.unescape(l) for l, t in rows if t.startswith("Offre")][0]  # message HTML non lu : liens du volet, bannière
 _, frag = req("/mail/pane" + link[1:], headers={"X-Requested-With": "fetch"})
 open(out + "/frag.html", "w", encoding="utf-8").write(frag)
+# fragment d'un message à pièces jointes : cases de sélection, aperçus, bouton plein écran
+attlink = [html.unescape(l) for l, t in rows if t.startswith("Photos")][0]
+_, fragatt = req("/mail/pane" + attlink[1:], headers={"X-Requested-With": "fetch"})
+open(out + "/fragatt.html", "w", encoding="utf-8").write(fragatt)
 _, opened = req(link)  # volet de lecture ouvert (liste + message) : raccourcis de réponse
 open(out + "/open.html", "w", encoding="utf-8").write(opened)
 print("pages générées : liste %d octets, fragment %d octets" % (len(home), len(frag)))
