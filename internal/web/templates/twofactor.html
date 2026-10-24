@@ -1,0 +1,48 @@
+{{define "content"}}{{template "setopen" .}}
+{{with .TwoFactor}}
+<h1 class="legend">{{$.T "twofactor.title"}}</h1>
+{{template "messages" $}}
+{{if .NewCodes}}
+<section>
+<h2>{{$.T "twofactor.codes_title"}}</h2>
+<p>{{$.T "twofactor.codes_text"}}</p>
+<pre class="backup-codes">
+{{range .NewCodes}}{{.}}
+{{end}}</pre>
+<p><a class="button" href="/settings/2fa">{{$.T "twofactor.codes_done"}}</a></p>
+</section>
+{{else if .Enabled}}
+<section>
+<p class="msg info">{{$.T "twofactor.enabled"}} ({{$.T "twofactor.backup_left" .BackupLeft}})</p>
+<form method="post" action="/settings/2fa/codes">
+<input type="hidden" name="csrf" value="{{$.CSRF}}">
+<label>{{$.T "twofactor.code"}} <input name="code" type="text" inputmode="numeric" autocomplete="one-time-code" required maxlength="20"></label>
+<button type="submit">{{$.T "twofactor.regen"}}</button>
+</form>
+<details class="danger"><summary>{{$.T "twofactor.disable"}}</summary>
+<form method="post" action="/settings/2fa/disable">
+<input type="hidden" name="csrf" value="{{$.CSRF}}">
+<p>{{$.T "twofactor.disable_text"}}</p>
+<label>{{$.T "twofactor.code"}} <input name="code" type="text" inputmode="numeric" autocomplete="one-time-code" required maxlength="20"></label>
+<button type="submit" class="danger">{{$.T "twofactor.disable"}}</button>
+</form></details>
+</section>
+{{else if .Setup}}
+<section>
+<p>{{$.T "twofactor.setup_text"}}</p>
+<p><img src="/settings/2fa/qr.png" width="256" height="256" alt="{{$.T "twofactor.qr_alt"}}"></p>
+<p>{{$.T "twofactor.secret"}} <code>{{.Secret}}</code></p>
+<form method="post" action="/settings/2fa/enable">
+<input type="hidden" name="csrf" value="{{$.CSRF}}">
+<label>{{$.T "twofactor.code"}} <input name="code" type="text" inputmode="numeric" autocomplete="one-time-code" required autofocus maxlength="20"></label>
+<button type="submit">{{$.T "twofactor.confirm"}}</button>
+</form>
+</section>
+{{else}}
+<section>
+<p>{{$.T "twofactor.intro"}}</p>
+<form method="post" action="/settings/2fa/start"><input type="hidden" name="csrf" value="{{$.CSRF}}"><button type="submit">{{$.T "twofactor.start"}}</button></form>
+</section>
+{{end}}
+{{end}}
+{{template "setclose" $}}{{end}}

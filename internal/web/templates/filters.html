@@ -1,0 +1,36 @@
+{{define "content"}}{{template "setopen" .}}
+<h1 class="legend">{{.T "set.filters"}}</h1>
+{{template "boxswitch" .}}
+{{template "messages" .}}
+{{with .Filters}}
+{{if .NotConfigured}}
+<p>{{$.T "filters.not_configured"}}</p>
+<p><a class="button" href="/accounts/{{$.ActiveID}}/edit#sieve">{{$.T "filters.configure"}}</a></p>
+{{else if $.ErrorKey}}
+<p><a href="/accounts/{{$.ActiveID}}/edit#sieve">{{$.T "filters.configure"}}</a></p>
+{{else}}
+{{if .RawActive}}<p class="msg warn">{{$.T "filters.raw_active"}} <a href="/settings/filters/raw?box={{$.ActiveID}}">{{$.T "filters.raw_edit"}}</a></p>{{end}}
+{{if .Foreign}}<p class="msg warn">{{$.T "filters.err.foreign"}}</p>{{end}}
+{{if .Rows}}
+<table class="folders-table filters-table">
+<thead><tr><th>{{$.T "filters.name"}}</th><th>{{$.T "filters.summary"}}</th><th></th></tr></thead>
+<tbody>
+{{range .Rows}}<tr{{if not .Enabled}} class="off"{{end}}>
+<td>{{.Name}}{{if not .Enabled}} <small class="role">({{$.T "filters.disabled"}})</small>{{end}}</td>
+<td>{{.Summary}}</td>
+<td class="acts">
+<form method="post" action="/settings/filters/action" class="inline">{{template "boxfield" $}}<input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="id" value="{{.ID}}">
+{{if not .First}}<button type="submit" class="link" name="action" value="up" title="{{$.T "filters.up"}}" aria-label="{{$.T "filters.up"}}">▲</button>{{end}}
+{{if not .Last}}<button type="submit" class="link" name="action" value="down" title="{{$.T "filters.down"}}" aria-label="{{$.T "filters.down"}}">▼</button>{{end}}
+<button type="submit" class="link" name="action" value="toggle">{{if .Enabled}}{{$.T "filters.disable"}}{{else}}{{$.T "filters.enable"}}{{end}}</button></form>
+<a href="/settings/filters/edit?box={{$.ActiveID}}&amp;id={{.ID}}">{{$.T "accounts.edit"}}</a>
+<details class="danger"><summary>{{$.T "accounts.delete"}}</summary>
+<form method="post" action="/settings/filters/action">{{template "boxfield" $}}<input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="id" value="{{.ID}}"><input type="hidden" name="action" value="delete">
+<p>{{$.T "filters.delete_confirm"}}</p><button type="submit" class="danger">{{$.T "accounts.delete_yes"}}</button></form></details>
+</td></tr>{{end}}
+</tbody></table>
+{{else}}<p>{{$.T "filters.none"}}</p>{{end}}
+<p><a class="button" href="/settings/filters/edit?box={{$.ActiveID}}">{{$.T "filters.add"}}</a> <a href="/settings/filters/raw?box={{$.ActiveID}}">{{$.T "filters.raw"}}</a></p>
+{{end}}
+{{end}}
+{{template "setclose" .}}{{end}}

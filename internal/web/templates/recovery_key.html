@@ -1,0 +1,14 @@
+{{define "content"}}
+<main class="card">
+<h1>{{.T "app.name"}}</h1>
+<h2>{{.T "recovery_key.title"}}</h2>
+<p>{{.T "recovery_key.intro"}}</p>
+<p class="keybox"><code id="recovery-key">{{.RecoveryKey}}</code></p>
+<p class="msg warn">{{.T "recovery_key.warning"}}</p>
+<p><a href="/recovery-key.txt" download="wmail-go-recovery-key.txt">{{.T "recovery_key.download"}}</a></p>
+<form method="post" action="/recovery-key">
+<input type="hidden" name="csrf" value="{{.CSRF}}">
+<button type="submit">{{.T "recovery_key.confirm"}}</button>
+</form>
+</main>
+{{end}}

@@ -1,0 +1,19 @@
+{{define "content"}}
+<main class="authpage"><div class="authwrap">
+<h1>{{.T "app.name"}}</h1>
+<h2 class="authtitle">{{.T "login.title"}}</h2>
+{{template "messages" .}}
+<form class="authbox" method="post" action="/login">
+<label><span class="sr">{{.T "login.login"}}</span>
+<input placeholder="{{.T "login.login"}}" name="login" type="text" autocomplete="username" required autofocus value="{{.Login}}"></label>
+<label><span class="sr">{{.T "login.password"}}</span>
+<input placeholder="{{.T "login.password"}}" name="password" type="password" autocomplete="current-password" required></label>
+<button type="submit">{{.T "login.submit"}}</button>
+</form>
+<p class="authlinks">
+{{if .AllowRegistration}}<a href="/register">{{.T "login.register_link"}}</a>{{end}}
+<a href="/recover">{{.T "login.recover_link"}}</a>
+</p>
+<p class="authlinks langs">{{range .Langs}}{{if .Current}}<strong>{{.Name}}</strong>{{else}}<a href="/lang?l={{.Code}}&amp;next=/login" hreflang="{{.Code}}">{{.Name}}</a>{{end}} {{end}}</p>
+</div></main>
+{{end}}

@@ -1,0 +1,81 @@
+{{define "content"}}{{template "setopen" .}}
+{{with .Filters}}
+<h1 class="legend">{{if .IsNew}}{{$.T "filters.add"}}{{else}}{{$.T "filters.edit"}}{{end}}</h1>
+{{template "messages" $}}
+{{if .Errors}}<ul class="msg error" role="alert">{{range .Errors}}<li>{{$.T .}}</li>{{end}}</ul>{{end}}
+<form method="post" action="/settings/filters/save" id="filter-form" class="filter-form">{{template "boxfield" $}}
+<input type="hidden" name="csrf" value="{{$.CSRF}}">
+<input type="hidden" name="id" value="{{.Edit.ID}}">
+{{if .Foreign}}<p class="msg warn">{{$.T "filters.err.foreign"}}</p>
+<label class="check"><input type="checkbox" name="confirm_overwrite"> {{$.T "filters.overwrite"}}</label>{{end}}
+<label>{{$.T "filters.name"}}
+<input name="name" type="text" maxlength="100" required value="{{.Edit.Name}}"></label>
+<label class="check"><input type="checkbox" name="enabled"{{if .Edit.Enabled}} checked{{end}}> {{$.T "filters.enabled"}}</label>
+
+<fieldset>
+<legend>{{$.T "filters.conditions"}}</legend>
+<label>{{$.T "filters.match"}}
+<select name="match"><option value="Any"{{if eq .Edit.ConditionsType "Any"}} selected{{end}}>{{$.T "filters.match_any"}}</option><option value="All"{{if eq .Edit.ConditionsType "All"}} selected{{end}}>{{$.T "filters.match_all"}}</option></select></label>
+<p><small>{{$.T "filters.no_condition"}}</small></p>
+<div id="conds">
+{{range .EditConds}}<div class="cond-row">
+<select name="cond_field" aria-label="{{$.T "filters.field"}}">
+<option value="From"{{if eq .Field "From"}} selected{{end}}>{{$.T "filters.f.from"}}</option>
+<option value="Recipient"{{if eq .Field "Recipient"}} selected{{end}}>{{$.T "filters.f.recipient"}}</option>
+<option value="Subject"{{if eq .Field "Subject"}} selected{{end}}>{{$.T "filters.f.subject"}}</option>
+<option value="Header"{{if eq .Field "Header"}} selected{{end}}>{{$.T "filters.f.header"}}</option>
+<option value="Size"{{if eq .Field "Size"}} selected{{end}}>{{$.T "filters.f.size"}}</option>
+</select>
+<input name="cond_second" type="text" maxlength="100" class="second" placeholder="{{$.T "filters.header_name"}}" value="{{.Second}}" aria-label="{{$.T "filters.header_name"}}">
+<select name="cond_type" aria-label="{{$.T "filters.type"}}">
+<option value="Contains"{{if eq .Type "Contains"}} selected{{end}}>{{$.T "filters.t.contains"}}</option>
+<option value="NotContains"{{if eq .Type "NotContains"}} selected{{end}}>{{$.T "filters.t.not_contains"}}</option>
+<option value="EqualTo"{{if eq .Type "EqualTo"}} selected{{end}}>{{$.T "filters.t.equal"}}</option>
+<option value="NotEqualTo"{{if eq .Type "NotEqualTo"}} selected{{end}}>{{$.T "filters.t.not_equal"}}</option>
+{{if $.Filters.Modules.regex}}<option value="Regex"{{if eq .Type "Regex"}} selected{{end}}>{{$.T "filters.t.regex"}}</option>{{end}}
+<option value="Over"{{if eq .Type "Over"}} selected{{end}}>{{$.T "filters.t.over"}}</option>
+<option value="Under"{{if eq .Type "Under"}} selected{{end}}>{{$.T "filters.t.under"}}</option>
+</select>
+<input name="cond_value" type="text" maxlength="500" value="{{.Value}}" aria-label="{{$.T "filters.value"}}">
+<button type="button" class="link rm" data-js-only hidden aria-label="{{$.T "filters.remove_condition"}}">×</button>
+</div>{{end}}
+</div>
+<button type="button" class="secondary" id="add-cond" data-js-only hidden>{{$.T "filters.add_condition"}}</button>
+</fieldset>
+
+<fieldset>
+<legend>{{$.T "filters.actions"}}</legend>
+<label>{{$.T "filters.action"}}
+<select name="action" id="action">
+<option value="None"{{if eq .Edit.ActionType "None"}} selected{{end}}>{{$.T "filters.act.none"}}</option>
+<option value="MoveTo"{{if eq .Edit.ActionType "MoveTo"}} selected{{end}}{{if not .Modules.fileinto}} disabled{{end}}>{{$.T "filters.act.move"}}</option>
+<option value="Forward"{{if eq .Edit.ActionType "Forward"}} selected{{end}}>{{$.T "filters.act.forward"}}</option>
+<option value="Reject"{{if eq .Edit.ActionType "Reject"}} selected{{end}}{{if not .Modules.reject}} disabled{{end}}>{{$.T "filters.act.reject"}}</option>
+<option value="Vacation"{{if eq .Edit.ActionType "Vacation"}} selected{{end}}{{if not .Modules.vacation}} disabled{{end}}>{{$.T "filters.act.vacation"}}</option>
+<option value="Discard"{{if eq .Edit.ActionType "Discard"}} selected{{end}}>{{$.T "filters.act.discard"}}</option>
+</select></label>
+<div class="act" data-act="MoveTo">
+<label>{{$.T "filters.folder"}}
+<select name="move_to"><option value=""></option>{{$v := .Edit.ActionValue}}{{range .Folders}}<option value="{{.}}"{{if eq . $v}} selected{{end}}>{{.}}</option>{{end}}</select></label>
+</div>
+<div class="act" data-act="Forward">
+<label>{{$.T "filters.address"}}<input name="forward_to" type="email" maxlength="254" value="{{if eq .Edit.ActionType "Forward"}}{{.Edit.ActionValue}}{{end}}"></label>
+<label class="check"><input type="checkbox" name="keep"{{if .Edit.Keep}} checked{{end}}> {{$.T "filters.keep"}}</label>
+</div>
+<div class="act" data-act="Reject">
+<label>{{$.T "filters.reject_msg"}}<textarea name="reject_msg" rows="4" maxlength="2000">{{if eq .Edit.ActionType "Reject"}}{{.Edit.ActionValue}}{{end}}</textarea></label>
+</div>
+<div class="act" data-act="Vacation">
+<label>{{$.T "filters.vac_subject"}}<input name="vac_subject" type="text" maxlength="200" value="{{.Edit.ActionValueSecond}}"></label>
+<label>{{$.T "filters.vac_msg"}}<textarea name="vac_msg" rows="5" maxlength="4000">{{if eq .Edit.ActionType "Vacation"}}{{.Edit.ActionValue}}{{end}}</textarea></label>
+<label>{{$.T "filters.vac_days"}}<input name="vac_days" type="number" min="1" max="365" value="{{.Edit.ActionValueThird}}"></label>
+<label>{{$.T "filters.vac_addrs"}}<input name="vac_addrs" type="text" maxlength="500" value="{{.Edit.ActionValueFourth}}"></label>
+<label class="check"><input type="checkbox" name="stop"{{if .Edit.Stop}} checked{{end}}> {{$.T "filters.stop"}}</label>
+</div>
+<label class="check mark"><input type="checkbox" name="mark_read"{{if .Edit.MarkAsRead}} checked{{end}}{{if not .Modules.imap4flags}} disabled{{end}}> {{$.T "filters.mark_read"}}</label>
+</fieldset>
+<button type="submit">{{$.T "settings.prefs.submit"}}</button> <a href="/settings/filters?box={{$.ActiveID}}">{{$.T "accounts.form.cancel"}}</a>
+</form>
+{{end}}
+{{template "setclose" .}}{{end}}
+{{define "scripts"}}<script src="/static/filters.js" defer></script>{{end}}

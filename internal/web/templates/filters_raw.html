@@ -1,0 +1,13 @@
+{{define "content"}}{{template "setopen" .}}
+<h1 class="legend">{{.T "filters.raw"}}</h1>
+{{template "messages" .}}
+{{with .Filters}}
+<p><small>{{$.T "filters.raw_hint"}}</small></p>
+<form method="post" action="/settings/filters/raw">{{template "boxfield" $}}
+<input type="hidden" name="csrf" value="{{$.CSRF}}">
+<textarea name="raw" class="raw-script" rows="22" spellcheck="false" maxlength="204800" aria-label="{{$.T "filters.raw"}}">{{.Raw}}</textarea>
+<label class="check"><input type="checkbox" name="use_raw"{{if .RawActive}} checked{{end}}> {{$.T "filters.raw_use"}}</label>
+<button type="submit">{{$.T "settings.prefs.submit"}}</button> <a href="/settings/filters?box={{$.ActiveID}}">{{$.T "accounts.form.cancel"}}</a>
+</form>
+{{end}}
+{{template "setclose" .}}{{end}}

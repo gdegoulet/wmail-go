@@ -1,0 +1,2 @@
+/* Sans JavaScript, l'arbre des dossiers reste entièrement visible (on ne pourrait pas le déplier). */
+.f[hidden] { display: flex !important; }

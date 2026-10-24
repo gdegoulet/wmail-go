@@ -1,0 +1,3 @@
+{{define "content"}}{{end}}
+
+{{define "fragment"}}{{if .Msg}}{{template "msgview" .}}{{else if .List}}{{if .List.PaneError}}<p class="msg error" role="alert">{{.T .List.PaneError}}</p>{{end}}{{end}}{{end}}

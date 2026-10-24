@@ -1,0 +1,43 @@
+{{define "content"}}{{with .Identities}}{{template "setopen" $}}
+<h1 class="legend">{{$.T "identities.title"}} – {{.AccountEmail}}</h1>
+{{template "messages" $}}
+<ul class="account-list">
+<li><div><strong>{{if .Main.Name}}{{.Main.Name}} {{end}}&lt;{{.Main.Email}}&gt;</strong> <small>({{$.T "identities.main"}})</small></div>
+<div class="row-actions"><a href="/accounts/{{.AccountID}}/edit">{{$.T "accounts.edit"}}</a></div></li>
+{{range $i, $x := .Extra}}{{with $x}}<li>
+<div><strong>{{if .Name}}{{.Name}} {{end}}&lt;{{.Email}}&gt;</strong>{{if .ReplyTo}}<br><small>{{$.T "compose.reply_to"}} : {{.ReplyTo}}</small>{{end}}{{if .Bcc}}<br><small>{{$.T "compose.bcc"}} : {{.Bcc}}</small>{{end}}</div>
+<div class="row-actions">
+<form method="post" action="/accounts/{{$.Identities.AccountID}}/identities/{{.ID}}/move" class="inline"><input type="hidden" name="csrf" value="{{$.CSRF}}">{{if gt $i 0}}<button type="submit" class="link" name="dir" value="up" title="{{$.T "accounts.move_up"}}" aria-label="{{$.T "accounts.move_up"}}">▲</button>{{end}}{{if lt $i (sub1 (len $.Identities.Extra))}}<button type="submit" class="link" name="dir" value="down" title="{{$.T "accounts.move_down"}}" aria-label="{{$.T "accounts.move_down"}}">▼</button>{{end}}</form>
+<a href="/accounts/{{$.Identities.AccountID}}/identities?edit={{.ID}}">{{$.T "accounts.edit"}}</a>
+<details class="danger"><summary>{{$.T "accounts.delete"}}</summary>
+<form method="post" action="/accounts/{{$.Identities.AccountID}}/identities/{{.ID}}/delete">
+<input type="hidden" name="csrf" value="{{$.CSRF}}">
+<p>{{$.T "identities.delete_confirm"}}</p>
+<button type="submit" class="danger">{{$.T "accounts.delete_yes"}}</button>
+</form></details>
+</div></li>{{end}}{{end}}
+</ul>
+{{if or .Editing (not .Full)}}
+<section>
+<h2>{{if .Editing}}{{$.T "identities.edit"}}{{else}}{{$.T "identities.add"}}{{end}}</h2>
+<form method="post" action="/accounts/{{.AccountID}}/identities">
+<input type="hidden" name="csrf" value="{{$.CSRF}}">
+<input type="hidden" name="iid" value="{{.Edit.ID}}">
+<label>{{$.T "accounts.form.email"}}
+<input name="email" type="email" required maxlength="254" value="{{.Edit.Email}}"></label>
+<label>{{$.T "identities.name"}}
+<input name="name" type="text" maxlength="100" value="{{.Edit.Name}}"></label>
+<label>{{$.T "compose.reply_to"}}
+<input name="reply_to" type="text" maxlength="500" value="{{.Edit.ReplyTo}}"></label>
+<label>{{$.T "identities.bcc"}}
+<input name="bcc" type="text" maxlength="500" value="{{.Edit.Bcc}}"></label>
+<label>{{$.T "accounts.form.signature"}}
+<textarea name="signature" rows="4" maxlength="5000">{{.Edit.Signature}}</textarea></label>
+<small>{{$.T "accounts.form.signature_hint"}}</small>
+<label class="check"><input name="signature_before" type="checkbox"{{if .Edit.SignatureBefore}} checked{{end}}> {{$.T "accounts.form.signature_before"}}</label>
+<button type="submit">{{if .Editing}}{{$.T "identities.save"}}{{else}}{{$.T "identities.add"}}{{end}}</button>
+{{if .Editing}}<a href="/accounts/{{.AccountID}}/identities">{{$.T "accounts.form.cancel"}}</a>{{end}}
+</form>
+</section>
+{{end}}
+{{template "setclose" $}}{{end}}{{end}}

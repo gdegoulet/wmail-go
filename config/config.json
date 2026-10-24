@@ -1,0 +1,32 @@
+{
+  "allow_registration": true,
+  "listen": "0.0.0.0:8080",
+  "data_dir": "/data",
+  "trusted_proxy": false,
+  "max_users": 0,
+  "block_private_networks": true,
+  "allowed_private_hosts": ["greenmail", "dovecot"],
+  "max_concurrent_kdf": 4,
+  "password_min_length": 12,
+  "session": {
+    "idle_minutes_default": 60,
+    "idle_minutes_max": 480,
+    "absolute_hours_default": 12,
+    "absolute_hours_max": 72
+  },
+  "rate_limit": {
+    "login": { "per_ip": "10/15m", "per_login": "5/15m" },
+    "recovery": { "per_ip": "5/1h", "per_login": "3/1h" },
+    "register": { "per_ip": "200/1h" },
+    "mail_test": { "per_ip": "30/10m", "per_login": "20/10m" },
+    "send": { "per_ip": "60/1h", "per_login": "30/1h" },
+    "sieve": { "per_ip": "200/10m", "per_login": "100/10m" }
+  },
+  "compose": { "max_attachment_mb": 25, "max_message_mb": 30, "max_attachments": 30, "max_session_mb": 100, "hide_x_mailer": false },
+  "kdf": { "memory_mib": 64, "iterations": 3, "parallelism": 4 },
+  "default_language": "fr",
+  "default_theme": "rainloop",
+  "timezone": "Europe/Paris",
+  "log_level": "info",
+  "log_format": "text"
+}

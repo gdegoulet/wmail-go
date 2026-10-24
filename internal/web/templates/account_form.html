@@ -1,0 +1,125 @@
+{{define "content"}}{{template "setopen" .}}
+<h1 class="legend">{{.T "accounts.form.title"}}</h1>
+{{if .FirstAccount}}<p class="msg info">{{.T "accounts.first_intro"}}</p>{{end}}
+{{if .FormErrorKeys}}<ul class="msg error" role="alert">{{range .FormErrorKeys}}<li>{{$.T .}}</li>{{end}}</ul>{{end}}
+
+{{with .IMAPResult}}<p class="msg {{if .OK}}info{{else}}error{{end}}" role="status"><strong>IMAP</strong> : {{if .OK}}{{$.T "accounts.test.ok"}}{{else}}{{$.T (printf "accounts.test.fail.%s" .Kind)}}<br><small>{{.Detail}}</small>{{end}}</p>{{end}}
+{{with .SMTPResult}}<p class="msg {{if .OK}}info{{else}}error{{end}}" role="status"><strong>SMTP</strong> : {{if .OK}}{{$.T "accounts.test.ok"}}{{else}}{{$.T (printf "accounts.test.fail.%s" .Kind)}}<br><small>{{.Detail}}</small>{{end}}</p>{{end}}
+
+<form method="post" action="/accounts/save" id="account-form">
+<input type="hidden" name="csrf" value="{{.CSRF}}">
+<input type="hidden" name="id" value="{{.Form.ID}}">
+
+<fieldset>
+<legend>{{.T "accounts.form.identity"}}</legend>
+<label>{{.T "accounts.form.email"}}
+<input name="email" type="email" autocomplete="email" required value="{{.Form.Email}}"></label>
+<label>{{.T "accounts.form.display_name"}}
+<input name="display_name" type="text" maxlength="100" value="{{.Form.DisplayName}}"></label>
+<label>{{.T "accounts.form.name"}}
+<input name="name" type="text" maxlength="100" value="{{.Form.Name}}"></label>
+</fieldset>
+
+<fieldset>
+<legend>{{.T "accounts.form.imap"}}</legend>
+<label>{{.T "accounts.form.host"}}
+<input name="imap_host" type="text" autocomplete="off" required value="{{.Form.IMAPHost}}"></label>
+<div class="grid2">
+<label>{{.T "accounts.form.port"}}
+<input name="imap_port" type="number" min="1" max="65535" required value="{{.Form.IMAPPort}}"></label>
+<label>{{.T "accounts.form.security"}}
+<select name="imap_security">
+<option value="tls"{{if eq .Form.IMAPSecurity "tls"}} selected{{end}}>{{.T "accounts.form.sec.tls"}}</option>
+<option value="starttls"{{if eq .Form.IMAPSecurity "starttls"}} selected{{end}}>{{.T "accounts.form.sec.starttls"}}</option>
+<option value="none"{{if eq .Form.IMAPSecurity "none"}} selected{{end}}>{{.T "accounts.form.sec.none"}}</option>
+</select></label>
+</div>
+<label>{{.T "accounts.form.login"}}
+<input name="imap_login" type="text" autocomplete="off" required value="{{.Form.IMAPLogin}}"></label>
+<label>{{.T "accounts.form.password"}}
+<input name="imap_password" type="password" autocomplete="new-password" value="{{.Form.IMAPPassword}}"{{if not .Form.HasIMAPPassword}} required{{end}}></label>
+{{if .Form.HasIMAPPassword}}<small>{{.T "accounts.form.password_kept"}}</small>{{end}}
+<label class="check"><input name="imap_verify" type="checkbox"{{if .Form.IMAPVerify}} checked{{end}}> {{.T "accounts.form.verify"}}</label>
+<small>{{.T "accounts.form.verify_hint"}}</small>
+<label class="check"><input name="imap_legacy" type="checkbox"{{if .Form.IMAPLegacy}} checked{{end}}> {{.T "accounts.form.legacy"}}</label>
+<small>{{.T "accounts.form.legacy_hint"}}</small>
+</fieldset>
+
+<fieldset>
+<legend>{{.T "accounts.form.smtp"}}</legend>
+<label>{{.T "accounts.form.host"}}
+<input name="smtp_host" type="text" autocomplete="off" required value="{{.Form.SMTPHost}}"></label>
+<div class="grid2">
+<label>{{.T "accounts.form.port"}}
+<input name="smtp_port" type="number" min="1" max="65535" required value="{{.Form.SMTPPort}}"></label>
+<label>{{.T "accounts.form.security"}}
+<select name="smtp_security">
+<option value="tls"{{if eq .Form.SMTPSecurity "tls"}} selected{{end}}>{{.T "accounts.form.sec.tls"}}</option>
+<option value="starttls"{{if eq .Form.SMTPSecurity "starttls"}} selected{{end}}>{{.T "accounts.form.sec.starttls"}}</option>
+<option value="none"{{if eq .Form.SMTPSecurity "none"}} selected{{end}}>{{.T "accounts.form.sec.none"}}</option>
+</select></label>
+</div>
+<small>{{.T "accounts.form.smtp_same"}}</small>
+<label>{{.T "accounts.form.login"}}
+<input name="smtp_login" type="text" autocomplete="off" value="{{.Form.SMTPLogin}}"></label>
+<label>{{.T "accounts.form.password"}}
+<input name="smtp_password" type="password" autocomplete="new-password" value="{{.Form.SMTPPassword}}"></label>
+{{if .Form.HasSMTPPassword}}<small>{{.T "accounts.form.password_kept"}}</small>{{end}}
+<label class="check"><input name="smtp_verify" type="checkbox"{{if .Form.SMTPVerify}} checked{{end}}> {{.T "accounts.form.verify"}}</label>
+<small>{{.T "accounts.form.verify_hint"}}</small>
+<label class="check"><input name="smtp_legacy" type="checkbox"{{if .Form.SMTPLegacy}} checked{{end}}> {{.T "accounts.form.legacy"}}</label>
+<small>{{.T "accounts.form.legacy_hint"}}</small>
+</fieldset>
+
+<fieldset id="sieve">
+<legend>{{.T "accounts.form.sieve"}}</legend>
+<label class="check"><input name="sieve_disabled" type="checkbox"{{if .Form.SieveDisabled}} checked{{end}}> {{.T "accounts.form.sieve_disable"}}</label>
+<small>{{.T "accounts.form.sieve_hint"}}</small>
+<label>{{.T "accounts.form.host"}}
+<input name="sieve_host" type="text" maxlength="253" placeholder="{{.T "accounts.form.sieve_host_ph"}}" value="{{.Form.SieveHost}}"></label>
+<label>{{.T "accounts.form.port"}}
+<input name="sieve_port" type="number" min="1" max="65535" placeholder="4190" value="{{.Form.SievePort}}"></label>
+<label>{{.T "accounts.form.security"}}
+<select name="sieve_security">
+<option value=""{{if eq .Form.SieveSecurity ""}} selected{{end}}>{{.T "accounts.form.sieve_sec_default"}}</option>
+<option value="starttls"{{if eq .Form.SieveSecurity "starttls"}} selected{{end}}>{{.T "accounts.form.sec.starttls"}}</option>
+<option value="tls"{{if eq .Form.SieveSecurity "tls"}} selected{{end}}>{{.T "accounts.form.sec.tls"}}</option>
+<option value="none"{{if eq .Form.SieveSecurity "none"}} selected{{end}}>{{.T "accounts.form.sec.none"}}</option>
+</select></label>
+<label>{{.T "accounts.form.login"}}
+<input name="sieve_login" type="text" maxlength="254" autocomplete="off" placeholder="{{.T "accounts.form.sieve_login_ph"}}" value="{{.Form.SieveLogin}}"></label>
+<label>{{.T "accounts.form.password"}}
+<input name="sieve_password" type="password" autocomplete="new-password"></label>
+{{if .Form.HasSievePassword}}<small>{{.T "accounts.form.password_kept"}}</small>{{end}}
+<label class="check"><input name="sieve_verify" type="checkbox"{{if .Form.SieveVerify}} checked{{end}}> {{.T "accounts.form.verify"}}</label>
+<label class="check"><input name="sieve_legacy" type="checkbox"{{if .Form.SieveLegacy}} checked{{end}}> {{.T "accounts.form.legacy"}}</label>
+</fieldset>
+
+<fieldset>
+<legend>{{.T "accounts.form.options"}}</legend>
+<label class="check"><input name="block_remote" type="checkbox"{{if .Form.BlockRemote}} checked{{end}}> {{.T "accounts.form.block_remote"}}</label>
+<label class="check"><input name="proxy_images" type="checkbox"{{if .Form.ProxyImages}} checked{{end}}> {{.T "accounts.form.proxy_images"}}</label>
+{{with .FoldersView}}{{range .Roles}}{{$role := .}}<label>{{$.T .LabelKey}}
+<select name="{{.Field}}">
+<option value=""{{if eq .Current ""}} selected{{end}}>{{$.T "folders.auto"}} ({{.Resolved}})</option>
+{{if .AllowNone}}<option value="-"{{if eq .Current "-"}} selected{{end}}>{{$.T "folders.unused"}}</option>{{end}}
+{{range $.FoldersView.Names}}<option value="{{.}}"{{if eq . $role.Current}} selected{{end}}>{{.}}</option>{{end}}
+{{if and (ne .Current "") (ne .Current "-")}}{{if not (inList $.FoldersView.Names .Current)}}<option value="{{.Current}}" selected>{{.Current}} ({{$.T "folders.missing"}})</option>{{end}}{{end}}
+</select></label>
+{{end}}{{if not .Names}}<small>{{$.T "folders.new_account_hint"}}</small>{{end}}
+<small>{{$.T "accounts.form.trash_hint"}}</small>{{end}}
+<label>{{.T "accounts.form.signature"}}
+<textarea name="signature" rows="4" maxlength="5000">{{.Form.Signature}}</textarea></label>
+<small>{{.T "accounts.form.signature_hint"}}</small>
+<label class="check"><input name="signature_before" type="checkbox"{{if .Form.SignatureBefore}} checked{{end}}> {{.T "accounts.form.signature_before"}}</label>
+</fieldset>
+
+<div class="actions">
+<button type="submit" name="action" value="test" class="secondary" formnovalidate>{{.T "accounts.form.test"}}</button>
+<button type="submit" name="action" value="save">{{.T "accounts.form.save"}}</button>
+{{if not .FirstAccount}}<a href="/accounts">{{.T "accounts.form.cancel"}}</a>{{end}}
+</div>
+</form>
+{{template "setclose" .}}{{end}}
+
+{{define "scripts"}}<script src="/static/accounts.js" defer></script>{{end}}

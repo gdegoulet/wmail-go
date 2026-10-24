@@ -1,0 +1,100 @@
+{{define "content"}}{{template "setopen" .}}
+<h1 class="legend">{{if eq .Section "security"}}{{.T "set.security"}}{{else}}{{.T "set.general"}}{{end}}</h1>
+{{template "messages" .}}
+{{if ne .Section "security"}}
+<section>
+<h2>{{.T "settings.prefs.title"}}</h2>
+<form method="post" action="/settings/preferences">
+<input type="hidden" name="csrf" value="{{.CSRF}}">
+<label>{{.T "settings.prefs.language"}}
+<select name="language">{{range .Languages}}<option value="{{.}}"{{if eq . $.Prefs.Language}} selected{{end}}>{{$.T (printf "lang.%s" .)}}</option>{{end}}</select></label>
+<label>{{.T "settings.prefs.theme"}}
+<select name="theme">{{range .Themes}}<option value="{{.}}"{{if eq . $.Prefs.Theme}} selected{{end}}>{{$.ThemeLabel .}}</option>{{end}}</select></label>
+<label>{{.T "settings.prefs.idle" .IdleMax}}
+<input name="idle_minutes" type="number" min="1" max="{{.IdleMax}}" value="{{.Prefs.IdleMinutes}}" required></label>
+<label>{{.T "settings.prefs.absolute" .AbsMax}}
+<input name="absolute_hours" type="number" min="1" max="{{.AbsMax}}" value="{{.Prefs.AbsoluteHours}}" required></label>
+<label>{{.T "settings.prefs.font_size"}}
+<select name="font_size">{{range .FontSizes}}<option value="{{.}}"{{if eq . $.Prefs.FontSize}} selected{{end}}>{{.}} px</option>{{end}}</select></label>
+<label>{{.T "settings.prefs.layout"}}
+<select name="layout">
+<option value="three"{{if eq .Prefs.Layout "three"}} selected{{end}}>{{.T "settings.layout.three"}}</option>
+<option value="list"{{if eq .Prefs.Layout "list"}} selected{{end}}>{{.T "settings.layout.list"}}</option>
+</select></label>
+<label>{{.T "settings.prefs.page_size"}}
+<input name="page_size" type="number" min="10" max="500" value="{{.Prefs.PageSize}}" required></label>
+<label class="check"><input name="mark_read" type="checkbox"{{if .Prefs.MarkRead}} checked{{end}}> {{.T "settings.prefs.mark_read"}}</label>
+<label>{{.T "settings.prefs.editor"}}
+<select name="editor">
+<option value="html"{{if or (eq .Prefs.Editor "") (eq .Prefs.Editor "html")}} selected{{end}}>{{.T "settings.editor.html"}}</option>
+<option value="plain"{{if eq .Prefs.Editor "plain"}} selected{{end}}>{{.T "settings.editor.plain"}}</option>
+<option value="html_forced"{{if eq .Prefs.Editor "html_forced"}} selected{{end}}>{{.T "settings.editor.html_forced"}}</option>
+<option value="plain_forced"{{if eq .Prefs.Editor "plain_forced"}} selected{{end}}>{{.T "settings.editor.plain_forced"}}</option>
+</select></label>
+<label class="check"><input name="draft_autosave" type="checkbox"{{if .Prefs.DraftAutosave}} checked{{end}}> {{.T "settings.prefs.draft_autosave"}}</label>
+<label>{{.T "settings.prefs.timezone"}}
+<input type="text" name="timezone" list="tzlist" maxlength="64" value="{{.Prefs.Timezone}}" placeholder="{{.Prefs.DefaultTimezone}}" autocomplete="off"></label>
+<small>{{.T "settings.prefs.timezone_hint" .Prefs.DefaultTimezone}}</small>
+<datalist id="tzlist"><option value="Europe/Paris"><option value="Europe/London"><option value="Europe/Brussels"><option value="Europe/Berlin"><option value="Europe/Madrid"><option value="Europe/Rome"><option value="Europe/Zurich"><option value="Europe/Lisbon"><option value="Europe/Amsterdam"><option value="Europe/Dublin"><option value="Europe/Athens"><option value="Europe/Moscow"><option value="UTC"><option value="Africa/Casablanca"><option value="Africa/Algiers"><option value="Africa/Tunis"><option value="Africa/Dakar"><option value="Africa/Abidjan"><option value="Africa/Johannesburg"><option value="America/New_York"><option value="America/Chicago"><option value="America/Denver"><option value="America/Los_Angeles"><option value="America/Montreal"><option value="America/Sao_Paulo"><option value="America/Martinique"><option value="America/Guadeloupe"><option value="Asia/Dubai"><option value="Asia/Kolkata"><option value="Asia/Bangkok"><option value="Asia/Shanghai"><option value="Asia/Tokyo"><option value="Australia/Sydney"><option value="Pacific/Noumea"><option value="Pacific/Tahiti"><option value="Indian/Reunion"></datalist>
+<label class="check"><input name="show_checkboxes" type="checkbox"{{if not .Prefs.HideChecks}} checked{{end}}> {{.T "settings.prefs.checkboxes"}}</label>
+<label class="check"><input name="animations" type="checkbox"{{if not .Prefs.NoAnim}} checked{{end}}> {{.T "settings.prefs.animations"}}</label>
+<label class="check"><input name="threads" type="checkbox"{{if .Prefs.Threads}} checked{{end}}> {{.T "settings.prefs.threads"}}</label>
+<label class="check"><input name="contacts_autosave" type="checkbox"{{if .Prefs.ContactsAuto}} checked{{end}}> {{.T "settings.prefs.contacts_autosave"}}</label>
+<label class="check"><input id="notify-desktop" name="notify_desktop" type="checkbox"{{if .Prefs.NotifyDesktop}} checked{{end}}> {{.T "settings.prefs.notify_desktop"}}</label>
+<label class="check"><input name="notify_sound" type="checkbox"{{if .Prefs.NotifySound}} checked{{end}}> {{.T "settings.prefs.notify_sound"}}</label>
+<label class="check"><input name="reply_same_folder" type="checkbox"{{if .Prefs.ReplySame}} checked{{end}}> {{.T "settings.prefs.reply_same_folder"}}</label>
+<button type="submit">{{.T "settings.prefs.submit"}}</button>
+</form>
+<form method="post" action="/settings/background" enctype="multipart/form-data" class="inline-reset">
+<input type="hidden" name="csrf" value="{{.CSRF}}">
+<label>{{.T "settings.background.label"}} <input type="file" name="file" accept="image/jpeg,image/png" required></label>
+<small>{{.T "settings.background.hint"}}</small>
+<button type="submit" class="secondary">{{.T "settings.background.set"}}</button>
+</form>
+{{if .Prefs.Background}}<form method="post" action="/settings/background/delete" class="inline-reset"><input type="hidden" name="csrf" value="{{.CSRF}}"><button type="submit" class="secondary">{{.T "settings.background.remove"}}</button></form>{{end}}
+{{if .Prefs.TrustedSenders}}<details class="trusted"><summary>{{.T "settings.trusted.title" (len .Prefs.TrustedSenders)}}</summary>
+<ul class="account-list">{{range .Prefs.TrustedSenders}}<li><div>{{.}}</div><div class="row-actions"><form method="post" action="/mail/trust" class="inline"><input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="email" value="{{.}}"><button type="submit" class="link" name="action" value="remove">{{$.T "settings.trusted.remove"}}</button></form></div></li>{{end}}</ul></details>{{end}}
+<p class="mailto-handler" data-js-only hidden><button type="button" class="secondary" id="mailto-register" data-uri="/compose?mailto=%s">{{.T "settings.mailto"}}</button> <small id="mailto-note">{{.T "settings.mailto_hint"}}</small></p>
+<form method="post" action="/settings/panes" class="inline-reset">
+<input type="hidden" name="csrf" value="{{.CSRF}}">
+<input type="hidden" name="folders" value="0">
+<input type="hidden" name="list" value="0">
+<p><small>{{.T "settings.panes.hint"}}</small></p>
+<button type="submit" class="secondary">{{.T "settings.panes.reset"}}</button>
+</form>
+</section>
+{{else}}
+<section>
+<h2>{{.T "settings.password.title"}}</h2>
+<form method="post" action="/settings/password">
+<input type="hidden" name="csrf" value="{{.CSRF}}">
+<label>{{.T "settings.password.old"}}
+<input name="old_password" type="password" autocomplete="current-password" required></label>
+<label>{{.T "settings.password.new"}}
+<input name="password" type="password" autocomplete="new-password" required minlength="{{.MinPassword}}"></label>
+<small>{{.T "register.password_hint" .MinPassword}}</small>
+<label>{{.T "settings.password.confirm"}}
+<input name="password2" type="password" autocomplete="new-password" required minlength="{{.MinPassword}}"></label>
+<button type="submit">{{.T "settings.password.submit"}}</button>
+</form>
+</section>
+
+<section>
+<h2>{{.T "twofactor.title"}}</h2>
+<p>{{.T "twofactor.intro"}}</p>
+<p><a class="button" href="/settings/2fa">{{.T "twofactor.manage"}}</a></p>
+</section>
+
+<section>
+<h2>{{.T "settings.recovery.title"}}</h2>
+<p>{{.T "settings.recovery.text"}}</p>
+<form method="post" action="/settings/recovery">
+<input type="hidden" name="csrf" value="{{.CSRF}}">
+<label>{{.T "login.password"}}
+<input name="password" type="password" autocomplete="current-password" required></label>
+<button type="submit">{{.T "settings.recovery.submit"}}</button>
+</form>
+</section>
+{{end}}
+{{template "setclose" .}}{{end}}
+{{define "scripts"}}<script src="/static/mailto.js" defer></script><script src="/static/notify-setting.js" defer></script>{{end}}

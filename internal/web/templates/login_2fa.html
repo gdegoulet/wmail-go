@@ -1,0 +1,15 @@
+{{define "content"}}
+<main class="authpage"><div class="authwrap">
+<h1>{{.T "app.name"}}</h1>
+<h2 class="authtitle">{{.T "twofactor.login_title"}}</h2>
+{{template "messages" .}}
+<form class="authbox" method="post" action="/login/2fa">
+<p>{{.T "twofactor.login_text"}}</p>
+<label><span class="sr">{{.T "twofactor.code"}}</span>
+<input placeholder="{{.T "twofactor.code"}}" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" required autofocus maxlength="20"></label>
+<label class="check"><input name="trust" type="checkbox"> {{.T "twofactor.trust"}}</label>
+<button type="submit">{{.T "login.submit"}}</button>
+</form>
+<p class="authlinks"><a href="/login">{{.T "twofactor.cancel"}}</a></p>
+</div></main>
+{{end}}

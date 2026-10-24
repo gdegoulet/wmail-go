@@ -1,0 +1,10 @@
+body { margin: 1.5cm; font: 12pt/1.4 Arial, "Liberation Sans", sans-serif; color: #000; background: #fff; }
+h1 { font-size: 16pt; margin: 0 0 .6em; }
+table.hdr { border-collapse: collapse; margin-bottom: 1em; width: 100%; border-bottom: 1px solid #999; }
+table.hdr th { text-align: left; vertical-align: top; width: 4.5em; padding: .15em .6em .15em 0; color: #555; font-weight: normal; }
+table.hdr td { padding: .15em 0; overflow-wrap: anywhere; }
+.body { overflow-wrap: anywhere; }
+.body img { max-width: 100%; height: auto; }
+.body blockquote { margin: 0; padding: 0 10px; border-left: 2px solid #000; }
+.body pre { white-space: pre-wrap; }
+@media print { .noprint { display: none; } body { margin: 0; } }

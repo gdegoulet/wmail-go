@@ -1,0 +1,32 @@
+{{define "content"}}{{template "setopen" .}}
+{{with .Templates}}
+<h1 class="legend">{{$.T "set.templates"}}</h1>
+{{template "messages" $}}
+<p class="muted">{{$.T "templates.intro"}}</p>
+{{if .Rows}}
+<ul class="account-list">
+{{range .Rows}}<li>
+<div><strong>{{.Name}}</strong><br><small>{{.Preview}}</small></div>
+<div class="row-actions">
+<a href="/settings/templates?edit={{.ID}}#form">{{$.T "accounts.edit"}}</a>
+<details class="danger"><summary>{{$.T "accounts.delete"}}</summary>
+<form method="post" action="/settings/templates/delete"><input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="id" value="{{.ID}}">
+<p>{{$.T "templates.delete_confirm"}}</p><button type="submit" class="danger">{{$.T "accounts.delete_yes"}}</button></form></details>
+</div></li>{{end}}
+</ul>
+{{else}}<p class="muted">{{$.T "templates.none"}}</p>{{end}}
+{{if or .Editing (not .Full)}}
+<section id="form">
+<h2>{{if .Editing}}{{$.T "templates.edit"}}{{else}}{{$.T "templates.add"}}{{end}}</h2>
+<form method="post" action="/settings/templates/save">
+<input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="id" value="{{.Edit.ID}}">
+<label>{{$.T "templates.name"}}<input type="text" name="name" required maxlength="100" value="{{.Edit.Name}}"></label>
+<label>{{$.T "templates.body"}}<textarea name="body" rows="10" maxlength="20000" required>{{.Edit.Body}}</textarea></label>
+<small>{{$.T "templates.vars"}}</small>
+<button type="submit">{{$.T "contacts.save"}}</button>
+{{if .Editing}} <a href="/settings/templates">{{$.T "accounts.form.cancel"}}</a>{{end}}
+</form>
+</section>
+{{end}}
+{{end}}
+{{template "setclose" $}}{{end}}

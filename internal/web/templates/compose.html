@@ -1,0 +1,110 @@
+{{define "content"}}{{with .Compose}}
+<main class="compose-page">
+<form id="compose" class="compose" method="post" action="/compose/send" data-autosave="{{if .Autosave}}1{{end}}" data-max-mb="{{.MaxAttachMB}}" data-saved-label="{{$.T "compose.saved_at"}}" data-leave="{{$.T "compose.discard_confirm"}}" data-warn-subject="{{$.T "compose.warn_subject"}}" data-warn-attach="{{$.T "compose.warn_attach"}}" data-warn-many="{{$.T "compose.warn_many"}}" data-uploading="{{$.T "compose.err.uploading"}}" data-attach-error="{{$.T "compose.err.attach_failed"}}" novalidate>
+<input type="hidden" name="csrf" value="{{$.CSRF}}">
+<input type="hidden" name="compose_id" value="{{.ID}}">
+<input type="hidden" name="back" value="{{.Back}}">
+<input type="hidden" name="draft_folder" value="{{.DraftFolder}}">
+<input type="hidden" name="draft_uid" value="{{.DraftUID}}">
+<input type="hidden" name="kind" value="{{.Kind}}">
+<input type="hidden" name="orig_folder" value="{{.OrigFolder}}">
+<input type="hidden" name="orig_uid" value="{{.OrigUID}}">
+<input type="hidden" name="in_reply_to" value="{{.InReplyTo}}">
+<input type="hidden" name="references" value="{{.References}}">
+
+<div class="cp-toolbar">
+<button type="submit" class="btn-send" id="cp-send" title="{{$.T "compose.send_hint"}}">{{template "icon" "send"}}<span class="lbl">{{$.T "compose.send"}}</span></button>
+{{if not .NoDrafts}}<button type="submit" class="btn-save" id="cp-save" formaction="/compose/save" title="{{$.T "compose.save_hint"}}">{{template "icon" "save"}}<span class="lbl">{{$.T "compose.save"}}</span></button>{{end}}
+<button type="submit" class="btn-discard" id="cp-discard" formaction="/compose/discard" title="{{$.T "compose.discard"}}" aria-label="{{$.T "compose.discard"}}">{{template "icon" "trash"}}</button>
+<span class="cp-saved" id="cp-saved" role="status" aria-live="polite">{{if .Saved}}{{$.T "compose.saved_at"}} {{.Saved}}{{end}}</span>
+<a class="cp-close" href="{{.Back}}" id="cp-close" title="{{$.T "compose.close"}}" aria-label="{{$.T "compose.close"}}">&times;</a>
+</div>
+
+<div class="cp-body">
+{{template "messages" $}}
+{{if .NoSent}}<p class="msg info">{{$.T "compose.no_sent_note"}}</p>{{end}}
+<div id="cp-status" class="msg error" role="alert" hidden></div>
+
+<div class="cp-grid">
+<div class="cp-row cp-from">
+<label class="cp-label" for="cp-identity">{{$.T "compose.from"}}</label>
+<div class="cp-value">
+<select name="identity" id="cp-identity">{{range .Identities}}<option value="{{.ID}}" data-signature="{{.Signature}}" data-signature-html="{{.SignatureHTML}}"{{if .Selected}} selected{{end}}>{{.Label}}</option>{{end}}</select>
+<span class="cp-links" data-js-only hidden>
+<a href="#" data-show="cc"{{if .ShowCc}} hidden{{end}}>{{$.T "compose.cc"}}</a>
+<a href="#" data-show="bcc"{{if .ShowBcc}} hidden{{end}}>{{$.T "compose.bcc"}}</a>
+<a href="#" data-show="reply_to"{{if .ShowReplyTo}} hidden{{end}}>{{$.T "compose.reply_to"}}</a>
+</span>
+</div>
+</div>
+<div class="cp-row">
+<label class="cp-label" for="cp-to">{{$.T "compose.to"}}</label>
+<div class="cp-value cp-pickrow"><input type="text" id="cp-to" name="to" value="{{.To}}" autocomplete="off" autocapitalize="off" spellcheck="false" autofocus><button type="button" class="link" id="cp-pick" data-js-only hidden data-title="{{$.T "contacts.pick_title"}}" data-close="{{$.T "contacts.pick_close"}}" data-search="{{$.T "contacts.search"}}">{{$.T "contacts.pick"}}</button></div>
+</div>
+<div class="cp-row" data-row="cc">
+<label class="cp-label" for="cp-cc">{{$.T "compose.cc"}}</label>
+<div class="cp-value"><input type="text" id="cp-cc" name="cc" value="{{.Cc}}" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+</div>
+<div class="cp-row" data-row="bcc">
+<label class="cp-label" for="cp-bcc">{{$.T "compose.bcc"}}</label>
+<div class="cp-value"><input type="text" id="cp-bcc" name="bcc" value="{{.Bcc}}" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+</div>
+<div class="cp-row" data-row="reply_to">
+<label class="cp-label" for="cp-replyto">{{$.T "compose.reply_to"}}</label>
+<div class="cp-value"><input type="text" id="cp-replyto" name="reply_to" value="{{.ReplyTo}}" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+</div>
+<div class="cp-row">
+<label class="cp-label" for="cp-subject">{{$.T "compose.subject"}}</label>
+<div class="cp-value"><input type="text" id="cp-subject" name="subject" value="{{.Subject}}" autocomplete="off"></div>
+</div>
+<div class="cp-row cp-tools">
+<span class="cp-label"></span>
+<div class="cp-value">
+<span class="cp-tabs" data-js-only hidden>
+<button type="button" class="active" data-tab="text" title="{{$.T "compose.tab_text"}}">{{template "icon" "doc"}}</button><button type="button" data-tab="files" title="{{$.T "compose.tab_files"}}"><span class="count" id="cp-count"></span>{{template "icon" "attach"}}</button>
+</span>
+{{if not .ForceMode}}<button type="button" class="cp-mode" id="cp-mode" data-js-only hidden title="{{$.T "compose.mode_toggle"}}" data-confirm="{{$.T "compose.mode_confirm"}}">{{$.T "compose.mode_toggle"}}</button>{{end}}
+{{if .Templates}}<details class="dropdown" data-dropdown data-js-only hidden><summary class="cp-mode" title="{{$.T "templates.insert"}}">{{$.T "templates.insert"}}</summary>
+<div class="menu scroll">{{range .Templates}}<button type="button" data-template="{{.ID}}">{{.Name}}</button>{{end}}</div></details>{{end}}
+<span class="cp-opts">
+<details class="dropdown right" data-dropdown><summary class="tbtn" title="{{$.T "compose.options"}}" aria-label="{{$.T "compose.options"}}">{{template "icon" "menu"}}</summary>
+<div class="menu">
+<label class="check"><input type="checkbox" name="receipt"{{if .Receipt}} checked{{end}}> {{$.T "compose.opt.receipt"}}</label>
+<label class="check"><input type="checkbox" name="dsn"{{if .DSN}} checked{{end}}> {{$.T "compose.opt.dsn"}}</label>
+<label class="check"><input type="checkbox" name="important"{{if .Important}} checked{{end}}> {{$.T "compose.opt.important"}}</label>
+</div></details>
+</span>
+</div>
+</div>
+</div>
+
+<div class="cp-text" id="cp-pane-text" data-mode="{{if .HTMLMode}}html{{else}}plain{{end}}">
+<div class="cp-fmt" id="cp-fmt" role="toolbar" aria-label="{{$.T "compose.options"}}" hidden>
+<select data-font aria-label="{{$.T "compose.tb.font"}}"><option value="Arial" selected>Arial</option><option>Georgia</option><option>Times New Roman</option><option>Courier New</option><option>Verdana</option><option>Trebuchet MS</option><option>Comic Sans MS</option></select>
+<select data-size aria-label="{{$.T "compose.tb.size"}}"><option>10</option><option>12</option><option selected>13</option><option>14</option><option>16</option><option>18</option><option>20</option><option>24</option><option>28</option><option>36</option><option>48</option></select>
+<span class="grp"><button type="button" data-cmd="bold" title="{{$.T "compose.tb.bold"}}" aria-label="{{$.T "compose.tb.bold"}}"><b>B</b></button><button type="button" data-cmd="italic" title="{{$.T "compose.tb.italic"}}" aria-label="{{$.T "compose.tb.italic"}}"><i>I</i></button><button type="button" data-cmd="underline" title="{{$.T "compose.tb.underline"}}" aria-label="{{$.T "compose.tb.underline"}}"><u>U</u></button><button type="button" data-cmd="removeFormat" title="{{$.T "compose.tb.clear"}}" aria-label="{{$.T "compose.tb.clear"}}">T<sub>x</sub></button></span>
+<span class="grp"><label class="clr" title="{{$.T "compose.tb.color"}}"><span class="sw" style="color:#000">A</span><input type="color" data-color="foreColor" value="#000000" aria-label="{{$.T "compose.tb.color"}}"></label><label class="clr" title="{{$.T "compose.tb.bgcolor"}}"><span class="sw bg">A</span><input type="color" data-color="hiliteColor" value="#ffff00" aria-label="{{$.T "compose.tb.bgcolor"}}"></label></span>
+<span class="grp"><button type="button" data-cmd="insertUnorderedList" title="{{$.T "compose.tb.ul"}}" aria-label="{{$.T "compose.tb.ul"}}">•≡</button><button type="button" data-cmd="insertOrderedList" title="{{$.T "compose.tb.ol"}}" aria-label="{{$.T "compose.tb.ol"}}">1≡</button><button type="button" data-cmd="outdent" title="{{$.T "compose.tb.outdent"}}" aria-label="{{$.T "compose.tb.outdent"}}">⇤</button><button type="button" data-cmd="indent" title="{{$.T "compose.tb.indent"}}" aria-label="{{$.T "compose.tb.indent"}}">⇥</button><button type="button" data-cmd="quote" title="{{$.T "compose.tb.quote"}}" aria-label="{{$.T "compose.tb.quote"}}">❝</button></span>
+<span class="grp"><button type="button" data-cmd="justifyLeft" title="{{$.T "compose.tb.left"}}" aria-label="{{$.T "compose.tb.left"}}">{{template "icon" "al-left"}}</button><button type="button" data-cmd="justifyCenter" title="{{$.T "compose.tb.center"}}" aria-label="{{$.T "compose.tb.center"}}">{{template "icon" "al-center"}}</button><button type="button" data-cmd="justifyRight" title="{{$.T "compose.tb.right"}}" aria-label="{{$.T "compose.tb.right"}}">{{template "icon" "al-right"}}</button><button type="button" data-cmd="justifyFull" title="{{$.T "compose.tb.justify"}}" aria-label="{{$.T "compose.tb.justify"}}">{{template "icon" "al-justify"}}</button></span>
+<span class="grp"><button type="button" data-cmd="link" title="{{$.T "compose.tb.link"}}" aria-label="{{$.T "compose.tb.link"}}" data-prompt="{{$.T "compose.tb.link_prompt"}}" data-bad="{{$.T "compose.tb.link_bad"}}">🔗</button><button type="button" data-cmd="unlink" title="{{$.T "compose.tb.unlink"}}" aria-label="{{$.T "compose.tb.unlink"}}">⛓</button><button type="button" data-cmd="insertHorizontalRule" title="{{$.T "compose.tb.hr"}}" aria-label="{{$.T "compose.tb.hr"}}">―</button></span>
+</div>
+<div id="cp-editor" class="cp-editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="{{$.T "compose.body"}}" spellcheck="true" hidden>{{.HTML}}</div>
+<textarea name="body" id="cp-bodytext" spellcheck="true" aria-label="{{$.T "compose.body"}}">{{.Body}}</textarea>
+</div>
+
+<div class="cp-files" id="cp-pane-files">
+<div class="cp-drop" id="cp-drop">
+<p>{{$.T "compose.drop"}}</p>
+<label class="btn-file">{{$.T "compose.attach"}}<input type="file" id="cp-file" multiple></label>
+<small>{{$.T "compose.attach_limit" .MaxAttachMB}}</small>
+</div>
+<ul class="cp-atts" id="cp-atts">{{range .Attachments}}
+<li data-id="{{.ID}}"><span class="name">{{.Name}}</span> <span class="size">{{.Size}}</span> <button type="button" class="link" data-remove="{{.ID}}" aria-label="{{$.T "compose.remove"}}">&times;</button></li>{{end}}
+</ul>
+<p class="cp-noatt" id="cp-noatt"{{if .Attachments}} hidden{{end}}>{{$.T "compose.no_attachments"}}</p>
+</div>
+</div>
+</form>
+</main>
+{{end}}{{end}}
+{{define "scripts"}}<script src="/static/chips.js" defer></script><script src="/static/contacts-ac.js" defer></script><script src="/static/compose.js" defer></script><script src="/static/editor.js" defer></script>{{end}}

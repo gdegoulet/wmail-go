@@ -1,0 +1,70 @@
+{{define "content"}}{{template "setopen" .}}
+<h1 class="legend">{{.T "set.folders"}}</h1>
+{{template "boxswitch" .}}
+{{template "messages" .}}
+{{if .FolderError}}
+<p class="msg error" role="alert">{{.T (printf "accounts.test.fail.%s" .FolderError.Kind)}}{{if .FolderError.Detail}}<br><small>{{.FolderError.Detail}}</small>{{end}}</p>
+<p><a href="/accounts/{{.ActiveID}}/edit">{{.T "mailbox.fix_account"}}</a></p>
+{{else}}{{with .FoldersView}}
+<section>
+<h2>{{$.T "folders.system"}} <small>{{$.BoxEmail}}</small></h2>
+<form method="post" action="/settings/folders/system" class="roles">{{template "boxfield" $}}
+<input type="hidden" name="csrf" value="{{$.CSRF}}">
+{{range .Roles}}{{$role := .}}<label>{{$.T .LabelKey}}
+<select name="{{.Field}}">
+<option value=""{{if eq .Current ""}} selected{{end}}>{{$.T "folders.auto"}} ({{.Resolved}})</option>
+{{if .AllowNone}}<option value="-"{{if eq .Current "-"}} selected{{end}}>{{$.T "folders.unused"}}</option>{{end}}
+{{range $.FoldersView.Names}}<option value="{{.}}"{{if eq . $role.Current}} selected{{end}}>{{.}}</option>{{end}}
+</select></label>{{end}}
+<small>{{$.T "folders.system_hint"}}</small>
+<button type="submit">{{$.T "settings.prefs.submit"}}</button>
+</form>
+</section>
+<section>
+<h2>{{$.T "folders.check"}}</h2>
+<p class="muted">{{$.T "folders.check_hint" 5}}</p>
+<form method="post" action="/settings/folders/check">{{template "boxfield" $}}
+<input type="hidden" name="csrf" value="{{$.CSRF}}">
+<div class="checklist">{{range .Check}}<label class="check"><input type="checkbox" name="check" value="{{.Name}}"{{if .Checked}} checked{{end}}> {{.Name}}</label>{{end}}</div>
+<button type="submit">{{$.T "settings.prefs.submit"}}</button>
+</form>
+</section>
+<section>
+<h2>{{$.T "folders.create"}}</h2>
+<form method="post" action="/settings/folders/action" class="inline-form">{{template "boxfield" $}}
+<input type="hidden" name="csrf" value="{{$.CSRF}}">
+<input type="hidden" name="action" value="create">
+<input type="hidden" name="delim" value="{{.DelimDefault}}">
+<label>{{$.T "folders.name"}}<input name="new_name" type="text" maxlength="100" required></label>
+<label>{{$.T "folders.parent"}}
+<select name="parent"><option value="">{{$.T "folders.root"}}</option>{{range .Names}}<option value="{{.}}">{{.}}</option>{{end}}</select></label>
+<button type="submit">{{$.T "folders.create_button"}}</button>
+</form>
+</section>
+<section>
+<h2>{{$.T "folders.list"}}</h2>
+<table class="folders-table">
+<thead><tr><th>{{$.T "folders.name"}}</th><th class="num">{{$.T "folders.messages"}}</th><th class="num">{{$.T "folders.unread"}}</th><th></th></tr></thead>
+<tbody>
+{{range .Rows}}<tr>
+<td class="fname indent{{.Indent}}">{{.Leaf}}{{if .Role}} <small class="role">{{$.T .Role}}</small>{{end}}</td>
+<td class="num">{{if .HasCount}}{{.Total}}{{end}}</td>
+<td class="num">{{if .HasCount}}{{.Unseen}}{{end}}</td>
+<td class="acts">
+{{if $.FoldersView.SubKnown}}<form method="post" action="/settings/folders/action" class="inline">{{template "boxfield" $}}<input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="name" value="{{.Name}}"><button type="submit" class="link" name="action" value="{{if .Subscribed}}unsubscribe{{else}}subscribe{{end}}">{{if .Subscribed}}{{$.T "folders.unsubscribe"}}{{else}}{{$.T "folders.subscribe"}}{{end}}</button></form>{{end}}
+{{if not .Protected}}
+<details class="dropdown right" data-dropdown><summary class="link">{{$.T "folders.rename"}}</summary>
+<div class="menu"><form method="post" action="/settings/folders/action">{{template "boxfield" $}}
+<input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="action" value="rename"><input type="hidden" name="name" value="{{.Name}}"><input type="hidden" name="delim" value="{{.Delim}}">
+<input name="new_name" type="text" maxlength="100" value="{{.Leaf}}" required><button type="submit">{{$.T "folders.rename"}}</button></form></div></details>
+<details class="danger"><summary>{{$.T "accounts.delete"}}</summary>
+<form method="post" action="/settings/folders/action">{{template "boxfield" $}}
+<input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="action" value="delete"><input type="hidden" name="name" value="{{.Name}}">
+<p>{{$.T "folders.delete_confirm" .Name}}</p>
+<button type="submit" class="danger">{{$.T "folders.delete_yes"}}</button></form></details>
+{{end}}
+</td></tr>{{end}}
+</tbody></table>
+</section>
+{{end}}{{end}}
+{{template "setclose" .}}{{end}}

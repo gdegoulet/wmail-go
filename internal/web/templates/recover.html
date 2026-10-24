@@ -1,0 +1,22 @@
+{{define "content"}}
+<main class="authpage"><div class="authwrap">
+<h1>{{.T "app.name"}}</h1>
+<h2 class="authtitle">{{.T "recover.title"}}</h2>
+<p class="authnote">{{.T "recover.intro"}}</p>
+{{template "messages" .}}
+<form class="authbox" method="post" action="/recover">
+<label><span class="sr">{{.T "login.login"}}</span>
+<input placeholder="{{.T "login.login"}}" name="login" type="text" autocomplete="username" required autofocus value="{{.Login}}"></label>
+<label><span class="sr">{{.T "recover.key"}}</span>
+<input placeholder="{{.T "recover.key"}}" name="recovery_key" type="text" autocomplete="off" spellcheck="false" required></label>
+<label><span class="sr">{{.T "recover.new_password"}}</span>
+<input placeholder="{{.T "recover.new_password"}}" name="password" type="password" autocomplete="new-password" required minlength="{{.MinPassword}}"></label>
+<small>{{.T "register.password_hint" .MinPassword}}</small>
+<label><span class="sr">{{.T "register.password_confirm"}}</span>
+<input placeholder="{{.T "register.password_confirm"}}" name="password2" type="password" autocomplete="new-password" required minlength="{{.MinPassword}}"></label>
+<button type="submit">{{.T "recover.submit"}}</button>
+</form>
+<p class="authlinks"><a href="/login">{{.T "register.back"}}</a></p>
+<p class="authlinks langs">{{range .Langs}}{{if .Current}}<strong>{{.Name}}</strong>{{else}}<a href="/lang?l={{.Code}}&amp;next=/recover" hreflang="{{.Code}}">{{.Name}}</a>{{end}} {{end}}</p>
+</div></main>
+{{end}}

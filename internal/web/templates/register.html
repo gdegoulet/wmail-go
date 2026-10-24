@@ -1,0 +1,20 @@
+{{define "content"}}
+<main class="authpage"><div class="authwrap">
+<h1>{{.T "app.name"}}</h1>
+<h2 class="authtitle">{{.T "register.title"}}</h2>
+{{template "messages" .}}
+<p class="msg warn authnote">{{.T "register.warning"}}</p>
+<form class="authbox" method="post" action="/register">
+<label><span class="sr">{{.T "login.login"}}</span>
+<input placeholder="{{.T "login.login"}}" name="login" type="text" autocomplete="username" required autofocus minlength="3" maxlength="64" value="{{.Login}}"></label>
+<label><span class="sr">{{.T "login.password"}}</span>
+<input placeholder="{{.T "login.password"}}" name="password" type="password" autocomplete="new-password" required minlength="{{.MinPassword}}"></label>
+<small>{{.T "register.password_hint" .MinPassword}}</small>
+<label><span class="sr">{{.T "register.password_confirm"}}</span>
+<input placeholder="{{.T "register.password_confirm"}}" name="password2" type="password" autocomplete="new-password" required minlength="{{.MinPassword}}"></label>
+<button type="submit">{{.T "register.submit"}}</button>
+</form>
+<p class="authlinks"><a href="/login">{{.T "register.back"}}</a></p>
+<p class="authlinks langs">{{range .Langs}}{{if .Current}}<strong>{{.Name}}</strong>{{else}}<a href="/lang?l={{.Code}}&amp;next=/register" hreflang="{{.Code}}">{{.Name}}</a>{{end}} {{end}}</p>
+</div></main>
+{{end}}

@@ -1,0 +1,27 @@
+{{define "content"}}{{template "setopen" .}}
+<h1 class="legend">{{.T "accounts.title"}}</h1>
+{{template "messages" .}}
+{{if .Accounts}}
+<ul class="account-list">
+{{range $i, $a := .Accounts}}{{with $a}}<li>
+<div><strong>{{.Name}}</strong><br><small>{{.Email}} · {{.IMAPHost}}</small></div>
+<div class="row-actions">
+<form method="post" action="/accounts/{{.ID}}/move" class="inline"><input type="hidden" name="csrf" value="{{$.CSRF}}">{{if gt $i 0}}<button type="submit" class="link" name="dir" value="up" title="{{$.T "accounts.move_up"}}" aria-label="{{$.T "accounts.move_up"}}">▲</button>{{end}}{{if lt $i (sub1 (len $.Accounts))}}<button type="submit" class="link" name="dir" value="down" title="{{$.T "accounts.move_down"}}" aria-label="{{$.T "accounts.move_down"}}">▼</button>{{end}}</form>
+<a href="/accounts/{{.ID}}/edit">{{$.T "accounts.edit"}}</a>
+<a href="/accounts/{{.ID}}/identities">{{$.T "accounts.identities"}}</a>
+<details class="danger">
+<summary>{{$.T "accounts.delete"}}</summary>
+<form method="post" action="/accounts/{{.ID}}/delete">
+<input type="hidden" name="csrf" value="{{$.CSRF}}">
+<p>{{$.T "accounts.delete_confirm"}}</p>
+<button type="submit" class="danger">{{$.T "accounts.delete_yes"}}</button>
+</form>
+</details>
+</div>
+</li>{{end}}{{end}}
+</ul>
+{{else}}
+<p>{{.T "accounts.none"}}</p>
+{{end}}
+<p><a class="button" href="/accounts/new">{{.T "accounts.add"}}</a></p>
+{{template "setclose" .}}{{end}}

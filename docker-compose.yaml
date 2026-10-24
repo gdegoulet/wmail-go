@@ -1,0 +1,84 @@
+# wmail-go – démarrage et tests sur le poste de travail (Docker ou Podman).
+#
+#   make up        démarre wmail-go            http://127.0.0.1:8080
+#   make test      lance go test dans le conteneur dev
+#   make mail-up   démarre GreenMail (IMAP/SMTP de test)
+
+name: wmail-go
+
+services:
+  webmail:
+    build:
+      context: .
+      target: runtime
+    image: localhost/wmail-go:dev
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./config/config.json:/config/config.json:ro
+      - wmail-go-data:/data
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+  # Outil en ligne de commande (mêmes données que le serveur) : make user-add LOGIN=alice
+  cli:
+    profiles: ["cli"]
+    build:
+      context: .
+      target: runtime
+    image: localhost/wmail-go:dev
+    volumes:
+      - ./config/config.json:/config/config.json:ro
+      - wmail-go-data:/data
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+
+  # Conteneur de développement : le code source est monté, aucun Go sur l'hôte.
+  dev:
+    profiles: ["dev"]
+    build:
+      context: .
+      target: dev
+    image: localhost/wmail-go-dev:dev
+    working_dir: /src
+    volumes:
+      - .:/src
+      - go-cache:/go
+    environment:
+      GOFLAGS: "-buildvcs=false"
+      GREENMAIL_IMAP: "greenmail:3143"
+      GREENMAIL_SMTP: "greenmail:3025"
+      DOVECOT_SIEVE: "dovecot:34190"
+      DOVECOT_IMAP: "dovecot:31143"
+
+  # Serveur Dovecot de test (IMAP et ManageSieve, sans TLS) pour les tests d'intégration des filtres : jamais en production.
+  # Utilisateur quelconque, mot de passe testpass. IMAP : dovecot:31143, ManageSieve : dovecot:34190.
+  dovecot:
+    profiles: ["test"]
+    image: docker.io/dovecot/dovecot:latest
+    environment:
+      USER_PASSWORD: "{PLAIN}testpass"
+    volumes:
+      - ./tools/dovecot/test.conf:/etc/dovecot/conf.d/99-test.conf:ro,Z
+
+  # Serveur IMAP/SMTP de test. Compte : test@localhost / testpass
+  greenmail:
+    profiles: ["test"]
+    image: docker.io/greenmail/standalone:2.1.3
+    environment:
+      GREENMAIL_OPTS: >-
+        -Dgreenmail.setup.test.all
+        -Dgreenmail.hostname=0.0.0.0
+        -Dgreenmail.users=test:testpass@localhost,second:secondpass@localhost
+    ports:
+      - "127.0.0.1:3143:3143"
+      - "127.0.0.1:3025:3025"
+
+volumes:
+  wmail-go-data:
+  go-cache:

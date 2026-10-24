@@ -1,0 +1,326 @@
+{{define "base"}}<!doctype html>
+<html lang="{{.Lang}}" data-theme="{{.Theme}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>{{.T "app.name"}} – {{.T .TitleKey}}</title>
+<link rel="stylesheet" href="/static/app.css">
+<link rel="stylesheet" href="/static/mail.css">
+<noscript><link rel="stylesheet" href="/static/noscript.css"></noscript>
+<link rel="stylesheet" href="/themes/{{.Theme}}/theme.css">
+{{if .User}}<link rel="stylesheet" href="/user.css">{{end}}
+</head>
+<body class="{{if .Mail}}mailpage{{if .FoldersHidden}} folders-collapsed{{end}}{{end}}{{if .HideChecks}} hide-checks{{end}}{{if .NoAnim}} no-anim{{end}}">
+{{template "icons"}}
+{{if and .User (not .HideNav)}}{{if .Mail}}{{template "mailbar" .}}{{else}}{{template "nav" .}}{{end}}{{end}}
+{{template "content" .}}
+{{with .Poll}}<div id="poll" hidden data-unseen="{{.Unseen}}" data-title="{{$.T "app.name"}} – {{$.T $.TitleKey}}" data-many="{{$.T "notify.many" 0}}"{{if .Desktop}} data-desktop{{end}}{{if .Sound}} data-sound{{end}}></div><script src="/static/poll.js" defer></script>{{end}}
+<script src="/static/menus.js" defer></script>
+{{block "scripts" .}}{{end}}
+</body>
+</html>{{end}}
+
+{{define "icons"}}<svg class="sprite" hidden width="0" height="0" aria-hidden="true" focusable="false"><defs>
+<symbol id="i-send" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M2 11.5 22 3l-5 18-5.5-5.5L8 19v-5.5z"/></symbol>
+<symbol id="i-contacts" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="1.5"/><circle cx="12" cy="10" r="2.5"/><path d="M8 17c.6-2 2-3 4-3s3.4 1 4 3"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></symbol>
+<symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 6h7l2 2h9v11H3z"/></symbol>
+<symbol id="i-archive" viewBox="0 0 24 24"><path d="M3 5h18v4H3zM5 9v10h14V9M10 13h4"/></symbol>
+<symbol id="i-spam" viewBox="0 0 24 24"><path d="M12 3 22 20H2z"/><path d="M12 9.5v4.5M12 17v.5"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></symbol>
+<symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7"/></symbol>
+<symbol id="i-star-o" viewBox="0 0 24 24"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></symbol>
+<symbol id="i-reply" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M10 6 3 12l7 6v-3.6c5 0 8 1.4 11 5.1-.7-6.2-4.3-10.5-11-10.500z"/></symbol>
+<symbol id="i-forward" viewBox="0 0 24 24"><path transform="matrix(-1 0 0 1 24 0)" fill="currentColor" stroke="none" d="M10 6 3 12l7 6v-3.6c5 0 8 1.4 11 5.1-.7-6.2-4.3-10.5-11-10.500z"/></symbol>
+<symbol id="i-attach" viewBox="0 0 24 24"><path d="m20 11-8.5 8.5a5 5 0 0 1-7-7L13 4a3.3 3.3 0 0 1 4.7 4.7l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4L14 7.5"/></symbol>
+<symbol id="i-save" viewBox="0 0 24 24"><path d="M4 4h13l3 3v13H4z"/><path d="M8 4v6h8V4M8 20v-6h8v6"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><path d="m14 6-6 6 6 6"/></symbol>
+<symbol id="i-al-left" viewBox="0 0 24 24"><path d="M4 6h16M4 10h10M4 14h16M4 18h10"/></symbol>
+<symbol id="i-al-center" viewBox="0 0 24 24"><path d="M4 6h16M7 10h10M4 14h16M7 18h10"/></symbol>
+<symbol id="i-al-right" viewBox="0 0 24 24"><path d="M4 6h16M10 10h10M4 14h16M10 18h10"/></symbol>
+<symbol id="i-al-justify" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="1"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></symbol>
+<symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 16h7"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.500v3M12 18.500v3M2.5 12h3M18.5 12h3M5.3 5.300l2.1 2.100M16.6 16.600l2.1 2.100M5.3 18.700l2.1-2.100M16.6 7.400l2.1-2.1"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3.2"/></symbol>
+<symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="1.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+<symbol id="i-notspam" viewBox="0 0 24 24"><path d="M12 3.5 2.5 20h19z"/><path d="m8.5 14 2.5 2.5 4.5-5"/></symbol>
+<symbol id="i-avatar" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M12 2.6c-2.4 0-4.2 2-4.2 4.8 0 2.1 1 3.8 2.4 4.6-3.6.9-6.2 3.6-6.2 7 0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2 0-3.4-2.6-6.1-6.2-7 1.4-.8 2.4-2.5 2.4-4.6 0-2.8-1.8-4.8-4.2-4.8z"/></symbol>
+<symbol id="i-expand" viewBox="0 0 24 24"><path d="M4 9V4h5M20 15v5h-5M4 4l6 6M20 20l-6-6"/></symbol>
+<symbol id="i-caret" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+<symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1"/><circle cx="9" cy="10" r="1.5"/><path d="m3 17 5-5 4 4 3-3 6 6"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><path d="M12 11v6M12 7v.5"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="m5 5 14 14M19 5 5 19"/></symbol>
+<symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></symbol>
+</defs></svg>{{end}}
+
+{{define "icon"}}<svg class="i" aria-hidden="true" focusable="false"><use href="#i-{{.}}"/></svg>{{end}}
+
+{{define "nav"}}<header class="topbar">
+<a class="brand" href="/">{{.T "app.name"}}</a>
+<nav>
+<a href="/">{{.T "home.title"}}</a>
+<a href="/accounts">{{.T "nav.accounts"}}</a>
+<a href="/settings">{{.T "nav.settings"}}</a>
+<span class="user">{{.User}}</span>
+<form method="post" action="/logout" class="inline">
+<input type="hidden" name="csrf" value="{{.CSRF}}">
+<button type="submit" class="link">{{.T "nav.logout"}}</button>
+</form>
+</nav>
+</header>{{end}}
+
+{{define "boxfield"}}<input type="hidden" name="box" value="{{.ActiveID}}">{{end}}
+{{define "boxswitch"}}{{if gt (len .Accounts) 1}}<p class="boxswitch"><span>{{.T "folders.box"}} :</span> {{range .Accounts}}{{if eq .ID $.ActiveID}}<strong>{{if .Email}}{{.Email}}{{else}}{{.Name}}{{end}}</strong>{{else}}<a href="{{$.Path}}?box={{.ID}}">{{if .Email}}{{.Email}}{{else}}{{.Name}}{{end}}</a>{{end}} {{end}}</p>{{else if .BoxEmail}}<p class="boxswitch"><span>{{.T "folders.box"}} :</span> <strong>{{.BoxEmail}}</strong></p>{{end}}{{end}}
+{{define "setopen"}}<div class="settings">
+<nav class="setmenu" aria-label="{{.T "nav.settings"}}">
+<a class="e-item{{if eq .Section "general"}} selected{{end}}" href="/settings">{{.T "set.general"}}</a>
+<a class="e-item{{if eq .Section "accounts"}} selected{{end}}" href="/accounts">{{.T "set.accounts"}}</a>
+<a class="e-item{{if eq .Section "folders"}} selected{{end}}" href="/settings/folders">{{.T "set.folders"}}</a>
+<a class="e-item{{if eq .Section "filters"}} selected{{end}}" href="/settings/filters">{{.T "set.filters"}}</a>
+<a class="e-item{{if eq .Section "templates"}} selected{{end}}" href="/settings/templates">{{.T "set.templates"}}</a>
+<a class="e-item{{if eq .Section "contacts"}} selected{{end}}" href="/contacts">{{.T "set.contacts"}}</a>
+<a class="e-item{{if eq .Section "security"}} selected{{end}}" href="/settings/security">{{.T "set.security"}}</a>
+</nav>
+<section class="setpane">
+<div class="settb">
+<a class="btn-back" href="/">{{template "icon" "back"}} {{.T "set.back"}}</a>
+<span class="who">{{.User}}</span>
+<form method="post" action="/logout" class="inline"><input type="hidden" name="csrf" value="{{.CSRF}}"><button type="submit" class="link">{{.T "nav.logout"}}</button></form>
+</div>
+<div class="setcontent">
+{{end}}
+{{define "setclose"}}</div></section></div>{{end}}
+
+{{define "mailbar"}}<header class="mailbar">
+<div class="mb-left">
+<a class="btn-new" href="/compose?back={{urlquery .List.Back}}" title="{{.T "compose.title"}}">{{template "icon" "send"}} {{.T "mail.new"}}</a>
+<a class="tbtn" href="/contacts" title="{{.T "set.contacts"}}" aria-label="{{.T "set.contacts"}}">{{template "icon" "contacts"}}</a>
+</div>
+<div class="mb-mid">
+<a class="tbtn" data-refresh href="{{.List.Back}}" title="{{.T "mail.refresh"}}" aria-label="{{.T "mail.refresh"}}">{{template "icon" "refresh"}}</a>
+<span class="tgroup">
+<details class="dropdown" data-dropdown><summary class="tbtn" title="{{.T "mail.move_to"}}" aria-label="{{.T "mail.move_to"}}">{{template "icon" "folder"}}{{template "icon" "caret"}}</summary>
+<div class="menu scroll">
+{{range .MoveRows}}{{if .SepBefore}}<hr>{{end}}<button type="submit" form="bulk" name="move_to" value="{{.Name}}" class="depth-{{.DepthClass}}"{{if .Active}} disabled{{end}}>{{$.FolderName .}}</button>{{else}}<span class="muted pad">{{$.T "mailbox.no_folders"}}</span>{{end}}
+</div></details>
+<details class="dropdown" data-dropdown><summary class="tbtn" title="{{.T "mail.copy_to"}}" aria-label="{{.T "mail.copy_to"}}">{{template "icon" "copy"}}{{template "icon" "caret"}}</summary>
+<div class="menu scroll">
+<span class="menu-title">{{.T "mail.copy_to"}}</span>
+{{range .MoveRows}}{{if .SepBefore}}<hr>{{end}}<button type="submit" form="bulk" name="copy_to" value="{{.Name}}" class="depth-{{.DepthClass}}">{{$.FolderName .}}</button>{{end}}
+</div></details>
+{{if not .List.HideArchive}}<button class="tbtn" type="submit" form="bulk" name="action" value="archive" title="{{.T "mail.act.archive"}}" aria-label="{{.T "mail.act.archive"}}" data-needs-selection>{{template "icon" "archive"}}</button>{{end}}
+{{if .List.NotSpam}}<button class="tbtn" type="submit" form="bulk" name="action" value="notspam" title="{{.T "mail.act.notspam"}}" aria-label="{{.T "mail.act.notspam"}}" data-needs-selection>{{template "icon" "notspam"}}</button>{{end}}
+{{if not .List.HideSpam}}<button class="tbtn" type="submit" form="bulk" name="action" value="spam" title="{{.T "mail.act.spam"}}" aria-label="{{.T "mail.act.spam"}}" data-needs-selection>{{template "icon" "spam"}}</button>{{end}}
+<button class="tbtn" type="submit" form="bulk" name="action" value="delete" title="{{.T "mail.act.delete"}}" aria-label="{{.T "mail.act.delete"}}" data-needs-selection{{if or .List.ClearKind (and .Msg .Msg.InTrash)}} data-confirm="{{.T "mail.delete_forever_confirm"}}"{{end}}>{{template "icon" "trash"}}</button>
+</span>
+<details class="dropdown" data-dropdown><summary class="tbtn" title="{{.T "mail.more"}}" aria-label="{{.T "mail.more"}}">{{template "icon" "menu"}}</summary>
+<div class="menu">
+<span class="menu-title">{{.T "mail.mark"}}</span>
+<button type="submit" form="bulk" name="action" value="read" data-needs-selection>{{.T "mail.act.read"}}</button>
+<button type="submit" form="bulk" name="action" value="unread" data-needs-selection>{{.T "mail.act.unread"}}</button>
+<button type="submit" form="bulk" name="action" value="flag" data-needs-selection>{{.T "mail.act.flag"}}</button>
+<button type="submit" form="bulk" name="action" value="unflag" data-needs-selection>{{.T "mail.act.unflag"}}</button>
+<button type="submit" form="bulk" name="action" value="readall">{{.T "mail.act.read_all"}}</button>
+{{if .List.SortURLs}}
+<hr>
+<span class="menu-title">{{.T "mail.filter.label"}}</span>
+<a href="{{.List.FilterAllURL}}"{{if ne .List.Filter "unread"}} class="current"{{end}}>{{.T "mail.filter.all"}}</a>
+<a href="{{.List.FilterUnreadURL}}"{{if eq .List.Filter "unread"}} class="current"{{end}}>{{.T "mail.filter.unread"}}</a>
+<hr>
+<span class="menu-title">{{.T "mail.sort.label"}}</span>
+<a href="{{index .List.SortURLs "date"}}"{{if index .List.SortMark "date"}} class="current"{{end}}>{{.T "mail.col.date"}} {{index .List.SortMark "date"}}</a>
+<a href="{{index .List.SortURLs "from"}}"{{if index .List.SortMark "from"}} class="current"{{end}}>{{.T "mail.col.from"}} {{index .List.SortMark "from"}}</a>
+<a href="{{index .List.SortURLs "subject"}}"{{if index .List.SortMark "subject"}} class="current"{{end}}>{{.T "mail.col.subject"}} {{index .List.SortMark "subject"}}</a>
+<a href="{{index .List.SortURLs "size"}}"{{if index .List.SortMark "size"}} class="current"{{end}}>{{.T "mail.col.size"}} {{index .List.SortMark "size"}}</a>
+<hr>
+<span class="menu-title">{{.T "mail.pagesize.label"}}</span>
+<form method="post" action="/mail/pagesize" class="sizes">
+<input type="hidden" name="csrf" value="{{.CSRF}}">
+<input type="hidden" name="back" value="{{.List.Back}}">
+{{range .List.PageSizes}}<button type="submit" name="size" value="{{.}}"{{if eq . $.List.PageSize}} class="current"{{end}}>{{.}}</button>{{end}}
+</form>
+{{end}}
+</div></details>
+</div>
+<div class="mb-right">
+<span class="who">{{if .TopUser}}{{.TopUser}}{{else}}{{.User}}{{end}}</span>
+<details class="dropdown right" data-dropdown><summary class="tbtn" title="{{.User}}" aria-label="{{.User}}">{{template "icon" "user"}}{{template "icon" "caret"}}</summary>
+<div class="menu">
+<span class="menu-title">{{.T "mailbox.account"}}</span>
+<form method="post" action="/accounts/select" class="acc-list">
+<input type="hidden" name="csrf" value="{{.CSRF}}">
+{{range .Accounts}}<button type="submit" name="id" value="{{.ID}}"{{if eq .ID $.ActiveID}} class="current" aria-current="true"{{end}}><span class="mark">{{if eq .ID $.ActiveID}}✓{{end}}</span> {{if .Email}}{{.Email}}{{else}}{{.Name}}{{end}}</button>{{end}}
+</form>
+<hr>
+<span class="menu-title">{{.User}}</span>
+<a href="/settings">{{.T "nav.settings"}}</a>
+<a href="/accounts">{{.T "nav.accounts"}}</a>
+<button type="button" data-keyhelp data-js-only hidden>{{.T "keys.title"}}</button>
+<hr>
+<form method="post" action="/logout"><input type="hidden" name="csrf" value="{{.CSRF}}"><button type="submit">{{.T "nav.logout"}}</button></form>
+</div></details>
+</div>
+<div id="keyhelp" class="keyhelp" role="dialog" aria-modal="true" aria-labelledby="keyhelp-title" hidden>
+<h2 id="keyhelp-title">{{.T "keys.title"}}</h2>
+<table>
+<tr><th colspan="2">{{.T "keys.list"}}</th></tr>
+<tr><td><kbd>C</kbd> <kbd>W</kbd></td><td>{{.T "keys.new"}}</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>A</kbd></td><td>{{.T "keys.select_all"}}</td></tr>
+<tr><td><kbd>Z</kbd></td><td>{{.T "mail.act.archive"}}</td></tr>
+<tr><td><kbd>Suppr</kbd> <kbd>#</kbd></td><td>{{.T "mail.act.delete"}}</td></tr>
+<tr><td><kbd>M</kbd></td><td>{{.T "mail.move_to"}}</td></tr>
+<tr><td><kbd>Q</kbd> / <kbd>U</kbd></td><td>{{.T "keys.read_unread"}}</td></tr>
+<tr><td><kbd>I</kbd></td><td>{{.T "keys.flag"}}</td></tr>
+<tr><td><kbd>/</kbd></td><td>{{.T "keys.search"}}</td></tr>
+<tr><td><kbd>↑</kbd> <kbd>↓</kbd> <kbd>Home</kbd> <kbd>End</kbd> <kbd>PgUp</kbd> <kbd>PgDn</kbd></td><td>{{.T "keys.navigate"}}</td></tr>
+<tr><td><kbd>Space</kbd> <kbd>Shift</kbd>+<kbd>↑↓</kbd></td><td>{{.T "keys.check"}}</td></tr>
+<tr><td><kbd>T</kbd></td><td>{{.T "keys.thread"}}</td></tr>
+<tr><th colspan="2">{{.T "keys.message"}}</th></tr>
+<tr><td><kbd>R</kbd></td><td>{{.T "mail.reply"}}</td></tr>
+<tr><td><kbd>A</kbd></td><td>{{.T "mail.reply_all"}}</td></tr>
+<tr><td><kbd>F</kbd> / <kbd>Maj</kbd>+<kbd>F</kbd></td><td>{{.T "mail.forward"}} / {{.T "mail.forward_att"}}</td></tr>
+<tr><td><kbd>Échap</kbd></td><td>{{.T "keys.close"}}</td></tr>
+<tr><th colspan="2">{{.T "compose.title"}}</th></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Entrée</kbd></td><td>{{.T "compose.send"}}</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>{{.T "compose.save"}}</td></tr>
+<tr><th colspan="2">{{.T "keys.general"}}</th></tr>
+<tr><td><kbd>?</kbd></td><td>{{.T "keys.title"}}</td></tr>
+<tr><td><kbd>`</kbd></td><td>{{.T "keys.user_menu"}}</td></tr>
+</table>
+<p><button type="button" data-keyhelp-close>{{.T "mail.close"}}</button></p>
+</div>
+</header>{{if .InfoKey}}<p class="flashbar" role="status">{{.T .InfoKey}}</p>{{end}}{{end}}
+
+{{define "messages"}}{{if .ErrorKey}}<p class="msg error" role="alert">{{.Err}}</p>{{end}}{{if .InfoKey}}<p class="msg info" role="status">{{.T .InfoKey}}</p>{{end}}{{end}}
+
+{{define "folderpanel"}}<aside class="folders">
+{{if .FolderError}}
+<p class="msg error" role="alert">{{.T (printf "accounts.test.fail.%s" .FolderError.Kind)}}
+{{if .FolderError.Detail}}<br><small>{{.FolderError.Detail}}</small>{{end}}</p>
+<p><a href="/accounts/{{.ActiveID}}/edit">{{.T "mailbox.fix_account"}}</a></p>
+{{else}}
+<ul class="folder-list sys">
+{{range .Folders}}{{if .System}}<li class="f role-{{.Role}}{{if .Active}} active{{end}}{{if .Bold}} has-unread{{end}}"{{if eq .Badge 0}}{{if not .Bold}} data-nobadge{{end}}{{end}}{{if .Selectable}} data-drop="{{.Name}}"{{end}}>
+<a class="fname" href="{{.URL}}">{{$.FolderName .}}</a>{{if gt .Badge 0}}<span class="badge" data-unread-badge>{{.Badge}}</span>{{end}}{{if eq .Role "inbox"}}{{$on := and $.List (eq $.List.Query "is:flagged")}}<a class="fstar{{if $on}} on{{end}}" href="{{if $on}}/{{else}}/?q=is%3Aflagged{{end}}" title="{{$.T "mail.flagged_only"}}" aria-label="{{$.T "mail.flagged_only"}}">{{if $on}}{{template "icon" "star"}}{{else}}{{template "icon" "star-o"}}{{end}}</a>{{end}}
+</li>{{end}}{{end}}
+</ul>
+<hr class="fsep">
+<ul class="folder-list usr" id="foldertree">
+{{range .Folders}}{{if not .System}}<li class="f depth-{{.DepthClass}}{{if .Active}} active{{end}}{{if not .Selectable}} nosel{{end}}{{if .Bold}} has-unread{{end}}{{if .SubUnread}} unread-sub{{end}}" data-key="{{.Key}}" data-depth="{{.Depth}}"{{if .HasChildren}} data-open="{{if .Open}}1{{else}}0{{end}}"{{end}}{{if .Collapsed}} hidden{{end}}{{if .Selectable}} data-drop="{{.Name}}"{{end}}>
+{{if .HasChildren}}<button type="button" class="caret" data-caret data-js-only hidden aria-expanded="{{if .Open}}true{{else}}false{{end}}" aria-label="{{$.T "folders.toggle_level"}}"><span aria-hidden="true">{{if .Open}}▾{{else}}▸{{end}}</span></button>{{else}}<span class="caret none"></span>{{end}}
+{{if .Selectable}}<a class="fname" href="{{.URL}}">{{$.FolderName .}}</a>{{else}}<span class="fname">{{$.FolderName .}}</span>{{end}}{{if gt .Badge 0}}<span class="badge" data-unread-badge>{{.Badge}}</span>{{end}}
+</li>{{end}}{{end}}
+</ul>
+{{end}}
+<div class="folders-foot">
+<button type="button" class="tbtn" data-folders-toggle title="{{.T "folders.toggle_pane"}}" aria-label="{{.T "folders.toggle_pane"}}" hidden data-js-only>{{template "icon" "expand"}}</button>
+<a class="tbtn" data-newfolder href="/settings/folders#create" title="{{.T "folders.create"}}" aria-label="{{.T "folders.create"}}">{{template "icon" "folder"}}</a>
+<a class="tbtn" href="/settings" title="{{.T "nav.settings"}}" aria-label="{{.T "nav.settings"}}">{{template "icon" "gear"}}</a>
+</div>
+{{if .Quota}}<p class="quota{{if .Quota.Full}} full{{end}}" title="{{.T "quota.title"}}"><progress class="bar" max="100" value="{{.Quota.Percent}}"></progress> {{.T "quota.text" .Quota.Used .Quota.Percent .Quota.Limit}}</p>
+{{end}}
+<div id="newfolder" class="keyhelp newfolder" role="dialog" aria-modal="true" aria-labelledby="newfolder-title" hidden>
+<h2 id="newfolder-title">{{.T "folders.create"}}</h2>
+<form method="post" action="/settings/folders/action">
+<input type="hidden" name="csrf" value="{{.CSRF}}"><input type="hidden" name="action" value="create"><input type="hidden" name="delim" value="{{.FolderDelim}}"><input type="hidden" name="return_to" value="{{if .List}}{{.List.Back}}{{else}}/{{end}}">
+<label>{{.T "folders.name"}}<input name="new_name" type="text" maxlength="100" required autocomplete="off"></label>
+<label>{{.T "folders.parent"}}
+<select name="parent"><option value="">{{.T "folders.root"}}</option>{{range .Folders}}{{if or .Selectable .HasChildren}}<option value="{{.Key}}">{{if .System}}{{$.FolderName .}} ({{.Key}}){{else}}{{.Key}}{{end}}</option>{{end}}{{end}}</select></label>
+<p><button type="submit">{{.T "folders.create_button"}}</button> <button type="button" class="secondary" data-newfolder-close>{{.T "accounts.form.cancel"}}</button></p>
+</form>
+</div>
+</aside>{{end}}
+
+{{define "msgview"}}{{with .Msg}}<div class="msgview" data-uid="{{.UID}}"{{if .JustRead}} data-just-read="1"{{end}}>
+<header class="mh">
+<div class="mh-top">
+<details class="msg-info"><summary title="{{$.T "mail.details"}}" aria-label="{{$.T "mail.details"}}">i</summary>
+<dl class="headers">
+<dt>{{$.T "mail.from"}}</dt><dd>{{.From}}</dd>
+{{if .To}}<dt>{{$.T "mail.to"}}</dt><dd>{{.To}}</dd>{{end}}
+{{if .Cc}}<dt>{{$.T "mail.cc"}}</dt><dd>{{.Cc}}</dd>{{end}}
+{{if .Bcc}}<dt>{{$.T "mail.bcc"}}</dt><dd>{{.Bcc}}</dd>{{end}}
+{{if .ReplyTo}}<dt>{{$.T "mail.reply_to"}}</dt><dd>{{.ReplyTo}}</dd>{{end}}
+<dt>{{$.T "mail.date"}}</dt><dd>{{.Date}}</dd>
+<dt>{{$.T "mail.size"}}</dt><dd>{{.Size}}</dd>
+{{if .DKIM}}<dt>DKIM</dt><dd>{{$.T (printf "mail.dkim.%s" .DKIM)}}</dd>{{end}}
+</dl>
+</details>
+<form method="post" action="/mail/action" class="starform">
+<input type="hidden" name="csrf" value="{{$.CSRF}}">
+<input type="hidden" name="folder" value="{{.Folder}}">
+<input type="hidden" name="back" value="{{.Back}}">
+<input type="hidden" name="stay" value="{{.Self}}">
+<input type="hidden" name="current_uid" value="{{.UID}}">
+<button type="submit" class="star{{if .Flagged}} on{{end}}" name="{{if .Flagged}}star_off{{else}}star_on{{end}}" value="{{.UID}}" title="{{if .Flagged}}{{$.T "mail.act.unflag"}}{{else}}{{$.T "mail.act.flag"}}{{end}}">{{if .Flagged}}{{template "icon" "star"}}{{else}}{{template "icon" "star-o"}}{{end}}</button>
+</form>
+<h1 class="msg-subject">{{.Subject}}</h1>
+<button type="button" class="mh-full" data-fullscreen-msg data-js-only hidden title="{{$.T "mail.fullscreen"}}" aria-label="{{$.T "mail.fullscreen"}}">{{template "icon" "expand"}}</button>
+<a class="mh-close" href="{{.Back}}" title="{{$.T "mail.close"}}" aria-label="{{$.T "mail.close"}}">{{template "icon" "close"}}</a>
+</div>
+<div class="mh-from">
+<span class="avatar">{{template "icon" "avatar"}}</span>
+<div class="mh-who">
+<div class="from"><a class="sender" href="/compose?to={{urlquery .SenderEmail}}&amp;back={{urlquery .Back}}" title="{{.SenderEmail}}">{{.SenderName}}</a> <span class="date">({{.Date}})</span>{{if .DKIM}} <span class="dkim dkim-{{.DKIM}}" title="{{$.T (printf "mail.dkim.%s" .DKIM)}}">{{if eq .DKIM "pass"}}✔{{else}}⚠{{end}}</span>{{end}}</div>
+{{if .ToShort}}<p class="to">{{$.T "mail.to_label"}} {{.ToShort}}</p>{{end}}
+</div>
+<span class="replygroup">
+{{if .IsDraft}}<a class="reply" href="{{.ComposeURL "draft"}}" title="{{$.T "mail.edit_draft"}}">{{template "icon" "doc"}}</a>{{else}}<a class="reply" href="{{.ComposeURL .ReplyMode}}" title="{{$.T (printf "mail.%s" (replykey .ReplyMode))}}" aria-label="{{$.T (printf "mail.%s" (replykey .ReplyMode))}}">{{if eq .ReplyMode "forward"}}{{template "icon" "forward"}}{{else}}{{template "icon" "reply"}}{{end}}</a>{{end}}
+<details class="dropdown right" data-dropdown><summary class="reply" title="{{$.T "mail.more"}}" aria-label="{{$.T "mail.more"}}">{{template "icon" "caret"}}</summary>
+<div class="menu">
+{{if .IsDraft}}<a href="{{.ComposeURL "draft"}}">{{$.T "mail.edit_draft"}}</a>{{end}}
+<a href="{{.ComposeURL "reply"}}">{{$.T "mail.reply"}}</a>
+<a href="{{.ComposeURL "replyall"}}">{{$.T "mail.reply_all"}}</a>
+<a href="{{.ComposeURL "forward"}}">{{$.T "mail.forward"}}</a>
+<a href="{{.ComposeURL "forwardatt"}}">{{$.T "mail.forward_att"}}</a>
+<a href="{{.ComposeURL "editasnew"}}">{{$.T "mail.edit_as_new"}}</a>
+{{if .SenderEmail}}<a href="{{.FilterURL}}">{{$.T "mail.filter_similar"}}</a>{{end}}
+{{if .SenderEmail}}{{if .ContactID}}<a href="/contacts?edit={{.ContactID}}">{{$.T "contacts.edit_contact"}}</a>{{else}}<form method="post" action="/contacts/add"><input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="email" value="{{.SenderEmail}}"><input type="hidden" name="name" value="{{.SenderName}}"><button type="submit">{{$.T "contacts.add_sender"}}</button></form>{{end}}{{end}}
+{{if .HasHTML}}{{if .ViewText}}<a href="{{.HTMLURL}}" data-pane>{{$.T "mail.view_html"}}</a>{{else}}<a href="{{.TextURL}}" data-pane>{{$.T "mail.view_text"}}</a>{{end}}{{end}}
+<hr>
+<a href="{{.PrintURL}}" target="_blank" rel="noopener">{{$.T "mail.print"}}</a>
+<a href="{{.SourceURL "headers"}}" target="_blank" rel="noopener">{{$.T "mail.view_headers"}}</a>
+<a href="{{.SourceURL "source"}}" target="_blank" rel="noopener">{{$.T "mail.view_source"}}</a>
+<a href="{{.SourceURL "eml"}}">{{$.T "mail.download_eml"}}</a>
+</div></details>
+</span>
+</div>
+</header>
+
+{{if .UnsubscribeURL}}<p class="bar unsubbar"><a href="{{.UnsubscribeURL}}"{{if .UnsubscribeExternal}} target="_blank" rel="noopener noreferrer"{{end}}>{{$.T "mail.unsubscribe"}}</a></p>{{end}}
+{{if .ReadReceipt}}<form class="bar mdnbar" method="post" action="/mail/mdn">
+<input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="folder" value="{{.Folder}}"><input type="hidden" name="uid" value="{{.UID}}"><input type="hidden" name="stay" value="{{.Self}}">
+<span>{{$.T "mail.mdn.ask" .ReadReceipt}}</span>
+<button type="submit" name="action" value="send">{{$.T "mail.mdn.send"}}</button>
+<button type="submit" name="action" value="ignore" class="secondary">{{$.T "mail.mdn.ignore"}}</button>
+</form>{{end}}
+{{if .Truncated}}<p class="bar warn">{{$.T "mail.truncated"}}</p>{{end}}
+{{if .Partial}}<p class="bar warn">{{$.T "mail.partial"}}</p>{{end}}
+{{if .RemoteBlocked}}<p class="bar imgbar" title="{{$.T "mail.remote_blocked" .RemoteBlocked}}">{{template "icon" "image"}} <a href="{{.ShowRemoteURL}}" data-pane>{{$.T "mail.show_images"}}</a>{{if .SenderEmail}} · <form class="inline" method="post" action="/mail/trust"><input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="email" value="{{.SenderEmail}}"><input type="hidden" name="stay" value="{{.Self}}"><button type="submit" class="link">{{$.T "mail.trust_sender"}}</button></form>{{end}}</p>{{end}}
+{{range .Events}}<div class="bar evbar">
+<span class="evicon">{{template "icon" "calendar"}}</span>
+<div class="evtext">
+<p class="evtitle"><strong>{{.Summary}}</strong>{{if .When}} <span class="evwhen">{{.When}}</span>{{end}}</p>
+<p class="evmeta">{{if .Organizer}}{{$.T "event.from"}} : {{.Organizer}}{{end}}{{if and .Organizer .Attendees}} | {{end}}{{if .Attendees}}<em>{{$.T "event.guests"}} : {{.Attendees}}</em>{{end}}</p>
+{{if .GoogleURL}}<p class="evlinks"><a class="evbtn evgoogle" href="{{.GoogleURL}}" target="_blank" rel="noopener noreferrer">Google</a> <a class="evbtn evoutlook" href="{{.OutlookURL}}" target="_blank" rel="noopener noreferrer">Outlook</a></p>{{end}}
+</div></div>
+{{end}}
+{{if .Attachments}}
+<div class="bar attbar">
+<ul class="atts">{{range .Attachments}}<li><a class="att" href="{{.URL}}" title="{{.Name}} ({{.Size}})">
+<span class="thumb">{{if .Thumb}}<img src="{{.Thumb}}" alt="" width="36" height="36">{{else}}<span class="ext">{{template "icon" "doc"}}</span>{{end}}</span>
+<span class="meta"><span class="name">{{.Name}}</span><span class="size">{{.Size}}</span></span>
+</a>{{if .PreviewURL}}<a class="preview" href="{{.PreviewURL}}" data-kind="{{.PreviewKind}}" data-name="{{.Name}}" target="_blank" rel="noopener" title="{{$.T "mail.att.preview"}}" aria-label="{{$.T "mail.att.preview"}}">{{template "icon" "eye"}}</a>{{end}}</li>{{end}}</ul>
+{{if .ZipURL}}<details class="dropdown right gear" data-dropdown><summary title="{{$.T "mail.att.options"}}" aria-label="{{$.T "mail.att.options"}}">{{template "icon" "gear"}}</summary>
+<div class="menu"><a href="{{.ZipURL}}">{{$.T "mail.att.zip"}}</a></div></details>{{end}}
+</div>
+{{end}}
+
+
+{{if .NoBody}}<p class="muted pad">{{$.T "mail.no_body"}}</p>
+{{else}}<iframe class="mailbody" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer" src="{{.BodyURL}}" title="{{$.T "mail.body"}}"></iframe>{{end}}
+</div>{{end}}{{end}}

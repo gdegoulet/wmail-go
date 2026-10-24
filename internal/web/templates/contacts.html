@@ -1,0 +1,101 @@
+{{define "content"}}{{template "setopen" .}}
+{{with .Contacts}}
+<h1 class="legend">{{$.T "contacts.title"}}</h1>
+{{if .Info}}<p class="msg ok">{{$.T .Info}}{{if eq .Info "contacts.info.imported"}} ({{$.T "contacts.import_result" .Added .Skipped}}){{end}}{{if eq .Info "contacts.info.synced"}} ({{$.T "contacts.sync.changes" .Added}}){{end}}</p>{{end}}
+{{template "messages" $}}
+<form method="get" action="/contacts" class="contacts-search">
+<input type="search" name="q" value="{{.Q}}" placeholder="{{$.T "contacts.search"}}" maxlength="100">
+{{if .AllTags}}<select name="tag"><option value="">{{$.T "contacts.all_tags"}}</option>{{range .AllTags}}<option{{if eq . $.Contacts.Tag}} selected{{end}}>{{.}}</option>{{end}}</select>{{end}}
+<button type="submit">{{$.T "contacts.search_go"}}</button>
+<a class="button" href="/contacts?new=1">{{$.T "contacts.new"}}</a>
+</form>
+<form method="post" action="/contacts/delete" id="clist">
+<input type="hidden" name="csrf" value="{{$.CSRF}}">
+{{if .Rows}}
+<table class="folders-table contacts-table">
+<thead><tr><th></th><th>{{$.T "contacts.name"}}</th><th>{{$.T "contacts.email"}}</th><th>{{$.T "contacts.phone"}}</th><th>{{$.T "contacts.tags"}}</th></tr></thead>
+<tbody>
+{{range .Rows}}<tr>
+<td><input type="checkbox" name="id" value="{{.ID}}" aria-label="{{$.T "contacts.select"}}"></td>
+<td><a href="/contacts?edit={{.ID}}">{{if .Name}}{{.Name}}{{else}}—{{end}}</a></td>
+<td>{{if .Email}}<a href="/compose?to={{urlquery .Email}}">{{.Email}}</a>{{end}}</td>
+<td>{{.Phone}}</td><td>{{.Tags}}</td></tr>{{end}}
+</tbody></table>
+<p class="muted">{{$.T "contacts.count" .Total}}
+{{if .PrevURL}} <a href="{{.PrevURL}}">« {{$.T "contacts.prev"}}</a>{{end}}{{if gt .Pages 1}} {{.Page}} / {{.Pages}}{{end}}{{if .NextURL}} <a href="{{.NextURL}}">{{$.T "contacts.next"}} »</a>{{end}}</p>
+<details class="danger"><summary>{{$.T "contacts.delete_selected"}}</summary>
+<p>{{$.T "contacts.delete_confirm"}}</p>
+<button type="submit" class="danger">{{$.T "accounts.delete_yes"}}</button></details>
+{{else}}<p class="muted">{{$.T "contacts.none"}}</p>{{end}}
+</form>
+
+{{if .Editing}}
+<section id="edit">
+<h2>{{if .Edit.ID}}{{$.T "contacts.edit"}}{{else}}{{$.T "contacts.new"}}{{end}}</h2>
+<form method="post" action="/contacts/save" class="contact-form">
+<input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="id" value="{{.Edit.ID}}">
+<div class="cf-grid">
+<label>{{$.T "contacts.prefix"}}<input type="text" name="prefix" maxlength="500" value="{{.Edit.Prefix}}"></label>
+<label>{{$.T "contacts.first"}}<input type="text" name="first" maxlength="500" value="{{.Edit.First}}"></label>
+<label>{{$.T "contacts.middle"}}<input type="text" name="middle" maxlength="500" value="{{.Edit.Middle}}"></label>
+<label>{{$.T "contacts.last"}}<input type="text" name="last" maxlength="500" value="{{.Edit.Last}}"></label>
+<label>{{$.T "contacts.suffix"}}<input type="text" name="suffix" maxlength="500" value="{{.Edit.Suffix}}"></label>
+<label>{{$.T "contacts.nick"}}<input type="text" name="nick" maxlength="500" value="{{.Edit.Nick}}"></label>
+<label>{{$.T "contacts.org"}}<input type="text" name="org" maxlength="500" value="{{.Edit.Org}}"></label>
+<label>{{$.T "contacts.job"}}<input type="text" name="title" maxlength="500" value="{{.Edit.Title}}"></label>
+<label>{{$.T "contacts.birthday"}}<input name="birthday" type="date" value="{{.Edit.Birthday}}"></label>
+</div>
+<fieldset><legend>{{$.T "contacts.email"}}</legend>
+{{range .EmailRows}}<div class="cf-row"><input type="text" name="email_type" list="t-mail" maxlength="20" value="{{.Type}}" aria-label="{{$.T "contacts.type"}}"><input name="email" type="email" maxlength="254" value="{{.Value}}"></div>{{end}}</fieldset>
+<fieldset><legend>{{$.T "contacts.phone"}}</legend>
+{{range .PhoneRows}}<div class="cf-row"><input type="text" name="phone_type" list="t-phone" maxlength="20" value="{{.Type}}" aria-label="{{$.T "contacts.type"}}"><input type="text" name="phone" maxlength="500" value="{{.Value}}"></div>{{end}}</fieldset>
+<fieldset><legend>{{$.T "contacts.url"}}</legend>
+{{range .URLRows}}<div class="cf-row"><input type="text" name="url" maxlength="500" value="{{.Value}}"></div>{{end}}</fieldset>
+<fieldset><legend>{{$.T "contacts.address"}}</legend>
+{{range .PostalRows}}<div class="cf-grid"><input type="hidden" name="adr_type" value="{{.Type}}">
+<label>{{$.T "contacts.street"}}<input type="text" name="adr_street" maxlength="500" value="{{.Street}}"></label>
+<label>{{$.T "contacts.city"}}<input type="text" name="adr_city" maxlength="500" value="{{.City}}"></label>
+<label>{{$.T "contacts.region"}}<input type="text" name="adr_region" maxlength="500" value="{{.Region}}"></label>
+<label>{{$.T "contacts.code"}}<input type="text" name="adr_code" maxlength="500" value="{{.Code}}"></label>
+<label>{{$.T "contacts.country"}}<input type="text" name="adr_country" maxlength="500" value="{{.Country}}"></label></div>{{end}}</fieldset>
+<label>{{$.T "contacts.tags"}}<input type="text" name="tags" maxlength="500" value="{{.TagsText}}"></label><small>{{$.T "contacts.tags_hint"}}</small>
+<label>{{$.T "contacts.notes"}}<textarea name="notes" rows="4" maxlength="10000">{{.Edit.Notes}}</textarea></label>
+<datalist id="t-mail"><option value="home"><option value="work"><option value="other"></datalist>
+<datalist id="t-phone"><option value="cell"><option value="home"><option value="work"><option value="fax"><option value="other"></datalist>
+<button type="submit">{{$.T "contacts.save"}}</button> <a href="/contacts">{{$.T "accounts.form.cancel"}}</a>
+{{if and .Edit.ID .Edit.Emails}}{{with index .Edit.Emails 0}} <a class="button" href="/compose?to={{urlquery .Value}}">{{$.T "contacts.write"}}</a>{{end}}{{end}}
+</form>
+</section>
+{{end}}
+
+<section>
+<h2>{{$.T "contacts.import_export"}}</h2>
+<form method="post" action="/contacts/import" enctype="multipart/form-data">
+<input type="hidden" name="csrf" value="{{$.CSRF}}">
+<label>{{$.T "contacts.import_file"}} <input type="file" name="file" accept=".vcf,.vcard,.csv,text/vcard,text/csv" required></label>
+<small>{{$.T "contacts.import_hint"}}</small>
+<button type="submit">{{$.T "contacts.import"}}</button>
+</form>
+<p><a class="button" href="{{.ExportURL}}&amp;format=vcf">{{$.T "contacts.export_vcf"}}</a> <a class="button" href="{{.ExportURL}}&amp;format=csv">{{$.T "contacts.export_csv"}}</a></p>
+</section>
+<section id="sync">
+<h2>{{$.T "contacts.sync.title"}}</h2>
+<p class="muted">{{$.T "contacts.sync.intro"}}</p>
+<form method="post" action="/contacts/sync/save">
+<input type="hidden" name="csrf" value="{{$.CSRF}}">
+<label class="check"><input type="checkbox" name="enabled"{{if .Sync.Enabled}} checked{{end}}> {{$.T "contacts.sync.enabled"}}</label>
+<label>{{$.T "contacts.sync.url"}}<input name="url" type="url" maxlength="500" placeholder="https://" value="{{.Sync.URL}}"></label>
+<label>{{$.T "contacts.sync.user"}}<input type="text" name="user" maxlength="200" autocomplete="off" value="{{.Sync.User}}"></label>
+<label>{{$.T "contacts.sync.password"}}<input name="password" type="password" maxlength="500" autocomplete="new-password" placeholder="{{if .Sync.HasPassword}}••••••••{{end}}"></label>
+{{if .Sync.HasPassword}}<label class="check"><input type="checkbox" name="clear_password"> {{$.T "contacts.sync.clear_password"}}</label>{{end}}
+<label>{{$.T "contacts.sync.interval"}}<input name="interval" type="number" min="5" max="320" value="{{.Sync.IntervalMinutes}}"></label>
+<button type="submit">{{$.T "contacts.save"}}</button>
+</form>
+{{if .Sync.Enabled}}
+<p>{{if .Sync.LastSync}}{{$.T "contacts.sync.last" .Sync.LastSync}}{{else}}{{$.T "contacts.sync.never"}}{{end}}{{if .Sync.Running}} — {{$.T "contacts.sync.running"}}{{end}}</p>
+{{if .Sync.Error}}<p class="msg error" role="alert">{{$.T "contacts.sync.last_error"}} <small>{{.Sync.Error}}</small></p>{{end}}
+<form method="post" action="/contacts/sync/run"><input type="hidden" name="csrf" value="{{$.CSRF}}"><button type="submit" class="secondary">{{$.T "contacts.sync.now"}}</button></form>
+{{end}}
+</section>
+{{end}}
+{{template "setclose" $}}{{end}}

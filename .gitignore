@@ -1,0 +1,7 @@
+data/
+*.key
+*.cfg
+users.idx
+rainloop/
+scratch/
+rainloop_plugins/

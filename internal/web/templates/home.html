@@ -1,0 +1,123 @@
+{{define "content"}}
+<div class="mailbox{{if .List.ThreePane}} three{{else}} listonly{{end}}{{if .Msg}} has-message{{end}}" data-csrf="{{.CSRF}}">
+{{template "folderpanel" .}}
+<div class="splitter a" data-pane="folders" role="separator" aria-orientation="vertical" tabindex="0" title="{{.T "mailbox.splitter"}}" aria-label="{{.T "mailbox.splitter.folders"}}"></div>
+
+<section class="listpane" aria-label="{{.T "mail.list"}}">
+{{if not .FolderError}}{{with .List}}
+<div class="lp-head">
+<label class="chk" data-js-only hidden title="Ctrl+A"><input type="checkbox" id="select-all" aria-label="{{$.T "mail.select_all"}}"></label>
+<details class="dropdown selmenu" data-dropdown data-js-only hidden><summary class="tbtn" title="{{$.T "mail.select_by"}}" aria-label="{{$.T "mail.select_by"}}">{{template "icon" "caret"}}</summary>
+<div class="menu">
+<button type="button" data-select="all">{{$.T "mail.sel.all"}}</button>
+<button type="button" data-select="none">{{$.T "mail.sel.none"}}</button>
+<button type="button" data-select="invert">{{$.T "mail.sel.invert"}}</button>
+<button type="button" data-select="unseen">{{$.T "mail.sel.unseen"}}</button>
+<button type="button" data-select="seen">{{$.T "mail.sel.seen"}}</button>
+<button type="button" data-select="flagged">{{$.T "mail.sel.flagged"}}</button>
+<button type="button" data-select="unflagged">{{$.T "mail.sel.unflagged"}}</button>
+</div></details>
+<form method="get" action="/" class="search">
+{{if ne .Folder "INBOX"}}<input type="hidden" name="folder" value="{{.Folder}}">{{end}}
+<label class="sr" for="q">{{$.T "mail.search.label"}}</label>
+<input id="q" name="q" type="search" maxlength="200" placeholder="{{$.T "mail.search.placeholder"}}" value="{{.Query}}">{{if .Query}}<a class="search-clear" href="{{.ClearSearchURL}}" title="{{$.T "mail.search.clear"}}" aria-label="{{$.T "mail.search.clear"}}">×</a>{{end}}
+<details class="dropdown adv right" data-dropdown><summary title="{{$.T "mail.search.options"}}" aria-label="{{$.T "mail.search.options"}}">{{template "icon" "caret"}}</summary>
+<div class="menu adv-menu">
+<label>{{$.T "mail.search.scope"}}
+<select name="scope">
+<option value="all"{{if eq .Scope "all"}} selected{{end}}>{{$.T "mail.scope.all"}}</option>
+<option value="subject"{{if eq .Scope "subject"}} selected{{end}}>{{$.T "mail.scope.subject"}}</option>
+<option value="from"{{if eq .Scope "from"}} selected{{end}}>{{$.T "mail.scope.from"}}</option>
+<option value="body"{{if eq .Scope "body"}} selected{{end}}>{{$.T "mail.scope.body"}}</option>
+</select></label>
+<label>{{$.T "mail.filter.label"}}
+<select name="filter">
+<option value="all"{{if ne .Filter "unread"}} selected{{end}}>{{$.T "mail.filter.all"}}</option>
+<option value="unread"{{if eq .Filter "unread"}} selected{{end}}>{{$.T "mail.filter.unread"}}</option>
+</select></label>
+<fieldset class="adv-fields"><legend>{{$.T "mail.adv.title"}}</legend>
+<label>{{$.T "mail.adv.from"}}<input name="adv_from" maxlength="100"></label>
+<label>{{$.T "mail.adv.to"}}<input name="adv_to" maxlength="100"></label>
+<label>{{$.T "mail.adv.subject"}}<input name="adv_subject" maxlength="100"></label>
+<label>{{$.T "mail.adv.text"}}<input name="adv_text" maxlength="100"></label>
+<label>{{$.T "mail.adv.date"}}<select name="adv_date"><option value="">{{$.T "mail.adv.date_all"}}</option><option value="3d">{{$.T "mail.adv.d3"}}</option><option value="1w">{{$.T "mail.adv.w1"}}</option><option value="1m">{{$.T "mail.adv.m1"}}</option><option value="3m">{{$.T "mail.adv.m3"}}</option><option value="6m">{{$.T "mail.adv.m6"}}</option><option value="1y">{{$.T "mail.adv.y1"}}</option></select></label>
+<label class="check"><input type="checkbox" name="adv_unread" value="1"> {{$.T "mail.adv.unread"}}</label>
+<label class="check"><input type="checkbox" name="adv_flagged" value="1"> {{$.T "mail.adv.flagged"}}</label>
+<label class="check"><input type="checkbox" name="adv_attach" value="1"> {{$.T "mail.adv.attach"}}</label>
+</fieldset>
+<button type="submit">{{$.T "mail.search.submit"}}</button>
+{{if .Query}}<a href="{{.ClearSearchURL}}">{{$.T "mail.search.clear"}}</a>{{end}}
+</div></details>
+</form>
+</div>
+
+{{if and .ClearKind .ClearCount}}
+<div class="listClear">
+<details class="dropdown clear" data-dropdown><summary class="clearlink">{{$.T (printf "mail.clear.%s" .ClearKind)}} ({{.ClearCount}})</summary>
+<div class="menu confirm">
+<p>{{$.T "mail.clear.confirm" .ClearCount}}</p>
+<form method="post" action="/mail/clear">
+<input type="hidden" name="csrf" value="{{$.CSRF}}">
+<input type="hidden" name="folder" value="{{.Folder}}">
+<input type="hidden" name="back" value="{{.Back}}">
+<button type="submit" class="danger-btn">{{$.T "mail.clear.yes"}}</button>
+</form>
+</div></details>
+</div>
+{{end}}
+{{if .Error}}
+<p class="msg error" role="alert">{{$.T (printf "accounts.test.fail.%s" .Error.Kind)}}{{if .Error.Detail}}<br><small>{{.Error.Detail}}</small>{{end}}</p>
+{{else}}
+{{if .Query}}<p class="searchdesc">{{$.T "mail.search.results" .Query}}</p>{{end}}
+{{if .ThreadOpen}}<p class="bar threadbar"><a href="{{.ThreadBackURL}}">‹ {{$.T "mail.thread_back"}}</a></p>{{end}}
+{{if and .ThreadMode .ThreadsUnsupported}}<p class="msg warn">{{$.T "mail.threads_unsupported"}}</p>{{end}}
+{{if .SortFallback}}<p class="msg warn">{{$.T "mail.sort_fallback"}}</p>{{end}}
+{{if eq .Filter "unread"}}<p class="filterbar"><span>{{$.T "mail.filter.unread"}}</span> <a href="{{.FilterAllURL}}">{{$.T "mail.filter.clear"}}</a></p>{{end}}
+<form id="bulk" method="post" action="/mail/action" class="msglist-form" data-eml-folder="{{$.List.Folder}}" data-eml-csrf="{{$.CSRF}}" data-eml-label="{{$.T "mail.eml_drop"}}" data-eml-error="{{$.T "mail.eml_error"}}">
+<input type="hidden" name="csrf" value="{{$.CSRF}}">
+<input type="hidden" name="folder" value="{{.Folder}}">
+<input type="hidden" name="back" value="{{.Back}}">
+<input type="hidden" name="stay" value="{{.Stay}}">
+<input type="hidden" name="current_uid" id="current-uid" value="{{if $.Msg}}{{$.Msg.UID}}{{end}}">
+{{if .Rows}}
+<ul class="msgrows">
+{{range .Rows}}<li id="m{{.UID}}" draggable="true" class="msgrow{{if not .Seen}} unread{{end}}{{if .Selected}} selected{{end}}{{if .Answered}} answered{{end}}">
+<span class="sidebar"></span>
+<div class="delimiter"></div>
+<div class="wrapper">
+<span class="flagParent"><button type="submit" class="star{{if .Flagged}} on{{end}}" name="{{if .Flagged}}star_off{{else}}star_on{{end}}" value="{{.UID}}" title="{{if .Flagged}}{{$.T "mail.act.unflag"}}{{else}}{{$.T "mail.act.flag"}}{{end}}" aria-label="{{if .Flagged}}{{$.T "mail.act.unflag"}}{{else}}{{$.T "mail.act.flag"}}{{end}}">{{if .Flagged}}{{template "icon" "star"}}{{else}}{{template "icon" "star-o"}}{{end}}</button></span>
+<span class="dateParent">{{.Date}}</span>
+<span class="checkedParent"><label class="chk"><input type="checkbox" name="uid" value="{{.UID}}" aria-label="{{$.T "mail.select"}}">{{if gt .ThreadCount 1}}<input type="hidden" name="th_{{.UID}}" value="{{.ThreadUIDs}}">{{end}}</label></span>
+<a class="rowlink" href="{{.ReadURL}}"{{if .Selected}} aria-current="true"{{end}}>
+<span class="senderParent">{{if .Answered}}<span class="ans" title="{{$.T "mail.answered"}}">{{template "icon" "reply"}}</span>{{end}}{{if .Forwarded}}<span class="ans" title="{{$.T "mail.forwarded"}}">{{template "icon" "forward"}}</span>{{end}}<span class="from">{{.From}}</span></span>
+{{if .HasAttachment}}<span class="attachmentParent clip{{if .AttachKind}} kind-{{.AttachKind}}{{end}}" title="{{$.T "mail.attachments"}}{{if .AttachKind}} ({{$.T (printf "mail.attkind.%s" .AttachKind)}}){{end}}">{{if eq .AttachKind "image"}}{{template "icon" "image"}}{{else}}{{template "icon" "doc"}}{{end}}</span>{{end}}
+<span class="subjectParent">{{if gt .ThreadCount 1}}<a class="threads" href="{{.ThreadURL}}" title="{{$.T "mail.thread_open"}}">{{.ThreadCount}}</a>{{end}}<span class="subj">{{if .Important}}<b class="imp" title="{{$.T "mail.important"}}">!</b> {{end}}{{if .Subject}}{{if .SubjectPrefix}}<span class="pfx">{{.SubjectPrefix}}</span>{{end}}{{.SubjectRest}}{{else}}<i>{{$.T "mail.no_subject"}}</i>{{end}}</span></span>
+</a>
+</div>
+</li>{{end}}
+</ul>
+{{else}}
+<p class="muted pad">{{if .Query}}{{$.T "mail.no_results"}}{{else if eq .Filter "unread"}}{{$.T "mail.no_unread"}}{{else}}{{$.T "mail.empty"}}{{end}}</p>
+{{end}}
+</form>
+<footer class="lp-foot">
+<span class="count">{{$.T "mail.total" .Total}}</span>
+<nav class="pager" aria-label="pagination"><span class="sr">{{$.T "mail.page" .Page .Pages}}</span>
+{{range .PageLinks}}{{if .Gap}}<span class="gap">…</span>{{else if .Current}}<span class="cur" aria-current="page">{{.Label}}</span>{{else}}<a href="{{.URL}}">{{.Label}}</a>{{end}}{{end}}
+</nav>
+</footer>
+{{end}}
+{{end}}{{end}}
+</section>
+{{if .List.ThreePane}}<div class="splitter b" data-pane="list" role="separator" aria-orientation="vertical" tabindex="0" title="{{.T "mailbox.splitter"}}" aria-label="{{.T "mailbox.splitter.list"}}"></div>
+
+<section class="readpane" aria-label="{{.T "mail.reading"}}">
+{{if .Msg}}{{template "msgview" .}}
+{{else if .List.PaneError}}<p class="msg error pad" role="alert">{{.T .List.PaneError}}</p>
+{{else}}<p class="muted pane-empty">{{.T "mailbox.placeholder"}}</p>{{end}}
+</section>
+{{end}}
+</div>
+{{end}}
+
+{{define "scripts"}}<script src="/static/list.js" defer></script><script src="/static/folders.js" defer></script><script src="/static/keys.js" defer></script><script src="/static/dnd.js" defer></script><script src="/static/listnav.js" defer></script><script src="/static/preview.js" defer></script><script src="/static/msgfull.js" defer></script><script src="/static/emldrop.js" defer></script><script src="/static/listrefresh.js" defer></script>{{end}}

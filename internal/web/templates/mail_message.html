@@ -1,0 +1,16 @@
+{{define "content"}}
+<div class="mailbox standalone" data-csrf="{{.CSRF}}">
+{{template "folderpanel" .}}
+<div class="splitter a" data-pane="folders" role="separator" aria-orientation="vertical" tabindex="0" title="{{.T "mailbox.splitter"}}" aria-label="{{.T "mailbox.splitter.folders"}}"></div>
+<form id="bulk" method="post" action="/mail/action" hidden>
+<input type="hidden" name="csrf" value="{{.CSRF}}">
+<input type="hidden" name="folder" value="{{.Msg.Folder}}">
+<input type="hidden" name="back" value="{{.Msg.Back}}">
+<input type="hidden" name="stay" value="{{.Msg.Self}}">
+<input type="hidden" name="current_uid" id="current-uid" value="{{.Msg.UID}}">
+</form>
+<main class="readpane">{{template "msgview" .}}</main>
+</div>
+{{end}}
+
+{{define "scripts"}}<script src="/static/list.js" defer></script><script src="/static/folders.js" defer></script><script src="/static/keys.js" defer></script><script src="/static/dnd.js" defer></script><script src="/static/listnav.js" defer></script><script src="/static/preview.js" defer></script><script src="/static/msgfull.js" defer></script>{{end}}
