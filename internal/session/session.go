@@ -15,24 +15,24 @@ import (
 
 // Session contient le compte déchiffré et l'état de navigation de l'utilisateur.
 type Session struct {
-	Mu                 sync.Mutex // protège Account, PendingRecoveryKey et ActiveMailAccount
-	ID                 string
-	Account            *store.Account
-	CSRF               string
-	Created            time.Time
-	LastSeen           time.Time // protégé par le Manager
-	Idle, Abs          time.Duration
-	PendingRecoveryKey string // clé à afficher puis confirmer avant de continuer
-	ActiveMailAccount  string
-	ContactsMu         sync.Mutex     // sérialise les accès au carnet d'adresses
-	ContactsRev        int            // incrémenté à chaque écriture du carnet (détecte une modification pendant une synchronisation)
-	ContactsSyncing    bool           // une synchronisation est en cours
-	ContactsTried      time.Time      // dernier essai de synchronisation (automatique ou manuel)
-	Contacts           *contacts.Book // carnet en cache (protégé par ContactsMu)
-	TwoFactorSetup     string         // secret en cours d'installation (pas encore confirmé), protégé par Mu
-	TwoFactorReveal      string    // secret révélé après un code valide, protégé par Mu
-	TwoFactorRevealUntil time.Time // fin de la période d'affichage du secret révélé
-	Flash              string         // clé d'un message à afficher une seule fois (protégée par Mu)
+	Mu                   sync.Mutex // protège Account, PendingRecoveryKey et ActiveMailAccount
+	ID                   string
+	Account              *store.Account
+	CSRF                 string
+	Created              time.Time
+	LastSeen             time.Time // protégé par le Manager
+	Idle, Abs            time.Duration
+	PendingRecoveryKey   string // clé à afficher puis confirmer avant de continuer
+	ActiveMailAccount    string
+	ContactsMu           sync.Mutex     // sérialise les accès au carnet d'adresses
+	ContactsRev          int            // incrémenté à chaque écriture du carnet (détecte une modification pendant une synchronisation)
+	ContactsSyncing      bool           // une synchronisation est en cours
+	ContactsTried        time.Time      // dernier essai de synchronisation (automatique ou manuel)
+	Contacts             *contacts.Book // carnet en cache (protégé par ContactsMu)
+	TwoFactorSetup       string         // secret en cours d'installation (pas encore confirmé), protégé par Mu
+	TwoFactorReveal      string         // secret révélé après un code valide, protégé par Mu
+	TwoFactorRevealUntil time.Time      // fin de la période d'affichage du secret révélé
+	Flash                string         // clé d'un message à afficher une seule fois (protégée par Mu)
 }
 
 // Manager garde les sessions actives.

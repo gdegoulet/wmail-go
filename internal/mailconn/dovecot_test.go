@@ -254,6 +254,40 @@ func TestRealDovecotMailboxOperations(t *testing.T) {
 	})
 }
 
+// C-06 : contre un vrai serveur, « from: adresse@exemple.fr » doit trouver autant de messages que la même adresse
+// cherchée sans mot-clé, que les deux-points soient suivis d'une espace ou non, et avec ou sans guillemets.
+func TestRealDovecotSearchOperatorWithFullAddress(t *testing.T) {
+	p, e := dovecot(t)
+	when := time.Date(2026, 9, 1, 8, 0, 0, 0, time.UTC)
+	const addr = "pascalinejaouen@yahoo.fr"
+	raw := "From: =?UTF-8?Q?Pascaline_Jaouen?= <" + addr + ">\r\nTo: moi@example.org\r\nCc: =?iso-8859-1?Q?St=E9phane?= <stephane@exemple.fr>\r\n" +
+		"Subject: Facture octobre\r\nDate: " + when.Format(time.RFC1123Z) + "\r\nMessage-ID: <c06@test>\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\ncorps\r\n"
+	dv(t, p, e, func(c *Conn) error {
+		if _, err := c.Append("INBOX", []byte(raw), "c06@test"); err != nil {
+			return err
+		}
+		_, err := c.Append("INBOX", rawMsg(2, "autre@exemple.fr", "Autre", "corps", when.Add(time.Hour)), "c06b@test")
+		return err
+	})
+	list := func(q string) int {
+		var res *ListResult
+		dv(t, p, e, func(c *Conn) (err error) {
+			res, err = c.ListMessages(ListQuery{Folder: "INBOX", Page: 1, PageSize: 50, Search: q, Scope: "all"})
+			return
+		})
+		return res.Total
+	}
+	for q, want := range map[string]int{
+		addr: 1, "from:" + addr: 1, "from: " + addr: 1, `from:"` + addr + `"`: 1, `from: "` + addr + `"`: 1,
+		"cc: stephane@exemple.fr": 1, "to: moi@example.org": 2, `subject: "Facture octobre"`: 1,
+		"from: " + addr + " subject: Facture": 1, "from: autre@exemple.fr": 1, "from: inconnu@exemple.fr": 0,
+	} {
+		if got := list(q); got != want {
+			t.Errorf("recherche %q : %d résultats, attendu %d", q, got, want)
+		}
+	}
+}
+
 func TestRealDovecotBulkMoveDoesNotBlock(t *testing.T) {
 	p, e := dovecot(t)
 	const n = 520

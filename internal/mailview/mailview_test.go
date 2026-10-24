@@ -541,6 +541,27 @@ func TestQuotedEncodedWordSender(t *testing.T) {
 	}
 }
 
+// E-06 : DecodeWords est le dernier rempart avant l'affichage d'un nom ; il doit traiter les deux encodages
+// (Q et B), les jeux de caractères autres qu'UTF-8 et les mots encodés entre guillemets.
+func TestDecodeWords(t *testing.T) {
+	for in, want := range map[string]string{
+		"=?utf-8?q?St=C3=A9phane?=":               "Stéphane",
+		"=?UTF-8?Q?St=C3=A9phane_Mar=C3=A9chal?=": "Stéphane Maréchal",
+		"=?utf-8?B?SsOpcsO0bWU=?=":                "Jérôme",
+		"=?iso-8859-1?Q?Fran=E7ois?=":             "François",
+		`"=?iso-8859-1?q?Andr=E9?="`:              `"André"`,
+		"=?utf-8?q?Id=C3=A9e?= Déco":              "Idée Déco",
+		"=?utf-8?q?a?= et =?iso-8859-1?q?=E9?=":   "a et é",
+		"Déjà décodé":                             "Déjà décodé",
+		"":                                        "",
+		"=?utf-8?x?inconnu?=":                     "=?utf-8?x?inconnu?=",
+	} {
+		if got := DecodeWords(in); got != want {
+			t.Errorf("DecodeWords(%q) = %q, attendu %q", in, got, want)
+		}
+	}
+}
+
 func TestExifOrientationRotatesThumbnail(t *testing.T) {
 	// Image 2×1 : pixel gauche rouge, droit bleu. Orientation 6 (quart de tour horaire) : le rouge passe en haut.
 	src := image.NewRGBA(image.Rect(0, 0, 2, 1))

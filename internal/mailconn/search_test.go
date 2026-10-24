@@ -42,6 +42,54 @@ func TestSearchOperators(t *testing.T) {
 	}
 }
 
+// C-06 : « from: adresse@exemple.fr » (une espace après les deux-points) ne renvoyait rien, car le mot-clé « from: »
+// et l'adresse repartaient en texte libre : la recherche portait alors sur la chaîne entière, en-tête From compris.
+func TestSearchOperatorValueAfterSpace(t *testing.T) {
+	const addr = "pascalinejaouen@yahoo.fr"
+	header := func(c *imap.SearchCriteria, key string) string {
+		for _, h := range c.Header {
+			if h.Key == key {
+				return h.Value
+			}
+		}
+		return ""
+	}
+	for _, q := range []string{
+		"from:" + addr, "from: " + addr, `from:"` + addr + `"`, `from: "` + addr + `"`, "FROM: " + addr,
+	} {
+		c := searchCriteria(q, "all", false)
+		if header(c, "From") != addr || len(c.Or) != 0 || len(c.Text) != 0 || len(c.Body) != 0 {
+			t.Errorf("%q : en-têtes %+v, Or %+v", q, c.Header, c.Or)
+		}
+	}
+	// les autres mots-clés acceptent aussi l'espace et une adresse complète
+	if c := searchCriteria("cc: "+addr, "all", false); header(c, "Cc") != addr {
+		t.Errorf("cc : %+v", c.Header)
+	}
+	if c := searchCriteria(`subject: "Facture 2026"`, "all", false); header(c, "Subject") != "Facture 2026" {
+		t.Errorf("subject : %+v", c.Header)
+	}
+	// « to: » cherche dans À ou Cc : un seul Or, sans texte libre résiduel
+	c := searchCriteria("to: "+addr, "all", false)
+	if len(c.Or) != 1 || len(c.Header) != 0 || c.Or[0][0].Header[0].Value != addr || c.Or[0][1].Header[0].Value != addr {
+		t.Errorf("to : %+v", c)
+	}
+	// combinaison : deux mots-clés séparés par une espace après les deux-points
+	c = searchCriteria("from: "+addr+" subject: Facture", "all", false)
+	if header(c, "From") != addr || header(c, "Subject") != "Facture" || len(c.Or) != 0 {
+		t.Errorf("combinaison : %+v %+v", c.Header, c.Or)
+	}
+	// un mot-clé sans valeur, une valeur invalide ou un mot-clé inconnu restent du texte libre
+	for _, q := range []string{"from:", "size: abc", "truc: machin"} {
+		if c := searchCriteria(q, "all", false); len(c.Header) != 0 || c.Larger != 0 || len(c.Or) != 1 {
+			t.Errorf("%q : %+v", q, c)
+		}
+	}
+	if c := searchCriteria("size: 2MB", "all", false); c.Larger != 2<<20 || len(c.Or) != 0 {
+		t.Errorf("size avec espace : %+v", c)
+	}
+}
+
 func TestHighPriority(t *testing.T) {
 	for in, want := range map[string]bool{
 		"Importance: high\r\n\r\n":                    true,

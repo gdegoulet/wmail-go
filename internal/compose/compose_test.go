@@ -47,6 +47,83 @@ func TestParseList(t *testing.T) {
 	}
 }
 
+// E-06 : en répondant à un message dont l'expéditeur porte un nom accentué, les champs À et Cc affichaient le mot
+// encodé RFC 2047 (« =?utf-8?q?St=C3=A9phane?= <s@x.fr> ») : (*mail.Address).String() réencode tout nom non ASCII.
+func TestFormatListKeepsNamesReadable(t *testing.T) {
+	for _, c := range []struct{ name, addr, want string }{
+		{"Stéphane", "s@x.fr", "Stéphane <s@x.fr>"},
+		{"=?utf-8?q?St=C3=A9phane?=", "s@x.fr", "Stéphane <s@x.fr>"},          // mot encodé resté dans le nom
+		{"=?iso-8859-1?Q?Fran=E7ois?=", "f@x.fr", "François <f@x.fr>"},        // autre jeu de caractères
+		{"=?utf-8?q?Pinterest?=", "p@x.fr", "Pinterest <p@x.fr>"},             // mot encodé resté d'un nom entre guillemets
+		{"Alice", "alice@x.fr", "Alice <alice@x.fr>"},                         // nom ASCII : pas de guillemets inutiles
+		{"Doe, John", "j@d.fr", `"Doe, John" <j@d.fr>`},                       // virgule : guillemets obligatoires
+		{"Zoé O'Hara (Société)", "z@x.fr", `"Zoé O'Hara (Société)" <z@x.fr>`}, // parenthèses : idem
+		{"", "bob@x.fr", "bob@x.fr"},
+	} {
+		got := FormatAddress(&mail.Address{Name: c.name, Address: c.addr})
+		if got != c.want {
+			t.Errorf("FormatAddress(%q, %q) = %q, attendu %q", c.name, c.addr, got, c.want)
+		}
+		if strings.Contains(got, "=?") {
+			t.Errorf("mot encodé dans %q", got)
+		}
+		// ce qui est affiché doit se relire : le formulaire renvoie ce texte tel quel
+		back, err := ParseList(got)
+		if err != nil || len(back) != 1 || back[0].Address != c.addr || back[0].Name != mailview.DecodeWords(strings.Trim(c.name, `"`)) {
+			t.Errorf("relecture de %q : %v %v", got, back, err)
+		}
+	}
+	list := []*mail.Address{{Name: "Stéphane", Address: "s@x.fr"}, {Address: "bob@x.fr"}}
+	if got := FormatList(list); got != "Stéphane <s@x.fr>, bob@x.fr" {
+		t.Errorf("FormatList = %q", got)
+	}
+	if got := FormatList(nil); got != "" {
+		t.Errorf("liste vide = %q", got)
+	}
+}
+
+// Le chemin complet d'une réponse : les adresses lues dans le message d'origine ne doivent plus porter de mot encodé
+// une fois remises dans les champs du formulaire.
+func TestReplyAddressesFromEncodedHeaders(t *testing.T) {
+	raw := []byte("From: =?utf-8?q?St=C3=A9phane_Mar=C3=A9chal?= <stephane@x.fr>\r\n" +
+		"To: \"=?iso-8859-1?Q?Fran=E7ois?=\" <francois@y.fr>, moi@example.org\r\n" +
+		"Cc: =?utf-8?B?SsOpcsO0bWU=?= <jerome@z.fr>\r\n" +
+		"Subject: =?utf-8?q?Facture_d=27=C3=A9t=C3=A9?=\r\nDate: Mon, 05 Oct 2026 09:00:00 +0000\r\n" +
+		"Message-ID: <e06@test>\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\ncorps\r\n")
+	m, err := mailview.Parse(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	conv := func(l []mailview.Address) []*mail.Address { // équivalent de netAddrs côté web
+		out := make([]*mail.Address, 0, len(l))
+		for _, a := range l {
+			out = append(out, &mail.Address{Name: a.Name, Address: a.Email})
+		}
+		return out
+	}
+	own := map[string]bool{"moi@example.org": true}
+	to, cc := ReplyAll(nil, conv(m.From), conv(m.To), conv(m.Cc), own)
+	gotTo, gotCc := FormatList(to), FormatList(cc)
+	if gotTo != "Stéphane Maréchal <stephane@x.fr>, François <francois@y.fr>" {
+		t.Errorf("À = %q", gotTo)
+	}
+	if gotCc != "Jérôme <jerome@z.fr>" {
+		t.Errorf("Cc = %q", gotCc)
+	}
+	if got := ReplySubject("Re", m.Subject); got != "Re: Facture d'été" {
+		t.Errorf("objet = %q", got)
+	}
+	// ligne de citation et en-tête de transfert : le nom décodé, jamais le mot encodé
+	if got := m.From[0].String(); got != "Stéphane Maréchal <stephane@x.fr>" {
+		t.Errorf("ligne de citation = %q", got)
+	}
+	fwd := ForwardText(ForwardHeader{Title: "---", From: "De", To: "À", Subject: "Objet",
+		FromV: m.From[0].String(), ToV: FormatList(conv(m.To)), SubjectV: m.Subject}, "corps")
+	if strings.Contains(fwd, "=?") {
+		t.Errorf("mot encodé dans l'en-tête de transfert :\n%s", fwd)
+	}
+}
+
 func TestReplySubject(t *testing.T) {
 	cases := []struct{ prefix, in, want string }{
 		{"Re", "Bonjour", "Re: Bonjour"},

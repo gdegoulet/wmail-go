@@ -149,15 +149,48 @@ func truncate(s string, n int) string {
 	return s
 }
 
-// FormatList met une liste d'adresses en une ligne « Nom <a@b>, c@d ».
+// FormatList met une liste d'adresses en une ligne « Nom <a@b>, c@d », destinée à l'affichage et aux champs du
+// formulaire de composition.
 func FormatList(list []*mail.Address) string {
 	parts := make([]string, 0, len(list))
 	for _, a := range list {
 		if a != nil {
-			parts = append(parts, a.String())
+			parts = append(parts, FormatAddress(a))
 		}
 	}
 	return strings.Join(parts, ", ")
+}
+
+// nameNeedsQuote indique qu'un nom d'affichage doit être mis entre guillemets : il contient un caractère spécial
+// de la RFC 5322, une espace en bordure ou un caractère de contrôle.
+func nameNeedsQuote(s string) bool {
+	if s != strings.TrimSpace(s) {
+		return true
+	}
+	return strings.ContainsAny(s, "()<>[]:;@\\,.\"")
+}
+
+// FormatAddress met une adresse sous la forme « Nom <a@b> », ou « a@b » si le nom est vide.
+//
+// Contrairement à (*mail.Address).String(), le nom reste lisible : un nom accentué n'est pas réencodé en mot encodé
+// RFC 2047 (« =?utf-8?q?St=C3=A9phane?= »), qui s'afficherait tel quel dans les champs À, Cc et Cci d'une réponse
+// ou d'un transfert. Un mot encodé qui aurait échappé au décodage en amont est décodé ici.
+func FormatAddress(a *mail.Address) string {
+	if a == nil {
+		return ""
+	}
+	name := mailview.DecodeWords(strings.TrimSpace(a.Name))
+	if name == "" {
+		// « <a@b> » n'est utile que si la partie locale demande des guillemets.
+		if s := (&mail.Address{Address: a.Address}).String(); s != "<"+a.Address+">" {
+			return s
+		}
+		return a.Address
+	}
+	if nameNeedsQuote(name) {
+		name = `"` + strings.NewReplacer(`\`, `\\`, `"`, `\"`).Replace(name) + `"`
+	}
+	return name + " " + (&mail.Address{Address: a.Address}).String()
 }
 
 // Dedup retire les doublons (adresse comparée sans casse) et les adresses de exclude (en minuscules).
