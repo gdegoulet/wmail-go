@@ -201,6 +201,15 @@ func rewriteImage(n *xhtml.Node, opts SanitizeOptions, rep *Report) {
 	}
 	src = strings.TrimSpace(src)
 	lower := strings.ToLower(src)
+	// Image jointe désignée par Content-Location : on la remplace avant tout traitement d'URL distante.
+	if len(opts.InlineImages) > 0 && !strings.HasPrefix(lower, "cid:") && !strings.HasPrefix(lower, "data:") {
+		for _, k := range LocationKeys(src) {
+			if data, ok := opts.InlineImages[k]; ok {
+				setAttr(n, "src", data)
+				return
+			}
+		}
+	}
 	switch {
 	case strings.HasPrefix(lower, "cid:"):
 		if data, ok := opts.InlineImages[NormalizeCID(src)]; ok {

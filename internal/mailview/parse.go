@@ -138,6 +138,20 @@ func charsetReader(label string, input io.Reader) (io.Reader, error) {
 	return message.CharsetReader(label, input)
 }
 
+// LocationKeys donne les clés sous lesquelles ranger une image désignée par Content-Location : la valeur entière
+// en minuscules et son dernier segment, car le HTML peut référencer l'une ou l'autre forme.
+func LocationKeys(loc string) []string {
+	loc = strings.ToLower(strings.TrimSpace(loc))
+	if loc == "" || len(loc) > 2048 {
+		return nil
+	}
+	keys := []string{"loc:" + loc}
+	if i := strings.LastIndexAny(loc, "/\\"); i >= 0 && i+1 < len(loc) {
+		keys = append(keys, "loc:"+loc[i+1:])
+	}
+	return keys
+}
+
 // NormalizeCID retire les chevrons et le préfixe « cid: » et met en minuscules.
 func NormalizeCID(s string) string {
 	s = strings.TrimSpace(s)
@@ -249,6 +263,21 @@ func Parse(raw []byte) (*Message, error) {
 			}
 			inlineTotal += len(b)
 			m.InlineImages[cid] = "data:" + ct + ";base64," + base64.StdEncoding.EncodeToString(b)
+		case inlineImageTypes[ct] && cid == "" && hdr.Get("Content-Location") != "" && disposition != "attachment":
+			// Image incorporée désignée par Content-Location (Outlook, Word) plutôt que par cid:.
+			if inlineTotal >= maxInlineAll {
+				continue
+			}
+			b, trunc, _ := readLimited(part.Body, maxInline)
+			if trunc {
+				m.Truncated = true
+				continue
+			}
+			inlineTotal += len(b)
+			uri := "data:" + ct + ";base64," + base64.StdEncoding.EncodeToString(b)
+			for _, k := range LocationKeys(hdr.Get("Content-Location")) {
+				m.InlineImages[k] = uri
+			}
 		case inline && ct == "text/plain" && m.Text == "":
 			b, trunc, _ := readLimited(part.Body, maxTextPart)
 			m.Text, m.Truncated = string(b), m.Truncated || trunc

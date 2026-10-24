@@ -561,3 +561,27 @@ func TestExifOrientationRotatesThumbnail(t *testing.T) {
 		t.Errorf("données non JPEG : %d", n)
 	}
 }
+
+// Image incorporée désignée par Content-Location (Outlook) : elle doit s'afficher comme une image cid:.
+func TestContentLocationInlineImage(t *testing.T) {
+	png := "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+	raw := "MIME-Version: 1.0\r\nContent-Type: multipart/related; boundary=b\r\n\r\n" +
+		"--b\r\nContent-Type: text/html; charset=utf-8\r\n\r\n" +
+		`<p><img src="http://exemple.invalid/image001.png"></p>` + "\r\n" +
+		"--b\r\nContent-Type: image/png\r\nContent-Location: http://exemple.invalid/image001.png\r\n" +
+		"Content-Transfer-Encoding: base64\r\n\r\n" + png + "\r\n--b--\r\n"
+	m, err := Parse([]byte(raw))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(m.Attachments) != 0 {
+		t.Errorf("l'image incorporée ne doit pas être listée en pièce jointe : %d", len(m.Attachments))
+	}
+	html, _ := Sanitize(m.HTML, SanitizeOptions{InlineImages: m.InlineImages, BlockRemote: true})
+	if !strings.Contains(html, "data:image/png;base64,") {
+		t.Errorf("image non remplacée :\n%s", html)
+	}
+	if strings.Contains(html, "exemple.invalid") {
+		t.Errorf("l'URL distante doit disparaître :\n%s", html)
+	}
+}
