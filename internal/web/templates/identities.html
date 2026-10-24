@@ -1,10 +1,12 @@
 {{define "content"}}{{with .Identities}}{{template "setopen" $}}
 <h1 class="legend">{{$.T "identities.title"}} – {{.AccountEmail}}</h1>
 {{template "messages" $}}
-<ul class="account-list">
+{{if .Extra}}<p class="muted" data-reorder-hint hidden>{{$.T "reorder.hint"}}</p>
+<p role="alert" data-reorder-error hidden>{{$.T "reorder.error"}}</p>{{end}}
+<ul class="account-list" data-reorder="identities" data-box="{{.AccountID}}" data-csrf="{{$.CSRF}}">
 <li><div><strong>{{if .Main.Name}}{{.Main.Name}} {{end}}&lt;{{.Main.Email}}&gt;</strong> <small>({{$.T "identities.main"}})</small></div>
 <div class="row-actions"><a href="/accounts/{{.AccountID}}/edit">{{$.T "accounts.edit"}}</a></div></li>
-{{range $i, $x := .Extra}}{{with $x}}<li>
+{{range $i, $x := .Extra}}{{with $x}}<li data-id="{{.ID}}">
 <div><strong>{{if .Name}}{{.Name}} {{end}}&lt;{{.Email}}&gt;</strong>{{if .ReplyTo}}<br><small>{{$.T "compose.reply_to"}} : {{.ReplyTo}}</small>{{end}}{{if .Bcc}}<br><small>{{$.T "compose.bcc"}} : {{.Bcc}}</small>{{end}}</div>
 <div class="row-actions">
 <form method="post" action="/accounts/{{$.Identities.AccountID}}/identities/{{.ID}}/move" class="inline"><input type="hidden" name="csrf" value="{{$.CSRF}}">{{if gt $i 0}}<button type="submit" class="link" name="dir" value="up" title="{{$.T "accounts.move_up"}}" aria-label="{{$.T "accounts.move_up"}}">▲</button>{{end}}{{if lt $i (sub1 (len $.Identities.Extra))}}<button type="submit" class="link" name="dir" value="down" title="{{$.T "accounts.move_down"}}" aria-label="{{$.T "accounts.move_down"}}">▼</button>{{end}}</form>
@@ -41,4 +43,4 @@
 </section>
 {{end}}
 {{template "setclose" $}}{{end}}{{end}}
-{{define "scripts"}}<script src="/static/richtext.js" defer></script>{{end}}
+{{define "scripts"}}<script src="/static/richtext.js" defer></script><script src="/static/reorder.js" defer></script>{{end}}

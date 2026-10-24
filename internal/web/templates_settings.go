@@ -119,6 +119,30 @@ func (s *Server) templatesDelete(w http.ResponseWriter, r *http.Request, sess *s
 	http.Redirect(w, r, "/settings/templates", http.StatusSeeOther)
 }
 
+// templatesReorder enregistre un ordre complet des modèles, envoyé par le glisser-déposer de la page des modèles.
+func (s *Server) templatesReorder(w http.ResponseWriter, r *http.Request, sess *session.Session) {
+	sess.Mu.Lock()
+	data := sess.Account.Data
+	out, ok := reorderByIDs(data.Templates, r.PostFormValue("order"), func(t userdata.Template) string { return t.ID })
+	if !ok {
+		sess.Mu.Unlock()
+		s.message(w, r, sess, http.StatusBadRequest, "", "mail.err.bad_request")
+		return
+	}
+	prev := data.Templates
+	data.Templates = out
+	err := s.store.SaveData(sess.Account)
+	if err != nil {
+		data.Templates = prev
+	}
+	sess.Mu.Unlock()
+	if err != nil {
+		s.serverError(w, r, sess, err)
+		return
+	}
+	s.reorderDone(w, r, "/settings/templates")
+}
+
 // templatesBody renvoie le texte d'un modèle (variables de date remplacées), pour l'insérer dans la composition.
 func (s *Server) templatesBody(w http.ResponseWriter, r *http.Request, sess *session.Session) {
 	id := r.URL.Query().Get("id")

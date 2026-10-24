@@ -491,6 +491,8 @@
   "mail.mdn.body": "Ceci est un accusé de lecture du message que vous avez envoyé.\n\nAttention : il indique seulement que le message a été affiché sur l'ordinateur du destinataire. Rien ne garantit que celui-ci en a lu ou compris le contenu.",
   "quota.title": "Espace utilisé sur le serveur",
   "quota.text": "%s (%d %%) sur %s",
+  "reorder.hint": "Glissez-déposez les lignes pour changer l'ordre.",
+  "reorder.error": "Le nouvel ordre n'a pas pu être enregistré.",
   "folders.missing": "introuvable sur le serveur",
   "folders.new_account_hint": "La liste des dossiers du serveur apparaît après l'enregistrement de la boîte (« Automatique » convient dans la plupart des cas).",
   "accounts.form.sieve": "Filtres : serveur ManageSieve (facultatif)",

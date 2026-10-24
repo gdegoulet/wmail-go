@@ -2,8 +2,10 @@
 <h1 class="legend">{{.T "accounts.title"}}</h1>
 {{template "messages" .}}
 {{if .Accounts}}
-<ul class="account-list">
-{{range $i, $a := .Accounts}}{{with $a}}<li>
+<p class="muted" data-reorder-hint hidden>{{.T "reorder.hint"}}</p>
+<p role="alert" data-reorder-error hidden>{{.T "reorder.error"}}</p>
+<ul class="account-list" data-reorder="accounts" data-csrf="{{.CSRF}}">
+{{range $i, $a := .Accounts}}{{with $a}}<li data-id="{{.ID}}">
 <div><strong>{{.Name}}</strong><br><small>{{.Email}} · {{.IMAPHost}}</small></div>
 <div class="row-actions">
 <form method="post" action="/accounts/{{.ID}}/move" class="inline"><input type="hidden" name="csrf" value="{{$.CSRF}}">{{if gt $i 0}}<button type="submit" class="link" name="dir" value="up" title="{{$.T "accounts.move_up"}}" aria-label="{{$.T "accounts.move_up"}}">▲</button>{{end}}{{if lt $i (sub1 (len $.Accounts))}}<button type="submit" class="link" name="dir" value="down" title="{{$.T "accounts.move_down"}}" aria-label="{{$.T "accounts.move_down"}}">▼</button>{{end}}</form>
@@ -25,3 +27,4 @@
 {{end}}
 <p><a class="button" href="/accounts/new">{{.T "accounts.add"}}</a></p>
 {{template "setclose" .}}{{end}}
+{{define "scripts"}}<script src="/static/reorder.js" defer></script>{{end}}

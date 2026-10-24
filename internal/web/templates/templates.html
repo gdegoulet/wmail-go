@@ -4,8 +4,10 @@
 {{template "messages" $}}
 <p class="muted">{{$.T "templates.intro"}}</p>
 {{if .Rows}}
-<ul class="account-list">
-{{range .Rows}}<li>
+<p class="muted" data-reorder-hint hidden>{{$.T "reorder.hint"}}</p>
+<p role="alert" data-reorder-error hidden>{{$.T "reorder.error"}}</p>
+<ul class="account-list" data-reorder="templates" data-csrf="{{$.CSRF}}">
+{{range .Rows}}<li data-id="{{.ID}}">
 <div><strong>{{.Name}}</strong><br><small>{{.Preview}}</small></div>
 <div class="row-actions">
 <a href="/settings/templates?edit={{.ID}}#form">{{$.T "accounts.edit"}}</a>
@@ -31,4 +33,4 @@
 {{end}}
 {{end}}
 {{template "setclose" $}}{{end}}
-{{define "scripts"}}<script src="/static/richtext.js" defer></script>{{end}}
+{{define "scripts"}}<script src="/static/richtext.js" defer></script><script src="/static/reorder.js" defer></script>{{end}}

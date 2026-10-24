@@ -1605,7 +1605,7 @@ func (s *Server) mailAction(w http.ResponseWriter, r *http.Request, sess *sessio
 type QuotaView struct {
 	Used, Limit string
 	Percent     int
-	Bar         int // largeur de la barre : au moins 2 % dès que la boîte n'est pas vide
+	Bar         int  // largeur de la barre : au moins 2 % dès que la boîte n'est pas vide
 	Full        bool // 90 % ou plus
 }
 

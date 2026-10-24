@@ -574,6 +574,63 @@ func moveInList[T any](list []T, i int, dir string, lo int) bool {
 	return true
 }
 
+// reorderByIDs renvoie la liste rangée dans l'ordre donné par « order » (identifiants séparés par des virgules).
+// L'ordre doit décrire exactement la liste existante : même nombre d'éléments, mêmes identifiants, aucun doublon.
+// Faux sinon : la liste d'origine n'est pas touchée.
+func reorderByIDs[T any](list []T, order string, id func(T) string) ([]T, bool) {
+	var ids []string
+	if order = strings.TrimSpace(order); order != "" {
+		ids = strings.Split(order, ",")
+	}
+	if len(ids) != len(list) {
+		return nil, false
+	}
+	out := make([]T, 0, len(list))
+	seen := make(map[string]bool, len(ids))
+	for _, raw := range ids {
+		key := strings.TrimSpace(raw)
+		if key == "" || seen[key] {
+			return nil, false
+		}
+		i := slices.IndexFunc(list, func(x T) bool { return id(x) == key })
+		if i < 0 {
+			return nil, false
+		}
+		seen[key] = true
+		out = append(out, list[i])
+	}
+	return out, true
+}
+
+// reorderDone conclut un réordonnancement : une courte réponse JSON pour le script, une redirection sinon
+// (sans JavaScript la page reste utilisable avec les flèches ▲ ▼).
+func (s *Server) reorderDone(w http.ResponseWriter, r *http.Request, back string) {
+	if r.Header.Get("X-Requested-With") == "fetch" {
+		h := w.Header()
+		h.Set("Content-Type", "application/json")
+		h.Set("Cache-Control", "no-store")
+		_, _ = w.Write([]byte(`{"ok":true}`))
+		return
+	}
+	http.Redirect(w, r, back, http.StatusSeeOther)
+}
+
+// accountsReorder enregistre un ordre complet des boîtes mail, envoyé par le glisser-déposer de la page des comptes.
+func (s *Server) accountsReorder(w http.ResponseWriter, r *http.Request, sess *session.Session) {
+	list := s.mailAccounts(sess)
+	out, ok := reorderByIDs(list, r.PostFormValue("order"), func(a userdata.MailAccount) string { return a.ID })
+	if !ok {
+		s.message(w, r, sess, http.StatusBadRequest, "", "mail.err.bad_request")
+		return
+	}
+	if err := s.saveAccounts(sess, out); err != nil {
+		s.serverError(w, r, sess, err)
+		return
+	}
+	s.log.Info("ordre des comptes mail modifié", "login", store.ReduceLogin(sess.Account.Login), "nombre", len(out))
+	s.reorderDone(w, r, "/accounts")
+}
+
 // accountMove change l'ordre des boîtes mail (la première est la boîte ouverte au départ).
 func (s *Server) accountMove(w http.ResponseWriter, r *http.Request, sess *session.Session) {
 	id, dir := r.PathValue("id"), r.PostFormValue("dir")

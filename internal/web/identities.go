@@ -136,6 +136,29 @@ func (s *Server) identitiesDelete(w http.ResponseWriter, r *http.Request, sess *
 	http.Redirect(w, r, "/accounts/"+accID+"/identities", http.StatusSeeOther)
 }
 
+// identitiesReorder enregistre un ordre complet des identités supplémentaires d'une boîte (champ « box »),
+// envoyé par le glisser-déposer. L'identité principale n'est pas concernée : elle reste toujours la première.
+func (s *Server) identitiesReorder(w http.ResponseWriter, r *http.Request, sess *session.Session) {
+	accID := r.PostFormValue("box")
+	list := s.mailAccounts(sess)
+	ai := slices.IndexFunc(list, func(a userdata.MailAccount) bool { return a.ID == accID })
+	if ai < 0 {
+		s.message(w, r, sess, http.StatusNotFound, "", "error.not_found")
+		return
+	}
+	out, ok := reorderByIDs(list[ai].Identities, r.PostFormValue("order"), func(x userdata.Identity) string { return x.ID })
+	if !ok {
+		s.message(w, r, sess, http.StatusBadRequest, "", "mail.err.bad_request")
+		return
+	}
+	list[ai].Identities = out
+	if err := s.saveAccounts(sess, list); err != nil {
+		s.serverError(w, r, sess, err)
+		return
+	}
+	s.reorderDone(w, r, "/accounts/"+accID+"/identities")
+}
+
 // identityMove change l'ordre des identités supplémentaires d'une boîte (l'identité principale reste la première).
 func (s *Server) identityMove(w http.ResponseWriter, r *http.Request, sess *session.Session) {
 	accID, iid, dir := r.PathValue("id"), r.PathValue("iid"), r.PostFormValue("dir")
