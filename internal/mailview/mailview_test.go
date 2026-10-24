@@ -8,6 +8,7 @@ import (
 	"image/gif"
 	"image/jpeg"
 	"image/png"
+	"net/url"
 	"strings"
 	"testing"
 )
@@ -452,5 +453,33 @@ func TestSanitizerKeepsModernLayoutStylesButNeverPositioning(t *testing.T) {
 	// une image de fond reste refusée
 	if out, _ := Sanitize(`<div style="background:url(https://t.example/p.gif) #fff">x</div>`, SanitizeOptions{}); strings.Contains(out, "url(") {
 		t.Errorf("url() CSS : %s", out)
+	}
+}
+
+func TestMailtoLinksAndAutoLinksInHTML(t *testing.T) {
+	compose := func(m string) string { return "/compose?mailto=" + url.QueryEscape(m) }
+	in := `<p>Écrivez à <a href="mailto:anne@x.org?subject=Re">Anne</a> ou à paul@x.org.</p>` +
+		`<p>Voir https://exemple.fr/a et www.exemple.fr.</p><pre>pas-de-lien@ici.fr</pre>` +
+		`<p><a href="https://garde.fr">lien existant paul@x.org</a></p>`
+	out, _ := Sanitize(in, SanitizeOptions{MailtoURL: compose})
+	for _, want := range []string{
+		`href="/compose?mailto=mailto%3Aanne%40x.org%3Fsubject%3DRe" target="_top"`,
+		`href="/compose?mailto=mailto%3Apaul%40x.org" target="_top">paul@x.org</a>`,
+		`<a href="https://exemple.fr/a" target="_blank" rel="nofollow noreferrer noopener">https://exemple.fr/a</a>`,
+		`<a href="http://www.exemple.fr" target="_blank"`,
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("%q absent de :\n%s", want, out)
+		}
+	}
+	if strings.Contains(out, `<pre><a`) || !strings.Contains(out, "<pre>pas-de-lien@ici.fr</pre>") {
+		t.Errorf("le contenu de <pre> ne doit pas être transformé : %s", out)
+	}
+	if strings.Count(out, "lien existant paul@x.org</a>") != 1 {
+		t.Errorf("pas de lien dans un lien : %s", out)
+	}
+	// sans MailtoURL, le lien reste un mailto: ordinaire
+	if out, _ := Sanitize(`<a href="mailto:a@b.fr">x</a>`, SanitizeOptions{}); !strings.Contains(out, `href="mailto:a@b.fr"`) {
+		t.Errorf("mailto inchangé : %s", out)
 	}
 }

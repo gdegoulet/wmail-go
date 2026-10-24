@@ -93,7 +93,7 @@ func (s *Server) mailPrint(w http.ResponseWriter, r *http.Request, sess *session
 	var body string
 	switch {
 	case m.HTML != "":
-		body, _ = mailview.Sanitize(m.HTML, mailview.SanitizeOptions{BlockRemote: block, InlineImages: m.InlineImages})
+		body, _ = mailview.Sanitize(m.HTML, mailview.SanitizeOptions{BlockRemote: block, InlineImages: m.InlineImages, MailtoURL: composeMailtoURL})
 	case m.Text != "":
 		body = mailview.TextToHTML(m.Text)
 	}

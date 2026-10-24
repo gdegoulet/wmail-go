@@ -1085,7 +1085,7 @@ func (s *Server) mailBody(w http.ResponseWriter, r *http.Request, sess *session.
 	var body string
 	switch {
 	case q.Get("view") != "text" && m.HTML != "":
-		body, _ = mailview.Sanitize(m.HTML, mailview.SanitizeOptions{BlockRemote: block, InlineImages: m.InlineImages, ProxyURL: s.proxyURLFunc(sess, acc)})
+		body, _ = mailview.Sanitize(m.HTML, mailview.SanitizeOptions{BlockRemote: block, InlineImages: m.InlineImages, ProxyURL: s.proxyURLFunc(sess, acc), MailtoURL: composeMailtoURL})
 		body = mailview.CollapseQuotes(body)
 	case m.Text != "":
 		body = mailview.TextToHTML(m.Text)
@@ -1102,7 +1102,7 @@ func (s *Server) mailBody(w http.ResponseWriter, r *http.Request, sess *session.
 	}
 	h := w.Header()
 	h.Set("Content-Security-Policy", "default-src 'none'; "+img+"; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; "+
-		"frame-ancestors 'self'; sandbox allow-popups allow-popups-to-escape-sandbox")
+		"frame-ancestors 'self'; sandbox allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation")
 	h.Set("X-Frame-Options", "SAMEORIGIN")
 	h.Set("Content-Type", "text/html; charset=utf-8")
 	h.Set("Cache-Control", "private, no-store")
@@ -1129,6 +1129,11 @@ func previewKind(declared string, data []byte) string {
 		}
 	}
 	return ""
+}
+
+// composeMailtoURL ouvre la composition de wmail-go pour un lien « mailto: » cliqué dans un message.
+func composeMailtoURL(mailto string) string {
+	return "/compose?" + url.Values{"mailto": {mailto}}.Encode()
 }
 
 var safeMediaType = regexp.MustCompile(`^[a-z0-9][a-z0-9.+-]*/[a-z0-9][a-z0-9.+-]*$`)
