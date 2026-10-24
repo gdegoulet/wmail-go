@@ -32,7 +32,6 @@ const (
 	// maxAttachmentBytes : taille maximale d'une pièce jointe téléchargée seule (le message entier n'est pas lu).
 	maxAttachmentBytes = 200 << 20
 	maxActionUIDs      = 500
-	mailTimeout        = 30 * time.Second
 	maxPageSize        = 500
 	maxThumbnails      = 12      // miniatures calculées par message
 	maxThumbSource     = 8 << 20 // taille maximale d'une image décodée pour sa miniature
@@ -478,8 +477,13 @@ func (s *Server) poolKey(sess *session.Session, acc userdata.MailAccount) string
 	return sess.ID + "/" + acc.ID
 }
 
+// mailTimeout est le délai d'une opération IMAP (timeouts.mail_seconds).
+func (s *Server) mailTimeout() time.Duration {
+	return time.Duration(s.cfg.Timeouts.Mail) * time.Second
+}
+
 func (s *Server) mailCtx(r *http.Request) (context.Context, context.CancelFunc) {
-	return context.WithTimeout(r.Context(), mailTimeout)
+	return context.WithTimeout(r.Context(), s.mailTimeout())
 }
 
 // mailErr répond à une erreur d'accès au serveur IMAP.

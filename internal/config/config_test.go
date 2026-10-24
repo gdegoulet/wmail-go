@@ -116,3 +116,17 @@ func TestComposeLimitsValidated(t *testing.T) {
 		t.Errorf("limites : %+v %v", cfg.Compose, err)
 	}
 }
+
+func TestTimeoutsDefaultsAndBounds(t *testing.T) {
+	c := Default()
+	if c.Timeouts.Mail != 30 || c.Timeouts.Send != 90 || c.Timeouts.Dial != 20 {
+		t.Errorf("délais par défaut : %+v", c.Timeouts)
+	}
+	for _, bad := range []Timeouts{{Mail: 1, Send: 90, Dial: 20}, {Mail: 30, Send: 5, Dial: 20}, {Mail: 30, Send: 90, Dial: 0}, {Mail: 1000, Send: 90, Dial: 20}} {
+		c := Default()
+		c.Timeouts = bad
+		if err := c.Validate(); err == nil {
+			t.Errorf("délais invalides acceptés : %+v", bad)
+		}
+	}
+}

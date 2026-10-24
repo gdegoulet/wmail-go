@@ -65,6 +65,9 @@ func New(cfg config.Config, st *store.Store, log *slog.Logger) (*Server, error) 
 		return nil, err
 	}
 	guard, err := mailconn.NewGuard(cfg.BlockPrivateNetworks, cfg.AllowedPrivateHosts)
+	if err == nil {
+		guard.SetDialTimeout(time.Duration(cfg.Timeouts.Dial) * time.Second)
+	}
 	if err != nil {
 		return nil, err
 	}

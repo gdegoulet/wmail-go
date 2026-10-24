@@ -104,6 +104,13 @@ type KDF struct {
 	Parallelism uint8  `json:"parallelism"`
 }
 
+// Timeouts fixe les délais des opérations distantes (en secondes).
+type Timeouts struct {
+	Mail int `json:"mail_seconds"` // liste, lecture, recherche, actions IMAP
+	Send int `json:"send_seconds"` // envoi d'un message par SMTP
+	Dial int `json:"dial_seconds"` // établissement d'une connexion (TCP et TLS)
+}
+
 // Config est le contenu de config.json.
 type Config struct {
 	AllowRegistration    bool       `json:"allow_registration"`
@@ -119,6 +126,7 @@ type Config struct {
 	RateLimit            RateLimits `json:"rate_limit"`
 	Compose              Compose    `json:"compose"`
 	KDF                  KDF        `json:"kdf"`
+	Timeouts             Timeouts   `json:"timeouts"`
 	DefaultLanguage      string     `json:"default_language"`
 	DefaultTheme         string     `json:"default_theme"`
 	Timezone             string     `json:"timezone"` // fuseau d'affichage des dates (ex. Europe/Paris) ; vide : celui du système
@@ -162,6 +170,7 @@ func Default() Config {
 		},
 		Compose:         Compose{MaxAttachmentMB: 25, MaxMessageMB: 30, MaxAttachments: 30, MaxSessionMB: 100},
 		KDF:             KDF{MemoryMiB: 64, Iterations: 3, Parallelism: 4},
+		Timeouts:        Timeouts{Mail: 30, Send: 90, Dial: 20},
 		DefaultLanguage: "fr",
 		DefaultTheme:    "rainloop",
 		Timezone:        "Europe/Paris",
@@ -237,6 +246,15 @@ func (c *Config) Validate() error {
 	}
 	if c.Compose.MaxSessionMB < c.Compose.MaxMessageMB || c.Compose.MaxSessionMB > 4096 {
 		add("compose.max_session_mb doit être au moins compose.max_message_mb et au plus 4096")
+	}
+	if c.Timeouts.Mail < 5 || c.Timeouts.Mail > 600 {
+		add("timeouts.mail_seconds doit être compris entre 5 et 600")
+	}
+	if c.Timeouts.Send < 10 || c.Timeouts.Send > 900 {
+		add("timeouts.send_seconds doit être compris entre 10 et 900")
+	}
+	if c.Timeouts.Dial < 2 || c.Timeouts.Dial > 120 {
+		add("timeouts.dial_seconds doit être compris entre 2 et 120")
 	}
 	if c.DefaultLanguage != "fr" && c.DefaultLanguage != "en" {
 		add("default_language doit valoir fr ou en")

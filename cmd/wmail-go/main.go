@@ -136,9 +136,12 @@ func cmdServe(args []string) error {
 		Addr:              cfg.Listen,
 		Handler:           srv.Handler(),
 		ReadHeaderTimeout: 10 * time.Second,
-		ReadTimeout:       30 * time.Second,
-		WriteTimeout:      30 * time.Second,
-		IdleTimeout:       120 * time.Second,
+		// Lecture et écriture : 5 minutes. Les opérations longues (téléversement d'une pièce jointe,
+		// envoi SMTP jusqu'à 90 s, recherche sur une grosse boîte) ont leur propre délai, plus court ;
+		// ces bornes-ci ne servent qu'à libérer une connexion abandonnée.
+		ReadTimeout:  5 * time.Minute,
+		WriteTimeout: 5 * time.Minute,
+		IdleTimeout:  120 * time.Second,
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)

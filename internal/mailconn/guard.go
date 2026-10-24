@@ -85,6 +85,13 @@ type Guard struct {
 	dialTimeout  time.Duration
 }
 
+// SetDialTimeout fixe le délai d'établissement d'une connexion (TCP et TLS).
+func (g *Guard) SetDialTimeout(d time.Duration) {
+	if d > 0 {
+		g.dialTimeout = d
+	}
+}
+
 // NewGuard crée un Guard. allowed contient des noms d'hôtes, des adresses IP ou des réseaux CIDR
 // autorisés même s'ils sont privés ; il n'a d'effet que si blockPrivate est vrai.
 func NewGuard(blockPrivate bool, allowed []string) (*Guard, error) {

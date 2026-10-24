@@ -55,5 +55,10 @@
   "default_theme": "rainloop",
   "timezone": "Europe/Paris",
   "log_level": "info",
-  "log_format": "text"
+  "log_format": "text",
+  "timeouts": {
+    "mail_seconds": 30,
+    "send_seconds": 90,
+    "dial_seconds": 20
+  }
 }

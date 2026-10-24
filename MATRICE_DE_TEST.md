@@ -48,12 +48,12 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 [A-04] Double authentification (TOTP)
   tester  : Réglages > Sécurité, activer, se déconnecter, se reconnecter
   attendu : code demandé, code de votre application accepté
-  réponse : 
+  réponse : OK
 
 [A-05] Appareil de confiance
   tester  : cocher la case au second facteur, se reconnecter
   attendu : plus de code demandé sur ce navigateur
-  réponse :
+  réponse : OK
 
 [A-06] Code de secours
   tester  : utiliser un code de secours au lieu du code TOTP
@@ -63,32 +63,32 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 [A-12] Revoir le secret 2FA
   tester  : Réglages > Sécurité, « Revoir le secret », saisir un code valide
   attendu : secret et QR affichés une seule fois ; refus avec un code faux
-  réponse :
+  réponse : OK mais GET ￼http://localhost:8080/settings/2fa/qr.png?again=1 404 (Not Found)
 
 [A-07] Clé de récupération
   tester  : afficher puis télécharger la clé
   attendu : fichier wmail-go-recovery-key.txt correct ; la clé permet de récupérer le compte
-  réponse :
+  réponse : OK
 
 [A-08] Retour à la page demandée après reconnexion
   tester  : ouvrir /settings/folders, attendre l'expiration de session, recharger, se reconnecter
   attendu : retour automatique sur /settings/folders (et non sur l'accueil)
-  réponse :
+  réponse : 
 
 [A-09] Changement de mot de passe
   tester  : Réglages > Sécurité, changer le mot de passe
   attendu : les autres sessions sont fermées, la nouvelle session reste valide
-  réponse :
+  réponse : OK
 
 [A-11] Message « session expirée »
   tester  : laisser la session expirer, recharger une page
   attendu : bandeau « Votre session a expiré » sur l'écran de connexion, puis retour à la page demandée
-  réponse :
+  réponse : OK
 
 [A-10] Langue de l'interface
   tester  : basculer fr / en
   attendu : toute l'interface suit, menus compris ; choix mémorisé
-  réponse :
+  réponse : OK
 ```
 
 ## B. Boîtes mail (IMAP / SMTP)
@@ -97,32 +97,32 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 [B-01] Suggestion automatique des serveurs
   tester  : ajouter une boîte en saisissant seulement l'adresse
   attendu : serveurs, ports et sécurité proposés
-  réponse :
+  réponse : OK
 
 [B-02] Bouton « Test »
   tester  : tester IMAP puis SMTP, y compris avec un mauvais mot de passe
   attendu : diagnostic clair (authentification, certificat, TLS hérité)
-  réponse :
+  réponse : OK
 
 [B-03] Plusieurs boîtes
   tester  : ajouter une deuxième boîte, basculer de l'une à l'autre
   attendu : liste, dossiers, compteurs et signature changent ; aucun mélange
-  réponse :
+  réponse : OK
 
 [B-04] Dossiers système d'une boîte
   tester  : Réglages > Dossiers, section « dossiers système »
   attendu : sélecteurs de dossiers existants (pas de saisie libre), choix « Automatique » par défaut
-  réponse :
+  réponse : OK
 
 [B-05] Identités
   tester  : ajouter une identité secondaire avec sa signature
   attendu : choix de l'expéditeur à la composition, signature liée à l'identité
-  réponse :
+  réponse : OK
 
 [B-06] Répondre à / Cci systématique
   tester  : renseigner ces champs dans les options de la boîte, envoyer un message
   attendu : en-têtes Reply-To et Bcc présents dans le message reçu
-  réponse :
+  réponse : OK
 
 [B-11] Serveur refusant LOGIN (LOGINDISABLED)
   tester  : boîte dont le serveur annonce LOGINDISABLED
@@ -137,7 +137,7 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 [B-12] Réordonner par glisser-déposer
   tester  : glisser une ligne dans la liste des comptes, puis des identités, puis des modèles
   attendu : nouvel ordre conservé après rechargement ; sans JavaScript les pages restent utilisables
-  réponse :
+  réponse : OK
 
 [B-08] Boîte en double refusée
   tester  : ajouter deux fois la même adresse sur le même serveur IMAP
@@ -153,7 +153,7 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
   tester  : boîte dont le serveur annonce QUOTA
   attendu : occupation et pourcentage en bas du panneau des dossiers ; barre verte visible même à moins de 1 %
             (rouge au-delà de 90 %) ; le texte garde la valeur exacte
-  réponse :
+  réponse : OK
 ```
 
 ## C. Liste des messages
@@ -162,16 +162,16 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 [C-01] Aspect général
   tester  : comparer le même dossier dans RainLoop et dans wmail-go
   attendu : mêmes colonnes, mêmes couleurs, même densité
-  réponse :
+  réponse : OK
 
 [C-33] Objets et expéditeurs encodés (RFC 2047)
   tester  : messages dont l'en-tête contient « =?utf-8?q?… » ou « =?Windows-1252?Q?… », y compris entre guillemets
   attendu : texte décodé partout — liste, volet de lecture, colonne expéditeur
-  réponse :
+  réponse : OK
 
 [C-02] Message non lu
   attendu : fond jaune pâle, barre orange à gauche, expéditeur et objet en gras
-  réponse :
+  réponse : OK
 
 [C-03] Conversation partiellement non lue
   tester  : fil dont seul un message ancien est non lu
@@ -181,29 +181,29 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 [C-04] Tri
   tester  : trier par date, expéditeur, objet, taille, dans les deux sens
   attendu : ordre correct, repère de tri visible, choix conservé en changeant de page
-  réponse :
+  réponse : OK
 
 [C-05] Taille de page
   tester  : 10, 50, 100, 500 messages par page
   attendu : pagination correcte, choix mémorisé
-  réponse :
+  réponse : OK
 
 [C-06] Recherche par opérateurs
   tester  : from:, to:, is:unseen, is:flagged, date:2026.10.05, size:2MB
   attendu : mêmes résultats que RainLoop
-  réponse :
+  réponse : ERROR from: pascalinejaouen@yahoo.fr ne retourne rien alors que recherche simple pascalinejaouen@yahoo.fr retourne des resultats
 
 [C-07] Recherche texte libre sur une grosse boîte
   attendu : résultats et temps comparables à RainLoop (pas de recherche dans le corps)
-  réponse :
+  réponse : OK
 
 [C-08] Bandeau et croix de recherche
   attendu : bandeau « Résultats de recherche pour … » et croix qui vide le champ
-  réponse :
+  réponse : WARNING : probleme d'affichage de la croix (on a l'impression qu'il a 2 croix mals alignées
 
 [C-09] Filtre « non lus »
   attendu : liste filtrée, compteur cohérent, retour à « tous » possible
-  réponse :
+  réponse : OK
 
 [C-10] Mode conversations
   attendu : regroupement identique à RainLoop, pastille du nombre de messages
@@ -211,7 +211,7 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 
 [C-11] Clic simple sur une ligne
   attendu : ouvre le message dans le volet de lecture, sans recharger la page
-  réponse :
+  réponse : OK
 
 [C-12] Ctrl+clic coche la ligne sans ouvrir le message
   tester  : Ctrl (ou Cmd) + clic sur une ligne

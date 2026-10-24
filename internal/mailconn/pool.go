@@ -10,6 +10,7 @@ import (
 	"github.com/emersion/go-imap/v2/imapclient"
 )
 
+// dialTimeout est la valeur de repli ; Guard.DialTimeout la remplace quand la configuration en fixe une.
 const dialTimeout = 20 * time.Second
 
 // Pool garde une connexion IMAP ouverte par clé (session + compte mail), utilisée par une seule

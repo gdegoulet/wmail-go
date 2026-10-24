@@ -27,7 +27,6 @@ import (
 )
 
 const (
-	sendTimeout     = 90 * time.Second
 	maxComposeBody  = 2 << 20 // texte d'un message
 	maxComposeField = 4000    // adresses, objet
 	flagForwarded   = imap.Flag("$Forwarded")
@@ -689,7 +688,7 @@ func (s *Server) composeSend(w http.ResponseWriter, r *http.Request, sess *sessi
 
 	start := time.Now()
 	s.addFailure(s.cfg.RateLimit.Send, ipKey, userKey) // compte chaque envoi (pas seulement les échecs)
-	ctx, cancel := context.WithTimeout(r.Context(), sendTimeout)
+	ctx, cancel := context.WithTimeout(r.Context(), time.Duration(s.cfg.Timeouts.Send)*time.Second)
 	defer cancel()
 	if err := s.guard.SendSMTP(ctx, smtpEndpoint(acc), ident.Email, msg.Recipients(), raw, f.DSN); err != nil {
 		fail(http.StatusBadGateway, err)
@@ -1066,7 +1065,7 @@ func (s *Server) mailMDN(w http.ResponseWriter, r *http.Request, sess *session.S
 		return
 	}
 	back := safeBack(r.PostFormValue("stay"))
-	ctx, cancel := context.WithTimeout(r.Context(), sendTimeout)
+	ctx, cancel := context.WithTimeout(r.Context(), time.Duration(s.cfg.Timeouts.Send)*time.Second)
 	defer cancel()
 	raw, m, err := s.fetchMessage(ctx, sess, acc, folder, uid, false)
 	if err != nil {
