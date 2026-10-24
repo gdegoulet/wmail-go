@@ -706,5 +706,8 @@
   "rich.plain": "texte brut",
   "rich.rich": "mise en forme",
   "rich.toggle": "Basculer entre texte brut et mise en forme",
-  "templates.rich_hint": "Un modèle mis en forme est inséré tel quel dans un message HTML, et converti en texte dans un message en texte brut."
+  "templates.rich_hint": "Un modèle mis en forme est inséré tel quel dans un message HTML, et converti en texte dans un message en texte brut.",
+  "contacts.write_selection": "Écrire à la sélection",
+  "contacts.err.no_selection": "Cochez d'abord un ou plusieurs contacts.",
+  "contacts.err.no_address": "Aucun des contacts cochés n'a d'adresse e-mail."
 }

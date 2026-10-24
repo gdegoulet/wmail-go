@@ -271,3 +271,34 @@ func TestWatchedFoldersInPoll(t *testing.T) {
 		t.Errorf("trop de dossiers : %d", resp.StatusCode)
 	}
 }
+
+func TestWriteToSelectedContacts(t *testing.T) {
+	e := newEnv(t, nil)
+	c, tok := e.loggedIn("alice")
+	ids := []string{}
+	for _, v := range []struct{ first, mail string }{{"Anne", "anne@x.fr"}, {"Paul", "paul@x.fr"}, {"Sans", ""}} {
+		f := url.Values{"csrf": {tok}, "first": {v.first}}
+		if v.mail != "" {
+			f.Set("email", v.mail)
+		}
+		resp, _ := e.do(c, "POST", "/contacts/save", f, nil)
+		ids = append(ids, strings.TrimPrefix(resp.Header.Get("Location"), "/contacts?info=saved&edit="))
+	}
+	resp, page := e.do(c, "POST", "/contacts/compose", url.Values{"csrf": {tok}}, nil)
+	if resp.StatusCode != 400 || !strings.Contains(page, "Cochez") {
+		t.Errorf("sans sélection : %d", resp.StatusCode)
+	}
+	resp, page = e.do(c, "POST", "/contacts/compose", url.Values{"csrf": {tok}, "id": {ids[2]}}, nil)
+	if resp.StatusCode != 400 || !strings.Contains(page, "adresse") {
+		t.Errorf("contact sans adresse : %d", resp.StatusCode)
+	}
+	resp, _ = e.do(c, "POST", "/contacts/compose", url.Values{"csrf": {tok}, "id": {ids[0], ids[1]}}, nil)
+	loc, _ := url.Parse(resp.Header.Get("Location"))
+	if resp.StatusCode != 303 || loc.Path != "/compose" || loc.Query().Get("to") != "Anne <anne@x.fr>, Paul <paul@x.fr>" {
+		t.Errorf("redirection : %d %s", resp.StatusCode, resp.Header.Get("Location"))
+	}
+	_, page = e.do(c, "GET", "/contacts", nil, nil)
+	if !strings.Contains(page, "data-needs-contacts") {
+		t.Error("bouton « Écrire à la sélection » absent")
+	}
+}

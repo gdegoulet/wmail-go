@@ -706,5 +706,8 @@
   "rich.plain": "plain text",
   "rich.rich": "formatting",
   "rich.toggle": "Switch between plain text and formatting",
-  "templates.rich_hint": "A formatted template is inserted as is into an HTML message, and converted to text in a plain-text message."
+  "templates.rich_hint": "A formatted template is inserted as is into an HTML message, and converted to text in a plain-text message.",
+  "contacts.write_selection": "Write to selection",
+  "contacts.err.no_selection": "Check one or more contacts first.",
+  "contacts.err.no_address": "None of the checked contacts has an email address."
 }

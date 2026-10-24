@@ -190,6 +190,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /contacts", s.auth(s.contactsGet))
 	mux.HandleFunc("POST /contacts/save", s.auth(s.contactsSave))
 	mux.HandleFunc("POST /contacts/delete", s.auth(s.contactsDelete))
+	mux.HandleFunc("POST /contacts/compose", s.auth(s.contactsCompose))
 	mux.HandleFunc("POST /contacts/import", s.auth(s.contactsImport))
 	mux.HandleFunc("GET /contacts/export", s.auth(s.contactsExport))
 	mux.HandleFunc("GET /contacts/suggest", s.auth(s.contactsSuggest))

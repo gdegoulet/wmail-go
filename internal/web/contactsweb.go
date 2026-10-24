@@ -448,3 +448,35 @@ func (s *Server) avatarsEnabled(sess *session.Session) bool {
 	defer sess.Mu.Unlock()
 	return sess.Account.Data.Settings.Avatars == "gravatar" || len(sess.Account.Data.MailAccounts) > 0
 }
+
+// contactsCompose ouvre une composition adressée aux contacts cochés (première adresse de chacun).
+func (s *Server) contactsCompose(w http.ResponseWriter, r *http.Request, sess *session.Session) {
+	_ = r.ParseForm()
+	ids := r.PostForm["id"]
+	if len(ids) == 0 {
+		s.contactsPage(w, r, sess, http.StatusBadRequest, nil, "contacts.err.no_selection")
+		return
+	}
+	want := map[string]bool{}
+	for _, id := range ids {
+		want[id] = true
+	}
+	var to []string
+	_ = s.readBook(sess, func(b *contacts.Book) {
+		for _, c := range b.Contacts {
+			if !want[c.ID] || len(c.Emails) == 0 || len(to) >= 100 {
+				continue
+			}
+			if n := c.Display(); n != "" && n != c.Emails[0].Value {
+				to = append(to, contacts.FormatAddress(n, c.Emails[0].Value))
+			} else {
+				to = append(to, c.Emails[0].Value)
+			}
+		}
+	})
+	if len(to) == 0 {
+		s.contactsPage(w, r, sess, http.StatusBadRequest, nil, "contacts.err.no_address")
+		return
+	}
+	http.Redirect(w, r, "/compose?"+url.Values{"to": {strings.Join(to, ", ")}}.Encode(), http.StatusSeeOther)
+}

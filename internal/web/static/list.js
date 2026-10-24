@@ -45,6 +45,19 @@
     if (b && !window.confirm(b.getAttribute("data-confirm"))) e.preventDefault();
   });
 
+  // Liste des contacts : le bouton « Écrire » suit la sélection.
+  (function () {
+    var clist = document.getElementById("clist");
+    if (!clist) return;
+    var buttons = document.querySelectorAll("[data-needs-contacts]");
+    function refreshContacts() {
+      var n = clist.querySelectorAll("input[name=id]:checked").length;
+      buttons.forEach(function (b) { b.disabled = n === 0; });
+    }
+    clist.addEventListener("change", refreshContacts);
+    refreshContacts();
+  })();
+
   var form = document.querySelector("form.msglist-form");
   if (!form) return;
 

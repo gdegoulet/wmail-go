@@ -8,6 +8,7 @@
 {{if .AllTags}}<select name="tag"><option value="">{{$.T "contacts.all_tags"}}</option>{{range .AllTags}}<option{{if eq . $.Contacts.Tag}} selected{{end}}>{{.}}</option>{{end}}</select>{{end}}
 <button type="submit">{{$.T "contacts.search_go"}}</button>
 <a class="button" href="/contacts?new=1">{{$.T "contacts.new"}}</a>
+<button type="submit" form="clist" formaction="/contacts/compose" formmethod="post" data-needs-contacts>{{$.T "contacts.write_selection"}}</button>
 </form>
 <form method="post" action="/contacts/delete" id="clist">
 <input type="hidden" name="csrf" value="{{$.CSRF}}">
@@ -103,4 +104,4 @@
 </section>
 {{end}}
 {{template "setclose" $}}{{end}}
-{{define "scripts"}}<script src="/static/contacts-photo.js" defer></script>{{end}}
+{{define "scripts"}}<script src="/static/contacts-photo.js" defer></script><script src="/static/list.js" defer></script>{{end}}
