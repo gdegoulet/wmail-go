@@ -100,6 +100,7 @@ type AttachmentView struct {
 	Thumb                   template.URL // URI data: d'une miniature (images), produite par le serveur donc de confiance
 	Ext                     string       // extension en capitales (autres fichiers)
 	Name, Type, Size, URL   string
+	Index                   int    // position de la partie dans le message (ZIP partiel)
 	Icon                    string // symbole du sprite, selon le type de fichier
 	PreviewURL, PreviewKind string // aperçu dans le navigateur : « image » ou « text » ; vide : téléchargement seulement
 }
@@ -1055,7 +1056,7 @@ func (s *Server) buildMessageView(sess *session.Session, acc userdata.MailAccoun
 	seenEvents := map[string]bool{}
 	for _, a := range m.Attachments {
 		aq := url.Values{"folder": {folder}, "uid": {uidStr}, "index": {strconv.Itoa(a.Index)}}
-		av := AttachmentView{Name: a.Name, Type: a.ContentType, Size: humanSize(int64(a.Size), lang), URL: "/mail/attachment?" + aq.Encode(), Ext: attachmentExt(a.Name), Icon: attachmentIcon(a.ContentType, a.Name)}
+		av := AttachmentView{Name: a.Name, Type: a.ContentType, Size: humanSize(int64(a.Size), lang), URL: "/mail/attachment?" + aq.Encode(), Ext: attachmentExt(a.Name), Icon: attachmentIcon(a.ContentType, a.Name), Index: a.Index}
 		if kind := previewKind(a.ContentType, a.Data()); kind != "" {
 			av.PreviewURL, av.PreviewKind = av.URL+"&inline=1", kind
 		}
@@ -1334,10 +1335,22 @@ func (s *Server) mailAttachmentsZip(w http.ResponseWriter, r *http.Request, sess
 		s.message(w, r, sess, http.StatusNotFound, "", "mail.err.not_found")
 		return
 	}
+	// « index » répété : seulement les pièces jointes cochées ; absent : toutes.
+	want := map[int]bool{}
+	for _, v := range r.URL.Query()["index"] {
+		if n, err := strconv.Atoi(v); err == nil {
+			want[n] = true
+		}
+	}
 	var buf bytes.Buffer
 	zw := zip.NewWriter(&buf)
 	used := map[string]int{}
+	picked := 0
 	for _, a := range m.Attachments {
+		if len(want) > 0 && !want[a.Index] {
+			continue
+		}
+		picked++
 		name := safeFileName(a.Name)
 		if n := used[strings.ToLower(name)]; n > 0 { // noms en double : « nom (2).ext »
 			ext := path.Ext(name)
@@ -1353,6 +1366,10 @@ func (s *Server) mailAttachmentsZip(w http.ResponseWriter, r *http.Request, sess
 			s.serverError(w, r, sess, err)
 			return
 		}
+	}
+	if picked == 0 {
+		s.message(w, r, sess, http.StatusNotFound, "", "mail.err.not_found")
+		return
 	}
 	if err := zw.Close(); err != nil {
 		s.serverError(w, r, sess, err)

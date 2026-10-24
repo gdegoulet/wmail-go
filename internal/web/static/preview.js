@@ -40,6 +40,19 @@
   }
   function go(d) { pos = (pos + d + list.length) % list.length; show(); }
 
+  // Sélection de pièces jointes : les cases cochées alimentent le lien « Télécharger la sélection (ZIP) ».
+  document.addEventListener("change", function (e) {
+    if (!e.target || !e.target.classList || !e.target.classList.contains("att-check")) return;
+    var link = document.querySelector("[data-zip-selected]");
+    if (!link) return;
+    var picked = [].slice.call(document.querySelectorAll(".att-check:checked")).map(function (c) { return c.value; });
+    var base = link.getAttribute("data-base") || link.getAttribute("href");
+    link.setAttribute("data-base", base);
+    link.hidden = picked.length === 0;
+    link.setAttribute("href", base + picked.map(function (i) { return "&index=" + encodeURIComponent(i); }).join(""));
+  });
+  document.querySelectorAll(".att-pick").forEach(function (el) { el.hidden = false; });
+
   document.addEventListener("click", function (e) {
     var a = e.target && e.target.closest ? e.target.closest("a.preview[data-kind=image], a.preview[data-kind=pdf]") : null;
     if (!a || e.ctrlKey || e.metaKey || e.shiftKey) return;

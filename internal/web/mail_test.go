@@ -1576,3 +1576,33 @@ func TestDeleteOpenMessageOpensNeighbour(t *testing.T) {
 		"uid": {uids[0][1], uids[2][1]}, "back": {"/"}, "current_uid": {uids[0][1]}, "open_next": {next}}, nil)
 	e.expect(resp, 303, "/")
 }
+
+// ZIP partiel : seules les pièces jointes dont l'index est passé entrent dans l'archive.
+func TestZipSelectedAttachments(t *testing.T) {
+	e := newEnv(t, nil)
+	port := mailtest.StartIMAPSeeded(t, "none", func(_ testing.TB, add func([]byte, time.Time, ...imap.Flag)) {
+		add(attachmentMessage(), time.Date(2026, 3, 2, 10, 0, 0, 0, time.UTC))
+	})
+	smtpPort := mailtest.StartSMTP(t, "none")
+	c, tok := e.loggedIn("alice")
+	e.expect1(e.do(c, "POST", "/accounts/save", accountForm(tok, mailPorts{imap: port, smtp: smtpPort}, "save"), nil))
+	_, page := e.do(c, "GET", "/?q=Photos&scope=subject", nil, nil)
+	link := linkTo(t, page, "Photos")
+	_, frag := e.do(c, "GET", "/mail/pane"+strings.TrimPrefix(link, "/"), nil, nil)
+	m := regexp.MustCompile(`href="(/mail/attachments\.zip\?[^"]+)"`).FindStringSubmatch(frag)
+	if m == nil {
+		t.Fatalf("lien ZIP absent :\n%s", frag)
+	}
+	zipURL := htmlUnescape(m[1])
+	resp, all := e.do(c, "GET", zipURL, nil, nil)
+	e.expect(resp, 200, "")
+	resp, one := e.do(c, "GET", zipURL+"&index=0", nil, nil)
+	e.expect(resp, 200, "")
+	if len(one) >= len(all) {
+		t.Errorf("ZIP d'une pièce (%d o) devrait être plus petit que le ZIP complet (%d o)", len(one), len(all))
+	}
+	resp, _ = e.do(c, "GET", zipURL+"&index=99", nil, nil)
+	if resp.StatusCode != 404 {
+		t.Errorf("index inconnu : statut %d, attendu 404", resp.StatusCode)
+	}
+}

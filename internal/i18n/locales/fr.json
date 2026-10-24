@@ -223,6 +223,8 @@
   "mail.reply_soon": "Répondre : bientôt disponible.",
   "mail.to_label": "À :",
   "mail.att.zip": "Tout télécharger (.zip)",
+  "mail.att.pick": "Sélectionner cette pièce jointe",
+  "mail.att.zip_selected": "Télécharger la sélection (ZIP)",
   "mail.att.options": "Options des pièces jointes",
   "mail.fullscreen": "Plein écran",
   "accounts.form.verify_hint": "Décochez pour accepter un certificat auto-signé, expiré ou au mauvais nom : la connexion reste chiffrée, mais l'identité du serveur n'est pas vérifiée.",

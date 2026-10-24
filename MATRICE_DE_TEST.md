@@ -75,6 +75,11 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
   attendu : les autres sessions sont fermées, la nouvelle session reste valide
   réponse :
 
+[A-11] Message « session expirée »
+  tester  : laisser la session expirer, recharger une page
+  attendu : bandeau « Votre session a expiré » sur l'écran de connexion, puis retour à la page demandée
+  réponse :
+
 [A-10] Langue de l'interface
   tester  : basculer fr / en
   attendu : toute l'interface suit, menus compris ; choix mémorisé
@@ -332,6 +337,11 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 
 [D-11] Noms des pièces jointes
   attendu : identiques à RainLoop, y compris les noms engendrés (calendar1.3.ics)
+  réponse :
+
+[D-23] ZIP des pièces jointes sélectionnées
+  tester  : cocher la case en haut à gauche de deux vignettes, menu de l'engrenage > « Télécharger la sélection »
+  attendu : archive contenant seulement ces deux fichiers
   réponse :
 
 [D-12] Télécharger toutes les pièces jointes
@@ -731,4 +741,4 @@ Je remplis ce tableau à partir de vos réponses : un retour `KO` y reste jusqu'
 ## Points livrés depuis la dernière session de test
 
 Ajoutés aux points ci-dessus, à valider en priorité : `C-12`, `C-13`, `C-14`, `C-15`, `C-30`, `C-31`, `D-10`, `D-15`, `D-16`,
-`D-21`, `D-22`, `E-03`, `F-01`, `F-05`, `G-02`, `G-07`, `I-01`, `I-05`, `I-09`, `I-11`, `A-08`, `C-24`, `B-08`, `B-09`, `C-32`, `I-12`, `I-13`.
+`D-21`, `D-22`, `E-03`, `F-01`, `F-05`, `G-02`, `G-07`, `I-01`, `I-05`, `I-09`, `I-11`, `A-08`, `C-24`, `B-08`, `B-09`, `C-32`, `I-12`, `I-13`, `D-23`, `A-11`.

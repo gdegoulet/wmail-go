@@ -223,6 +223,8 @@
   "mail.reply_soon": "Reply: coming soon.",
   "mail.to_label": "To:",
   "mail.att.zip": "Download all (.zip)",
+  "mail.att.pick": "Select this attachment",
+  "mail.att.zip_selected": "Download selection (ZIP)",
   "mail.att.options": "Attachment options",
   "mail.fullscreen": "Full screen",
   "accounts.form.verify_hint": "Untick to accept a self-signed, expired or wrongly named certificate: the connection stays encrypted, but the server's identity is not checked.",
