@@ -8,3 +8,6 @@ users.idx
 /scratch/
 # certificats engendrés localement
 /deploy/certs/
+# fichiers d'échange des éditeurs
+*.swp
+*~
