@@ -259,18 +259,9 @@
 {{define "msgview"}}{{with .Msg}}<button type="button" class="backtop" data-backtop hidden title="{{$.T "mail.back_top"}}" aria-label="{{$.T "mail.back_top"}}">{{template "icon" "up-arrow"}}</button><div class="msgview" data-uid="{{.UID}}"{{if .JustRead}} data-just-read="1"{{end}}>
 <header class="mh">
 <div class="mh-top">
-<details class="msg-info"><summary title="{{$.T "mail.details"}}" aria-label="{{$.T "mail.details"}}">i</summary>
-<dl class="headers">
-<dt>{{$.T "mail.from"}}</dt><dd>{{.From}}</dd>
-{{if .To}}<dt>{{$.T "mail.to"}}</dt><dd>{{.To}}</dd>{{end}}
-{{if .Cc}}<dt>{{$.T "mail.cc"}}</dt><dd>{{.Cc}}</dd>{{end}}
-{{if .Bcc}}<dt>{{$.T "mail.bcc"}}</dt><dd>{{.Bcc}}</dd>{{end}}
-{{if .ReplyTo}}<dt>{{$.T "mail.reply_to"}}</dt><dd>{{.ReplyTo}}</dd>{{end}}
-<dt>{{$.T "mail.date"}}</dt><dd>{{.Date}}</dd>
-<dt>{{$.T "mail.size"}}</dt><dd>{{.Size}}</dd>
-{{if .DKIM}}<dt>DKIM</dt><dd>{{$.T (printf "mail.dkim.%s" .DKIM)}}</dd>{{end}}
-</dl>
-</details>
+{{/* Les détails eux-mêmes sont plus bas, dans le flux (div.infobar) : une surcouche posée sur le message était
+     illisible. Le <details> ne garde que son bouton « i », qui commande l'affichage du bloc. */}}
+<details class="msg-info"><summary title="{{$.T "mail.details"}}" aria-label="{{$.T "mail.details"}}" aria-controls="msg-headers">i</summary></details>
 <form method="post" action="/mail/action" class="starform">
 <input type="hidden" name="csrf" value="{{$.CSRF}}">
 <input type="hidden" name="folder" value="{{.Folder}}">
@@ -317,6 +308,21 @@
 </span>
 </div>
 </header>
+
+{{/* Détails du message : bloc opaque dans le flux, à la suite de l'en-tête, au même niveau que la bande des
+     pièces jointes (comme RainLoop). Le bouton « i » de l'en-tête l'ouvre et le referme. */}}
+<div class="bar infobar" id="msg-headers">
+<dl class="headers">
+<dt>{{$.T "mail.from"}}</dt><dd>{{.From}}</dd>
+{{if .To}}<dt>{{$.T "mail.to"}}</dt><dd>{{.To}}</dd>{{end}}
+{{if .Cc}}<dt>{{$.T "mail.cc"}}</dt><dd>{{.Cc}}</dd>{{end}}
+{{if .Bcc}}<dt>{{$.T "mail.bcc"}}</dt><dd>{{.Bcc}}</dd>{{end}}
+{{if .ReplyTo}}<dt>{{$.T "mail.reply_to"}}</dt><dd>{{.ReplyTo}}</dd>{{end}}
+<dt>{{$.T "mail.date"}}</dt><dd>{{.Date}}</dd>
+<dt>{{$.T "mail.size"}}</dt><dd>{{.Size}}</dd>
+{{if .DKIM}}<dt>DKIM</dt><dd>{{$.T (printf "mail.dkim.%s" .DKIM)}}</dd>{{end}}
+</dl>
+</div>
 
 {{if .UnsubscribeURL}}<p class="bar unsubbar"><a href="{{.UnsubscribeURL}}"{{if .UnsubscribeExternal}} target="_blank" rel="noopener noreferrer"{{end}}>{{$.T "mail.unsubscribe"}}</a></p>{{end}}
 {{if .ReadReceipt}}<form class="bar mdnbar" method="post" action="/mail/mdn">

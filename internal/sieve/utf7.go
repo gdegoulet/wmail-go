@@ -6,7 +6,11 @@ import (
 	"unicode/utf16"
 )
 
-// Les noms de dossiers que RainLoop enregistre dans ses filtres sont en UTF-7 modifié (RFC 3501, 5.1.3).
+// Les noms de dossiers que RainLoop enregistre dans ses filtres sont en UTF-7 modifié (RFC 3501, 5.1.3) : le
+// préfixe est « & » et non « + », et l'alphabet base64 se termine par « +, » au lieu de « +/ ».
+//
+// À ne pas confondre avec mailview.decodeUTF7, qui décode l'UTF-7 ordinaire (RFC 2152) des corps de messages :
+// les deux encodages se ressemblent mais ne sont pas interchangeables.
 
 var utf7b64 = base64.NewEncoding("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+,").WithPadding(base64.NoPadding)
 

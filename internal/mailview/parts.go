@@ -1,6 +1,9 @@
 package mailview
 
-import "strings"
+import (
+	"strconv"
+	"strings"
+)
 
 // PartDesc décrit une partie MIME telle que le serveur IMAP l'annonce (BODYSTRUCTURE), sans télécharger le message.
 type PartDesc struct {
@@ -50,27 +53,15 @@ func AttachmentParts(parts []PartDesc) []AttachmentPart {
 	return out
 }
 
+// pathString écrit un chemin de partie à la manière d'IMAP (« 1 », « 1.2 »). Un chemin vide désigne un message
+// sans structure multipart, dont l'unique partie porte le numéro 1.
 func pathString(path []int) string {
 	if len(path) == 0 {
 		return "1"
 	}
 	parts := make([]string, len(path))
 	for i, n := range path {
-		parts[i] = itoa(n)
+		parts[i] = strconv.Itoa(n)
 	}
 	return strings.Join(parts, ".")
-}
-
-func itoa(n int) string {
-	if n == 0 {
-		return "0"
-	}
-	var b [12]byte
-	i := len(b)
-	for n > 0 {
-		i--
-		b[i] = byte('0' + n%10)
-		n /= 10
-	}
-	return string(b[i:])
 }

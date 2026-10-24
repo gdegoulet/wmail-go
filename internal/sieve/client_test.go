@@ -114,7 +114,7 @@ func TestClientStartTLSRequiredBeforeAuth(t *testing.T) {
 	}
 	// serveur sans STARTTLS
 	plain := dial(t, sievetest.Start(t, "none").Port)
-	if err := plain.StartTLS(&tls.Config{InsecureSkipVerify: true}); !errors.Is(err, ErrNoStartTL) { //nolint:gosec
+	if err := plain.StartTLS(&tls.Config{InsecureSkipVerify: true}); !errors.Is(err, ErrNoStartTLS) { //nolint:gosec
 		t.Errorf("STARTTLS absent : %v", err)
 	}
 }

@@ -29,6 +29,9 @@ import (
 	"wmail-go/internal/vault"
 )
 
+// Erreurs du stockage. ErrInvalidCredentials est volontairement indistincte : à l'ouverture d'un compte, un login
+// inconnu, un fichier absent et un mauvais mot de passe donnent tous cette même erreur, pour ne pas révéler
+// quels logins existent. Les autres ne surviennent qu'une fois l'appelant déjà authentifié ou en ligne de commande.
 var (
 	ErrInvalidCredentials = errors.New("identifiants invalides")
 	ErrInvalidLogin       = errors.New("login invalide")
@@ -563,8 +566,10 @@ func (s *Store) SaveBlob(acc *Account, kind string, plain []byte) error {
 	})
 }
 
-// LoadContacts et SaveContacts : carnet d'adresses.
+// LoadContacts lit le carnet d'adresses du compte ; nil s'il n'y en a pas encore.
 func (s *Store) LoadContacts(acc *Account) ([]byte, error) { return s.LoadBlob(acc, "contacts") }
+
+// SaveContacts réécrit le carnet d'adresses du compte ; un contenu vide le supprime.
 func (s *Store) SaveContacts(acc *Account, plain []byte) error {
 	return s.SaveBlob(acc, "contacts", plain)
 }

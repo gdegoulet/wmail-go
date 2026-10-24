@@ -19,21 +19,33 @@ import (
 	"golang.org/x/text/unicode/norm"
 )
 
+// Bornes du carnet. Elles protègent le fichier chiffré du compte, qui est lu et réécrit en entier à chaque
+// modification : un carnet sans limite rendrait chaque enregistrement coûteux et pourrait dépasser la taille
+// maximale d'un contenu chiffré (voir vault).
 const (
-	MaxContacts = 5000
-	MaxValues   = 20 // adresses, téléphones, URL par contact
-	MaxTags     = 20
-	MaxField    = 500 // longueur d'un champ texte simple
-	MaxNotes    = 10000
+	MaxContacts = 5000      // fiches par carnet
+	MaxValues   = 20        // adresses, téléphones, URL ou adresses postales par contact
+	MaxTags     = 20        // étiquettes par contact
+	MaxField    = 500       // longueur d'un champ texte simple (nom, organisation…)
+	MaxNotes    = 10000     // longueur du champ de notes libres
 	MaxPhoto    = 350 << 10 // image d'un contact (URI data:)
-	MaxExtra    = 8 << 10   // propriétés vCard conservées telles quelles
-	PageSize    = 50
+	MaxExtra    = 8 << 10   // total des propriétés vCard conservées telles quelles
+	PageSize    = 50        // fiches par page de résultat
+	// maxExtraLines borne le nombre de propriétés vCard inconnues gardées, en plus de MaxExtra qui borne leur
+	// taille : un fichier fabriqué pourrait sinon tenir dans MaxExtra avec des milliers de lignes minuscules.
+	maxExtraLines = 40
+	// minPhoneDigits : en deçà, une recherche de chiffres rapprocherait n'importe quel numéro.
+	minPhoneDigits = 3
 )
 
+// Erreurs du carnet.
 var (
+	// ErrNotFound : aucune fiche ne porte cet identifiant.
 	ErrNotFound = errors.New("contacts : contact introuvable")
-	ErrFull     = errors.New("contacts : carnet plein")
-	ErrEmpty    = errors.New("contacts : contact vide")
+	// ErrFull : le carnet a atteint MaxContacts.
+	ErrFull = errors.New("contacts : carnet plein")
+	// ErrEmpty : la fiche ne contient rien d'identifiable (ni nom, ni adresse, ni note).
+	ErrEmpty = errors.New("contacts : contact vide")
 )
 
 // Typed est une valeur étiquetée (home, work, mobile…).
@@ -143,7 +155,7 @@ func (c *Contact) Normalize() error {
 		if e = strings.TrimSpace(e); e == "" || strings.ContainsAny(e, "\r\n") || !strings.Contains(e, ":") {
 			continue
 		}
-		if total += len(e); total > MaxExtra || len(extra) >= 40 {
+		if total += len(e); total > MaxExtra || len(extra) >= maxExtraLines {
 			break
 		}
 		extra = append(extra, e)
@@ -253,7 +265,10 @@ func (b *Book) ByEmail(addr string) *Contact {
 	return nil
 }
 
-// Save ajoute ou met à jour (selon ID) une fiche normalisée.
+// Save ajoute la fiche (ID vide) ou remplace celle de même ID, après normalisation. Sur un remplacement, les
+// champs que l'interface n'envoie pas sont repris de l'ancienne fiche : la fréquence d'usage, le lien CardDAV
+// (Href, ETag) et les propriétés vCard inconnues, sans quoi une simple modification depuis le formulaire
+// délierait le contact de son carnet distant et perdrait ses propriétés.
 func (b *Book) Save(c *Contact) error {
 	if err := c.Normalize(); err != nil {
 		return err
@@ -396,7 +411,7 @@ func (b *Book) Search(q, tag string, page int) (list []*Contact, total int) {
 		}
 		if q != "" && !strings.Contains(c.haystack(), q) {
 			// un numéro de téléphone se cherche aussi en chiffres seuls (« 0612 » trouve « +33 6 12 … »)
-			if d := strings.TrimLeft(digitsOnly(q), "0"); len(d) < 3 || !strings.Contains(c.phoneDigits(), d) {
+			if d := strings.TrimLeft(digitsOnly(q), "0"); len(d) < minPhoneDigits || !strings.Contains(c.phoneDigits(), d) {
 				continue
 			}
 		}

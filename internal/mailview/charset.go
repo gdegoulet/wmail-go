@@ -32,7 +32,9 @@ func init() {
 	}
 }
 
-// decodeUTF7 décode l'UTF-7 de RFC 2152 (+base64- pour les caractères hors ASCII).
+// decodeUTF7 décode l'UTF-7 de RFC 2152 (« +base64- » pour les caractères hors ASCII), tel qu'il apparaît dans
+// le corps d'anciens messages. Ce n'est pas l'UTF-7 modifié des noms de dossiers IMAP : celui-là est traité par
+// sieve.FromUTF7, avec un préfixe et un alphabet base64 différents.
 func decodeUTF7(s string) string {
 	var out strings.Builder
 	for i := 0; i < len(s); i++ {

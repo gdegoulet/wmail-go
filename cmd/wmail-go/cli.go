@@ -15,21 +15,22 @@ import (
 	"wmail-go/internal/store"
 )
 
-// prompter lit les mots de passe : sans écho sur un terminal, ligne par ligne sinon.
+// prompter lit les mots de passe : sans écho quand l'entrée est un vrai terminal, ligne par ligne sinon
+// (--password-stdin, script, conteneur sans TTY). La confirmation d'un nouveau mot de passe n'est demandée
+// qu'en mode terminal : en mode ligne, l'appelant ne fournit qu'une valeur.
 type prompter struct {
-	in        io.Reader
-	errw      io.Writer
-	lineMode  bool
-	reader    *bufio.Reader
-	interactV bool
+	in          io.Reader
+	errw        io.Writer
+	reader      *bufio.Reader
+	interactive bool
 }
 
+// newPrompter choisit le mode de lecture. forceLine (--password-stdin) impose la lecture ligne par ligne même
+// sur un terminal, pour que les tests et les scripts se comportent de la même façon partout.
 func newPrompter(in io.Reader, errw io.Writer, forceLine bool) *prompter {
 	p := &prompter{in: in, errw: errw, reader: bufio.NewReader(in)}
 	if f, ok := in.(*os.File); ok && !forceLine && term.IsTerminal(int(f.Fd())) {
-		p.interactV = true
-	} else {
-		p.lineMode = true
+		p.interactive = true
 	}
 	return p
 }
@@ -44,7 +45,7 @@ func (p *prompter) readLine() (string, error) {
 
 // secret demande une valeur secrète.
 func (p *prompter) secret(label string) (string, error) {
-	if p.interactV {
+	if p.interactive {
 		fmt.Fprint(p.errw, label+" : ")
 		b, err := term.ReadPassword(int(p.in.(*os.File).Fd()))
 		fmt.Fprintln(p.errw)
@@ -56,7 +57,7 @@ func (p *prompter) secret(label string) (string, error) {
 // newSecret demande un nouveau mot de passe, avec confirmation en mode interactif.
 func (p *prompter) newSecret(label string) (string, error) {
 	pw, err := p.secret(label)
-	if err != nil || !p.interactV {
+	if err != nil || !p.interactive {
 		return pw, err
 	}
 	again, err := p.secret("Confirmer")

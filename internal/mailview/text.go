@@ -8,6 +8,9 @@ import (
 	xhtml "golang.org/x/net/html"
 )
 
+// textWidth est la largeur à laquelle HTMLToText coupe les lignes, comme RainLoop.
+const textWidth = 100
+
 var urlRe = regexp.MustCompile(`(?i)\b((?:https?|ftp)://[^\s<>"']+|www\.[^\s<>"']+\.[^\s<>"']+)|([A-Za-z0-9._%+\-]+@[A-Za-z0-9\-]+(?:\.[A-Za-z0-9\-]+)+)`)
 
 // quoteDepth compte les « > » en tête de ligne (les espaces entre eux sont permis) et renvoie la ligne sans ces marques.
@@ -67,7 +70,8 @@ func TextToHTML(text string) string {
 
 func quoteDepthOf(line string) int { d, _ := quoteDepth(line); return d }
 
-// balanced retire les ponctuations finales d'une adresse, mais garde une « ) » qui ferme une « ( » de l'adresse.
+// trimURL retire les ponctuations finales d'une adresse détectée dans du texte (« voir http://x/y. »), mais garde
+// une parenthèse ou un crochet fermants qui équilibrent un ouvrant de l'adresse elle-même.
 func trimURL(u string) string {
 	for len(u) > 0 {
 		c := u[len(u)-1]
@@ -140,7 +144,6 @@ func Unflow(text string, delsp bool) string {
 	return strings.Join(out, "\n")
 }
 
-// HTMLToText extrait le texte visible d'un document HTML (pour la vue « texte »).
 // HTMLToText extrait le texte visible d'un document HTML (vue « texte », partie texte d'un envoi HTML, citation d'une
 // réponse en texte brut). Comme RainLoop : les citations sont préfixées par « > », les éléments de liste par « * »,
 // les liens gardent leur adresse entre parenthèses, les cellules d'un tableau sont séparées, et les lignes sont
@@ -162,7 +165,7 @@ func HTMLToText(src string) string {
 	for {
 		switch z.Next() {
 		case xhtml.ErrorToken:
-			return wrapText(quotePrefix(strings.TrimSpace(collapseBlank(sb.String()))), 100)
+			return wrapText(trimLineEnds(strings.TrimSpace(collapseBlank(sb.String()))), textWidth)
 		case xhtml.StartTagToken, xhtml.SelfClosingTagToken:
 			name, hasAttr := z.TagName()
 			tag := string(name)
@@ -252,8 +255,9 @@ func HTMLToText(src string) string {
 
 var spaceRe = regexp.MustCompile(`[ \t\r\n]+`)
 
-// quotePrefix complète le préfixe « > » sur les lignes d'une citation qui en manquent (sauts de ligne internes).
-func quotePrefix(s string) string {
+// trimLineEnds retire les espaces de fin de chaque ligne. Elles viennent des espaces insérés entre deux balises
+// par le tokenizer ; laissées en place, elles feraient passer la ligne pour du « format=flowed » à la relecture.
+func trimLineEnds(s string) string {
 	lines := strings.Split(s, "\n")
 	for i, l := range lines {
 		lines[i] = strings.TrimRight(l, " ")
@@ -291,7 +295,10 @@ func wrapText(s string, width int) string {
 
 var blankRe = regexp.MustCompile(`\n{3,}`)
 
+// collapseBlank ramène les suites de lignes vides à une seule et remplace les espaces insécables (U+00A0, très
+// fréquentes dans le HTML des infolettres) par des espaces ordinaires : en texte brut elles ne se voient pas,
+// mais elles empêcheraient wrapText de couper la ligne et seraient recopiées telles quelles dans une réponse.
 func collapseBlank(s string) string {
-	s = strings.ReplaceAll(s, " ", " ")
+	s = strings.ReplaceAll(s, "\u00a0", " ")
 	return blankRe.ReplaceAllString(s, "\n\n")
 }

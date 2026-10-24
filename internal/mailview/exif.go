@@ -3,7 +3,6 @@ package mailview
 import (
 	"encoding/binary"
 	"image"
-	"image/draw"
 )
 
 // exifOrientation lit l'étiquette Orientation (0x0112) d'un JPEG. Elle vaut 1 à 8 ; 0 si absente ou illisible.
@@ -117,6 +116,5 @@ func applyOrientation(img image.Image, orientation int) image.Image {
 			out.Set(dx, dy, img.At(b.Min.X+x, b.Min.Y+y))
 		}
 	}
-	var _ draw.Image = out
 	return out
 }

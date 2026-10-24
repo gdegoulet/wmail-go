@@ -10,8 +10,13 @@ import (
 	"github.com/emersion/go-imap/v2/imapclient"
 )
 
-// dialTimeout est la valeur de repli ; Guard.DialTimeout la remplace quand la configuration en fixe une.
-const dialTimeout = 20 * time.Second
+// loginTimeout borne l'ouverture ET l'authentification d'une connexion du pool. À ne pas confondre avec
+// Guard.dialTimeout, qui ne borne que l'établissement TCP/TLS : quand la configuration en fixe un, c'est
+// lui qui sert, augmenté de tlsLoginMargin pour laisser passer la poignée de main puis le LOGIN.
+const loginTimeout = 20 * time.Second
+
+// tlsLoginMargin est le supplément accordé au délai du garde pour la négociation TLS et l'authentification.
+const tlsLoginMargin = 5 * time.Second
 
 // Pool garde une connexion IMAP ouverte par clé (session + compte mail), utilisée par une seule
 // requête à la fois. Une connexion inactive est fermée après idle.
@@ -74,9 +79,9 @@ func (p *Pool) Do(ctx context.Context, key string, ep Endpoint, fn func(*Conn) e
 		reused := e.client != nil && e.ep == ep && !closedClient(e.client)
 		if !reused {
 			e.drop()
-			d := dialTimeout
+			d := loginTimeout
 			if t := p.guard.DialTimeout(); t > 0 {
-				d = t + 5*time.Second // la garde borne déjà la connexion elle-même ; on laisse la marge du TLS
+				d = t + tlsLoginMargin
 			}
 			dctx, cancel := context.WithTimeout(ctx, d)
 			start := time.Now()

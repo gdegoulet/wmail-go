@@ -1,6 +1,14 @@
-// Package mailconn ouvre les connexions IMAP et SMTP vers les serveurs des utilisateurs.
-// Le Guard protège contre le SSRF : le serveur Go ne se connecte pas aux réseaux privés,
-// sauf aux hôtes autorisés explicitement dans config.json (allowed_private_hosts).
+// Package mailconn ouvre les connexions vers les serveurs des utilisateurs — IMAP, SMTP et ManageSieve (sieve.go,
+// qui délègue le dialogue au paquet sieve) — et expose au-dessus de la connexion IMAP les opérations sur les
+// dossiers et les messages.
+//
+// Toute connexion sortante, y compris celle du client HTTP rendu par Guard.HTTPClient, passe par le Guard : il
+// protège contre le SSRF en refusant les réseaux privés, sauf les hôtes explicitement autorisés dans config.json
+// (allowed_private_hosts). La vérification porte sur l'adresse IP résolue, et c'est cette adresse-là qui est
+// composée, pour qu'une réponse DNS changeant entre le contrôle et la connexion reste sans effet.
+//
+// Le paquet dépend de mailview pour deux choses seulement : le décodeur de jeux de caractères de repli, et la
+// mise en forme des domaines punycode des adresses rendues dans les résumés de messages.
 package mailconn
 
 import (

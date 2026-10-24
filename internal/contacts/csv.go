@@ -19,12 +19,17 @@ var csvHeader = []string{"First Name", "Middle Name", "Last Name", "Title", "Suf
 	"Mobile Phone", "Home Phone", "Business Phone", "Other Phone", "Web Page", "Company", "Job Title",
 	"Street", "City", "State", "Postal Code", "Country", "Birthday", "Notes", "Categories"}
 
-// field d'une colonne reconnue à l'import.
+// colKind désigne le champ de Contact qu'alimente une colonne du CSV ; typ est l'étiquette à donner à la valeur
+// (home, work, cell…) quand l'en-tête la précise. Un colKind vide signifie « colonne non reconnue, à ignorer ».
 type colKind struct {
 	name string
 	typ  string
 }
 
+// headerKind reconnaît un en-tête de colonne parmi ceux qu'exportent Outlook, Google Contacts, Thunderbird et
+// leurs versions françaises. La comparaison se fait sur une forme réduite (sans accents, sans casse, séparateurs
+// ramenés à l'espace), d'où le passage par fold : « Téléphone portable » et « mobile_phone » tombent sur la
+// même entrée.
 func headerKind(h string) colKind {
 	h = fold(strings.TrimSpace(strings.TrimPrefix(h, "\ufeff")))
 	h = strings.NewReplacer("-", " ", "_", " ", ".", " ").Replace(h)

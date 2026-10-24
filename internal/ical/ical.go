@@ -10,8 +10,14 @@ import (
 )
 
 const (
-	MaxSize   = 256 << 10
+	// MaxSize : au-delà, le fichier est tronqué avant analyse. Une invitation légitime tient très en deçà ;
+	// la pièce jointe, elle, peut être de n'importe quelle taille.
+	MaxSize = 256 << 10
+	// MaxEvents : seuls les premiers événements d'un fichier sont lus (une invitation en contient un, un agenda
+	// exporté par erreur en contiendrait des milliers).
 	MaxEvents = 5
+	// maxAttendees borne la liste des participants d'un même événement.
+	maxAttendees = 100
 )
 
 // Person est un organisateur ou un participant.
@@ -121,10 +127,14 @@ func text(s string) string {
 	return strings.TrimSpace(b.String())
 }
 
+// person lit un ORGANIZER ou un ATTENDEE, dont la valeur est une URI (« mailto:bob@x.fr ») et le nom un
+// paramètre CN. Le préfixe est cherché n'importe où, et non en tête, car certains émetteurs le font précéder
+// d'espaces ou d'un autre schéma.
 func person(p prop) Person {
+	const mailto = "mailto:"
 	email := p.value
-	if i := strings.Index(strings.ToLower(email), "mailto:"); i >= 0 {
-		email = email[i+7:]
+	if i := strings.Index(strings.ToLower(email), mailto); i >= 0 {
+		email = email[i+len(mailto):]
 	}
 	return Person{Name: text(p.params["CN"]), Email: strings.TrimSpace(email), Status: strings.ToUpper(p.params["PARTSTAT"])}
 }
@@ -205,7 +215,7 @@ func Parse(data []byte, local *time.Location) []Event {
 			case "ORGANIZER":
 				cur.Organizer = person(p)
 			case "ATTENDEE":
-				if len(cur.Attendees) < 100 {
+				if len(cur.Attendees) < maxAttendees {
 					cur.Attendees = append(cur.Attendees, person(p))
 				}
 			case "DTSTART":

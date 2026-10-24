@@ -240,7 +240,7 @@ func (c *Conn) sortedUIDs(crit *imap.SearchCriteria, q ListQuery) (uids []uint32
 			case "from":
 				if len(m.Envelope.From) > 0 {
 					a := m.Envelope.From[0]
-					k.str = strings.ToLower(cmp(a.Name, a.Mailbox+"@"+a.Host))
+					k.str = strings.ToLower(firstNonEmpty(a.Name, a.Mailbox+"@"+a.Host))
 				}
 			case "subject":
 				k.str = baseSubject(m.Envelope.Subject)
@@ -287,7 +287,8 @@ func (c *Conn) sortedUIDs(crit *imap.SearchCriteria, q ListQuery) (uids []uint32
 	return out, false, nil
 }
 
-func cmp(a, b string) string {
+// firstNonEmpty renvoie a, ou b si a est vide.
+func firstNonEmpty(a, b string) string {
 	if a != "" {
 		return a
 	}
@@ -381,8 +382,6 @@ func attachmentKind(mime, name string) string {
 	return ""
 }
 
-// fixUTF8 relit en ISO-8859-1 un en-tête qui n'est pas de l'UTF-8 valide (serveurs ou expéditeurs non conformes),
-// pour afficher « réunion » plutôt qu'un caractère de remplacement.
 // decodeWords décode les mots encodés RFC 2047 que le serveur laisse tels quels dans l'ENVELOPE
 // (« =?utf-8?q?Pinterest?= »), y compris entre guillemets.
 func decodeWords(s string) string {
@@ -399,6 +398,9 @@ func decodeWords(s string) string {
 	return s
 }
 
+// fixUTF8 relit en ISO-8859-1 un en-tête qui n'est pas de l'UTF-8 valide (serveurs ou expéditeurs non conformes),
+// pour afficher « réunion » plutôt qu'un caractère de remplacement. Chaque octet devient le point de code de même
+// valeur, ce qui est exactement la table ISO-8859-1.
 func fixUTF8(s string) string {
 	if utf8.ValidString(s) {
 		return s
@@ -594,11 +596,10 @@ func (c *Conn) groupThreads(crit *imap.SearchCriteria, uids []uint32, q ListQuer
 		}
 		seen[gi] = true
 		out = append(out, u)
-		var mem []uint32
-		for _, m := range groups[gi] { // seuls les messages de la recherche (uids) comptent
-			mem = append(mem, m)
-		}
-		threads[u] = mem
+		// Tous les membres du fil rendus par THREAD sont conservés, y compris ceux qui ne figurent pas dans uids :
+		// les drapeaux « non lu » et « suivi » de la ligne résument la conversation entière, pas seulement sa part
+		// retenue par la recherche. La copie évite de partager le tableau de groups avec l'appelant.
+		threads[u] = slices.Clone(groups[gi])
 	}
 	return out, threads, nil
 }

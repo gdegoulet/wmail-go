@@ -49,6 +49,9 @@ const (
 // flexBool accepte les booléens écrits par PHP : true, false, "1", "0", 1, 0, "".
 type flexBool bool
 
+// UnmarshalJSON accepte indifféremment un booléen, un nombre ou une chaîne : toute valeur autre que 1 ou true
+// vaut faux, y compris une valeur illisible, pour qu'un filtre écrit par RainLoop ne fasse jamais échouer la
+// lecture du script entier.
 func (b *flexBool) UnmarshalJSON(data []byte) error {
 	s := strings.Trim(strings.TrimSpace(string(data)), `"`)
 	*b = s == "1" || s == "true"
@@ -182,8 +185,19 @@ var (
 	sizeRe       = regexp.MustCompile(`^[0-9]{1,12}[KkMmGg]?$`)
 	headerNameRe = regexp.MustCompile(`^[!-9;-~]{1,100}$`)
 	spacesRe     = regexp.MustCompile(` {2,}`)
+	// filterIDRe borne l'identifiant d'un filtre : il est recopié tel quel dans le marqueur « BEGIN:FILTER:<id> »
+	// du script, donc il ne doit contenir ni espace, ni retour à la ligne, ni rien qui ferme un commentaire.
+	filterIDRe = regexp.MustCompile(`^[A-Za-z0-9_-]{1,64}$`)
 )
 
+// headerLineLen est la longueur des lignes de l'en-tête base64 d'un filtre : c'est celle qu'écrit RainLoop, et
+// headerBlockRe recolle les lignes à la relecture, donc la valeur exacte n'a d'importance que pour la comparaison
+// octet par octet d'un script relu puis réécrit.
+const headerLineLen = 74
+
+// errFalse est le test Sieve rendu pour une condition invalide. « false » est préféré à l'omission de la règle :
+// le filtre reste présent dans le script (donc relisible et modifiable par l'utilisateur) mais ne se déclenche
+// jamais, au lieu de s'appliquer à tous les messages comme le ferait une condition absente.
 const errFalse = "false"
 
 // conditionScript renvoie le test Sieve d'une condition et les extensions nécessaires.
@@ -249,6 +263,9 @@ func conditionScript(c Condition, req map[string]bool) string {
 	return spacesRe.ReplaceAllString(neg+test, " ")
 }
 
+// filterScript écrit le corps Sieve d'un filtre (le « if » et ses actions) et note dans req les extensions qu'il
+// emploie, que BuildScript rassemble ensuite dans l'unique ligne « require » en tête du script. Un filtre sans
+// condition s'applique à tout : il est écrit sans « if » ni accolades, d'où le drapeau all.
 func filterScript(f Filter, req map[string]bool) string {
 	const nl = "\r\n"
 	tab := "    "
@@ -360,7 +377,7 @@ func BuildScript(filters []Filter) (string, error) {
 		if f.ID == "" {
 			f.ID = NewID()
 		}
-		if !regexp.MustCompile(`^[A-Za-z0-9_-]{1,64}$`).MatchString(f.ID) {
+		if !filterIDRe.MatchString(f.ID) {
 			return "", fmt.Errorf("identifiant de filtre invalide")
 		}
 		hdr, err := marshalHeader(f)
@@ -369,9 +386,9 @@ func BuildScript(filters []Filter) (string, error) {
 		}
 		enc := base64.StdEncoding.EncodeToString(hdr)
 		var chunks strings.Builder
-		for len(enc) > 74 {
-			chunks.WriteString(enc[:74] + nl)
-			enc = enc[74:]
+		for len(enc) > headerLineLen {
+			chunks.WriteString(enc[:headerLineLen] + nl)
+			enc = enc[headerLineLen:]
 		}
 		chunks.WriteString(enc + nl)
 		block := []string{"/*", "BEGIN:FILTER:" + f.ID, "BEGIN:HEADER", chunks.String() + "END:HEADER", "*/"}

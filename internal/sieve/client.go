@@ -17,9 +17,9 @@ import (
 
 // Erreurs du client.
 var (
-	ErrAuth      = errors.New("authentification refusée")
-	ErrNoStartTL = errors.New("le serveur n'annonce pas STARTTLS")
-	ErrProtocol  = errors.New("réponse ManageSieve inattendue")
+	ErrAuth       = errors.New("authentification refusée")
+	ErrNoStartTLS = errors.New("le serveur n'annonce pas STARTTLS")
+	ErrProtocol   = errors.New("réponse ManageSieve inattendue")
 )
 
 // ServerError est une réponse NO ou BYE du serveur.
@@ -41,9 +41,12 @@ func (e *ServerError) Error() string {
 }
 
 const (
-	maxLine    = 64 << 10
-	maxScript  = 1 << 20
-	maxListing = 1000
+	maxLine    = 64 << 10 // ligne de réponse (hors littéral)
+	maxScript  = 1 << 20  // script accepté, en lecture comme en écriture
+	maxListing = 1000     // lignes de données avant la réponse finale : borne un serveur qui ne conclut jamais
+	// readBuffer : les capacités annoncées à l'accueil tiennent dans ce tampon, ce qui évite de rallonger la
+	// première lecture ; il est recréé après STARTTLS puisque la connexion sous-jacente change.
+	readBuffer = 8192
 )
 
 // Client est une session ManageSieve.
@@ -55,7 +58,7 @@ type Client struct {
 
 // New prend en charge une connexion déjà ouverte et lit les capacités annoncées à l'accueil.
 func New(conn net.Conn) (*Client, error) {
-	c := &Client{conn: conn, r: bufio.NewReaderSize(conn, 8192)}
+	c := &Client{conn: conn, r: bufio.NewReaderSize(conn, readBuffer)}
 	if err := c.readCapabilities(); err != nil {
 		return nil, err
 	}
@@ -251,7 +254,7 @@ func (c *Client) cmd(format string, args ...any) ([][]token, error) {
 // StartTLS bascule la connexion en TLS (STARTTLS) puis relit les capacités.
 func (c *Client) StartTLS(cfg *tls.Config) error {
 	if _, ok := c.Capability("STARTTLS"); !ok {
-		return ErrNoStartTL
+		return ErrNoStartTLS
 	}
 	if _, err := c.cmd("STARTTLS\r\n"); err != nil {
 		return err
@@ -260,7 +263,7 @@ func (c *Client) StartTLS(cfg *tls.Config) error {
 	if err := tc.Handshake(); err != nil {
 		return err
 	}
-	c.conn, c.r = tc, bufio.NewReaderSize(tc, 8192)
+	c.conn, c.r = tc, bufio.NewReaderSize(tc, readBuffer)
 	// Après STARTTLS, le serveur renvoie ses capacités (sans commande) ; certains attendent CAPABILITY.
 	if err := c.readCapabilities(); err != nil {
 		return err
@@ -285,7 +288,8 @@ func (c *Client) Authenticate(login, password string) error {
 		}
 		return err
 	}
-	// Un serveur peut renvoyer de nouvelles capacités ; on les relit seulement si besoin.
+	// Un serveur peut joindre de nouvelles capacités à son OK : readResponse les a déjà consommées comme lignes de
+	// données, et celles d'avant l'authentification suffisent à l'usage qui est fait du client (extensions Sieve).
 	return nil
 }
 
@@ -331,7 +335,9 @@ func (c *Client) GetScript(name string) (string, error) {
 	return data[0][0].s, nil
 }
 
-// literal envoie un script en littéral non synchronisant {n+}.
+// withScript envoie une commande dont l'argument final est un script, transmis en littéral non synchronisant
+// « {n+} » : le serveur n'a pas à accuser réception de la taille avant de recevoir le corps, ce qui évite
+// un aller-retour. La réponse finale est lue avant de rendre la main.
 func (c *Client) withScript(prefix, script string) error {
 	if len(script) > maxScript {
 		return errors.New("script trop volumineux")

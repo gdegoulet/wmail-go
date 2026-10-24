@@ -16,9 +16,9 @@ type PollResult struct {
 
 const maxNewPolled = 10
 
-// Poll renvoie les compteurs du dossier et, si sinceUID > 0, les nouveaux messages non lus d'UID >= sinceUID.
 // UnseenMany renvoie le nombre de non lus de plusieurs dossiers. Avec LIST-STATUS (ou IMAP4rev2), une seule
 // commande suffit pour tous ; sinon un STATUS par dossier est envoyé, les réponses étant attendues ensemble.
+// Un dossier absent de la réponse ne figure pas dans la carte renvoyée (il a pu disparaître entre-temps).
 func (c *Conn) UnseenMany(folders []string) (_ map[string]uint32, err error) {
 	if len(folders) == 0 {
 		return map[string]uint32{}, nil
@@ -55,6 +55,9 @@ func (c *Conn) UnseenMany(folders []string) (_ map[string]uint32, err error) {
 	return out, nil
 }
 
+// Poll renvoie les compteurs du dossier et, si sinceUID > 0, les nouveaux messages non lus d'UID >= sinceUID.
+// Le STATUS précède le SELECT : quand il montre qu'il n'y a rien de neuf (UIDNEXT inchangé ou aucun non lu),
+// le dossier n'est pas ouvert du tout, ce qui rend le sondage périodique peu coûteux.
 func (c *Conn) Poll(folder string, sinceUID uint32) (_ *PollResult, err error) {
 	defer c.trace("sondage", false, "dossier", folder, "depuis", sinceUID)(&err)
 	st, err := c.Client.Status(folder, &imap.StatusOptions{NumMessages: true, NumUnseen: true, UIDNext: true}).Wait()
