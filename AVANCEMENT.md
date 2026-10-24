@@ -18,8 +18,9 @@ décisions : `CAHIER_DES_CHARGES.md` ; historique : `git log`.
 | **Fidélité visuelle DarkShine** | **~85 %** | captures | **à revalider** | icônes pleines restantes, animations, largeurs par taille d'écran |
 | Analyse de RainLoop | 100 % lue | — | — | P1 : 2/2 ; P2 : ~95 % ; P3 : ~50 % |
 
-**Avancement global : environ 91 %** (fonctions 40 %, fidélité visuelle 25 %, validation sur vos boîtes 20 %, tests 15 %).
-Détail : fonctions ~98 %, couverture de RainLoop ~96 %, tests automatiques ~92 %, **validation par vous ~35 %**
+**Avancement global : environ 94 %** (fonctions 40 %, fidélité visuelle 25 %, validation sur vos boîtes 20 %, tests 15 %).
+Détail : fonctions ~99 %, couverture de RainLoop ~97 %, fidélité visuelle ~92 %, tests automatiques ~93 %,
+**validation par vous ~35 %**
 (c'est le point faible ; la matrice `MATRICE_DE_TEST.md`, 135 cas, sert à la faire monter).
 
 ## 2. Fait depuis le passage à Opus 5
@@ -39,6 +40,11 @@ la page demandée après reconnexion (2FA comprise). IMAP : tri naturel des doss
 création automatique d'un dossier système absent (MOVE/COPY/APPEND). SMTP : EHLO avec le vrai nom d'hôte.
 Lecture : X-Confirm-Reading-To et Return-Receipt-To, brouillons RainLoop (X-Draft-Info). Liste : suppression
 définitive (Maj+Suppr), « tout marquer non lu », 20 suggestions d'adresses.
+
+Depuis (travail en parallèle avec des agents) : réglages enregistrés à la volée avec coche verte, vignettes de
+thèmes, réordonnancement par glisser-déposer (comptes, identités, modèles), 15 icônes reprises de la police de
+RainLoop, repères de glisser-déposer, focus clavier sur les dossiers, images Content-Location, domaines punycode
+lisibles, fond d'écran vectoriel du thème.
 
 Reste des P2/P3 : fidélité visuelle DarkShine (icônes pleines, boutons des réglages, aperçu « N sélectionnés »,
 fond des conversations non lues, icônes de pièces jointes par type), vue contacts en deux volets, disposition

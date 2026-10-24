@@ -110,6 +110,7 @@
 
 .theme-name {
   display: block;
+  min-height: 2.4em; /* toutes les vignettes gardent la même hauteur, même si le nom tient sur deux lignes */
   margin-top: .3rem;
   font-size: .78rem;
   line-height: 1.2;
