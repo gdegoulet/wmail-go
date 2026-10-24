@@ -24,6 +24,14 @@ help:
 	@echo "make user-add|user-list|user-passwd|user-recover|user-delete LOGIN=nom   gestion des comptes"
 	@echo "make theme-background FILE=image.jpg   pose votre fond d'écran pour le thème rainloop"
 	@echo "make clean     supprime conteneurs et volumes (efface les données !)"
+	@echo ""
+	@echo "Déploiement HTTPS (nginx) et exploitation :"
+	@echo "make tls-cert [TLS_HOST=domaine]   certificat auto-signé dans deploy/certs/"
+	@echo "make tls-up    démarre nginx + wmail-go (https://localhost:8443) ; tls-up-dev partage les données de make up"
+	@echo "make tls-user-add LOGIN=nom        crée un compte dans le volume du déploiement"
+	@echo "make tls-logs|tls-ps|tls-down      journaux, état, arrêt"
+	@echo "make backup [BACKUP_DIR=rep]       archive datée du volume de données"
+	@echo "make restore FILE=archive.tar.gz   restauration (serveur arrêté)"
 
 build:
 	$(COMPOSE) build webmail
