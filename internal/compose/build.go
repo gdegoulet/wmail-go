@@ -56,15 +56,33 @@ type Message struct {
 var ErrNoRecipient = errors.New("aucun destinataire")
 
 // Recipients renvoie les adresses d'enveloppe (À, Cc, Cci), sans doublon.
+func asciiAddr(a *mail.Address) *mail.Address {
+	if a == nil {
+		return nil
+	}
+	c := *a
+	c.Address = ToASCIIDomain(c.Address)
+	return &c
+}
+
+func asciiList(l []*mail.Address) []*mail.Address {
+	out := make([]*mail.Address, 0, len(l))
+	for _, a := range l {
+		out = append(out, asciiAddr(a))
+	}
+	return out
+}
+
 func (m *Message) Recipients() []string {
 	var out []string
 	seen := map[string]bool{}
 	for _, l := range [][]*mail.Address{m.To, m.Cc, m.Bcc} {
 		for _, a := range l {
-			k := strings.ToLower(a.Address)
+			addr := ToASCIIDomain(a.Address) // domaine en punycode : l'enveloppe SMTP n'accepte pas l'Unicode
+			k := strings.ToLower(addr)
 			if !seen[k] {
 				seen[k] = true
-				out = append(out, a.Address)
+				out = append(out, addr)
 			}
 		}
 	}
@@ -108,10 +126,10 @@ func (m *Message) Build(includeBcc bool) ([]byte, error) {
 
 	var h gomail.Header
 	h.SetDate(orNow(m.Date))
-	h.SetAddressList("From", []*gomail.Address{m.From})
+	h.SetAddressList("From", []*gomail.Address{asciiAddr(m.From)})
 	setList := func(key string, l []*mail.Address) {
 		if len(l) > 0 {
-			h.SetAddressList(key, l)
+			h.SetAddressList(key, asciiList(l)) // domaines en punycode dans les en-têtes aussi
 		}
 	}
 	setList("To", m.To)
@@ -152,7 +170,7 @@ func (m *Message) Build(includeBcc bool) ([]byte, error) {
 		h.Set("X-Priority", "1 (Highest)")
 	}
 	if m.ReadReceipt {
-		h.SetAddressList("Disposition-Notification-To", []*gomail.Address{m.From})
+		h.SetAddressList("Disposition-Notification-To", []*gomail.Address{asciiAddr(m.From)})
 	}
 	if m.Draft != nil && m.Draft.Kind != "" {
 		h.Set("X-Wmail-Draft-Info", EncodeDraftInfo(*m.Draft))

@@ -5,7 +5,9 @@ package compose
 import (
 	"errors"
 	"fmt"
+	"golang.org/x/net/idna"
 	"net/mail"
+	"regexp"
 	"strings"
 	"unicode"
 )
@@ -60,7 +62,13 @@ func ParseList(s string) ([]*mail.Address, error) {
 		}
 		a, err := mail.ParseAddress(p)
 		if err != nil {
-			return nil, fmt.Errorf("%w : %q", ErrInvalidAddress, truncate(p, 60))
+			if a, err = parseLoose(p); err != nil {
+				return nil, fmt.Errorf("%w : %q", ErrInvalidAddress, truncate(p, 60))
+			}
+		}
+		// « 'Nom' <a@b> » : les apostrophes entourant le nom sont décoratives (RainLoop les retire aussi).
+		if n := a.Name; len(n) > 1 && strings.HasPrefix(n, "'") && strings.HasSuffix(n, "'") {
+			a.Name = strings.TrimSpace(n[1 : len(n)-1])
 		}
 		if hasControl(a.Name) || hasControl(a.Address) || !strings.Contains(a.Address, "@") {
 			return nil, fmt.Errorf("%w : %q", ErrInvalidAddress, truncate(p, 60))
@@ -68,6 +76,65 @@ func ParseList(s string) ([]*mail.Address, error) {
 		out = append(out, a)
 	}
 	return out, nil
+}
+
+var (
+	looseMailRe    = regexp.MustCompile(`[^\s<>,;"'()]+@[^\s<>,;"'()]+\.[^\s<>,;"'()]+`)
+	looseCommentRe = regexp.MustCompile(`\(([^()]*)\)`)
+	headerLikeRe   = regexp.MustCompile(`^[A-Za-z][A-Za-z-]{1,30}:`)
+)
+
+// parseLoose lit les formes qu'un analyseur strict refuse mais qu'un utilisateur écrit couramment :
+// « Nom a@b.fr », « a@b.fr (Nom) », « 'Nom' <a@b.fr> », une adresse suivie d'un point final.
+func parseLoose(p string) (*mail.Address, error) {
+	name := ""
+	rest := looseCommentRe.ReplaceAllStringFunc(p, func(m string) string {
+		if name == "" {
+			name = strings.TrimSpace(m[1 : len(m)-1])
+		}
+		return " "
+	})
+	m := looseMailRe.FindStringIndex(rest)
+	if m == nil {
+		return nil, ErrInvalidAddress
+	}
+	addr := strings.Trim(rest[m[0]:m[1]], ".,;")
+	if name == "" {
+		name = strings.TrimSpace(rest[:m[0]] + " " + rest[m[1]:])
+		name = strings.Trim(name, " \t<>,;\"'")
+	}
+	// « Bcc: pirate@x » et les autres formes qui ressemblent à un en-tête sont refusées (tentative d'injection).
+	if headerLikeRe.MatchString(name) || hasControl(name) || hasControl(addr) || !strings.Contains(addr, "@") {
+		return nil, ErrInvalidAddress
+	}
+	return &mail.Address{Name: name, Address: addr}, nil
+}
+
+// ToASCIIDomain convertit en punycode le domaine d'une adresse (RFC 5890) : les serveurs SMTP n'acceptent pas un domaine
+// en Unicode sans l'extension SMTPUTF8. La partie locale est laissée telle quelle.
+func ToASCIIDomain(addr string) string {
+	at := strings.LastIndexByte(addr, '@')
+	if at < 0 {
+		return addr
+	}
+	domain := addr[at+1:]
+	if isASCII(domain) {
+		return addr
+	}
+	ascii, err := idna.Lookup.ToASCII(domain)
+	if err != nil || ascii == "" {
+		return addr
+	}
+	return addr[:at+1] + ascii
+}
+
+func isASCII(s string) bool {
+	for i := 0; i < len(s); i++ {
+		if s[i] > 127 {
+			return false
+		}
+	}
+	return true
 }
 
 func truncate(s string, n int) string {

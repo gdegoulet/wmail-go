@@ -306,3 +306,43 @@ func TestMDNBuild(t *testing.T) {
 		t.Error("destinataire manquant accepté")
 	}
 }
+
+func TestParseListAcceptsLooseFormsAndIDN(t *testing.T) {
+	list, err := ParseList("Jean Dupont jean@x.fr, pierre@y.fr (Pierre Martin), 'Zoé' <zoe@z.fr>, bob@b.fr.")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(list) != 4 {
+		t.Fatalf("%d adresses : %v", len(list), FormatList(list))
+	}
+	for i, want := range []struct{ name, addr string }{
+		{"Jean Dupont", "jean@x.fr"}, {"Pierre Martin", "pierre@y.fr"}, {"Zoé", "zoe@z.fr"}, {"", "bob@b.fr"},
+	} {
+		if list[i].Name != want.name || list[i].Address != want.addr {
+			t.Errorf("%d : %q <%s>, attendu %q <%s>", i, list[i].Name, list[i].Address, want.name, want.addr)
+		}
+	}
+	if _, err := ParseList("vraiment pas une adresse"); err == nil {
+		t.Error("texte sans adresse accepté")
+	}
+	if got := ToASCIIDomain("zoé@café.fr"); got != "zoé@xn--caf-dma.fr" {
+		t.Errorf("punycode : %s", got)
+	}
+	if got := ToASCIIDomain("a@b.fr"); got != "a@b.fr" {
+		t.Errorf("domaine ASCII modifié : %s", got)
+	}
+}
+
+func TestIDNInEnvelopeAndHeaders(t *testing.T) {
+	m := &Message{From: &mail.Address{Name: "Zoé", Address: "zoe@café.fr"}, To: []*mail.Address{{Address: "ami@déjà.fr"}}, Subject: "x", Text: "y"}
+	if r := m.Recipients(); len(r) != 1 || r[0] != "ami@xn--dj-kia8a.fr" {
+		t.Errorf("enveloppe : %v", r)
+	}
+	raw, err := m.Build(false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(raw), "xn--caf-dma.fr") || !strings.Contains(string(raw), "xn--dj-kia8a.fr") {
+		t.Errorf("en-têtes sans punycode :\n%s", raw)
+	}
+}
