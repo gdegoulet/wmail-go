@@ -401,6 +401,11 @@ body:has(.authpage) { margin: 0; }
 .roles label { max-width: 28rem; }
 .inline-form { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; }
 .inline-form label { margin: 0; }
+/* Écran étroit : un menu de la barre d'outils s'ouvrait hors de l'écran. */
+@media (max-width: 45rem) {
+  .mailbar .menu, details.right > .menu { left: 0; right: auto; max-width: calc(100vw - 1.4rem); }
+  .mb-right details.right > .menu { left: auto; right: 0; }
+}
 @media (max-width: 45rem) { .settings { flex-direction: column; padding: 0; } .setmenu { width: auto; padding-top: .5rem; display: flex; flex-wrap: wrap; } .setmenu .e-item { font-size: 1rem; } .setpane { border-radius: 0; } .setcontent { padding: 1rem; } .settb { padding: .29rem .57rem; } }
 
 /* Éditeur de texte riche */

@@ -428,6 +428,12 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
   attendu : repère visible dans la liste et en lecture
   réponse :
 
+[D-28] Impression d'un message
+  tester  : menu « … » > Imprimer, puis aperçu avant impression
+  attendu : objet, De, À, Cc, Cci, Répondre à, Date, pièces jointes en liste ; corps lisible ; URL des liens entre
+            parenthèses ; aucune barre d'outils ; pas d'aplat de couleur
+  réponse :
+
 [D-20] Plein écran du message
   tester  : bouton, puis Échap
   attendu : bascule correcte, la liste réapparaît
@@ -720,6 +726,25 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
   réponse :
 ```
 
+## I bis. Téléphone et mode sans JavaScript
+
+```
+[I-16] Courrier sur téléphone (≈420 px)
+  tester  : réduire la fenêtre à 420 px, ouvrir un message, ouvrir le menu « Déplacer vers »
+  attendu : volet de lecture pleine largeur, barre d'outils sur plusieurs lignes, menus dans l'écran
+  réponse :
+
+[I-17] Composition sur téléphone
+  tester  : écrire un message à 420 px avec une identité au nom long, joindre un fichier
+  attendu : aucun débordement horizontal, champs et boutons accessibles
+  réponse :
+
+[I-18] Navigateur sans JavaScript
+  tester  : désactiver JavaScript, parcourir la liste, ouvrir un message, écrire et envoyer
+  attendu : tout reste utilisable ; les commandes inopérantes (dépôt de fichiers) sont masquées
+  réponse :
+```
+
 ## J. Sécurité et robustesse
 
 ```
@@ -802,4 +827,4 @@ Je remplis ce tableau à partir de vos réponses : un retour `KO` y reste jusqu'
 ## Points livrés depuis la dernière session de test
 
 Ajoutés aux points ci-dessus, à valider en priorité : `C-12`, `C-13`, `C-14`, `C-15`, `C-30`, `C-31`, `D-10`, `D-15`, `D-16`,
-`D-21`, `D-22`, `E-03`, `F-01`, `F-05`, `G-02`, `G-07`, `I-01`, `I-05`, `I-09`, `I-11`, `A-08`, `C-24`, `B-08`, `B-09`, `C-32`, `I-12`, `I-13`, `D-23`, `A-11`, `B-10`, `A-12`, `D-24`, `C-33`, `B-11`, `B-12`, `C-34`, `D-25`, `D-26`, `D-27`, `I-01`, `I-14`, `I-15`.
+`D-21`, `D-22`, `E-03`, `F-01`, `F-05`, `G-02`, `G-07`, `I-01`, `I-05`, `I-09`, `I-11`, `A-08`, `C-24`, `B-08`, `B-09`, `C-32`, `I-12`, `I-13`, `D-23`, `A-11`, `B-10`, `A-12`, `D-24`, `C-33`, `B-11`, `B-12`, `C-34`, `D-25`, `D-26`, `D-27`, `I-01`, `I-14`, `I-15`, `D-28`, `I-16`, `I-17`, `I-18`.
