@@ -821,9 +821,24 @@ Mettre les deux côte à côte et noter l'écart le plus visible.
 
 Je remplis ce tableau à partir de vos réponses : un retour `KO` y reste jusqu'à correction et nouvelle validation.
 
-| Identifiant | Date | Votre retour | Correction | Commit | État |
-|---|---|---|---|---|---|
-| — | — | — | — | — | — |
+| Identifiant | Date | Votre retour | Correction | État |
+|---|---|---|---|---|
+| A-12 | 24/10 | QR « again=1 » en 404 | le secret révélé reste affichable 2 min, le temps du chargement de l'image | **à revalider** |
+| C-06 | 24/10 | `from: adresse` sans résultat | une espace après les deux-points faisait repartir toute la requête en texte libre ; le mot-clé consomme le jeton suivant (test Dovecot réel) | **à revalider** |
+| C-08 | 24/10 | deux croix mal alignées | croix native du champ `type=search` masquée, la nôtre recentrée | **à revalider** |
+| C-15 | 24/10 | « ça télécharge la page » | comportement de Chrome (Alt+clic télécharge) ; point reformulé, clic du milieu conservé | sans objet |
+| C-16 | 24/10 | curseur clavier invisible | le fond d'état n'est plus écrasé ; liseré et barre latérale marqués | **à revalider** |
+| D-09 | 24/10 | image précédente pendant le chargement | image masquée et `src` retiré, anneau d'attente après 150 ms | **à revalider** |
+| D-15 | 24/10 | flèches inopérantes et grisées | `/mail/pane` rendait une liste vide ; les voisins sont désormais déduits de la liste affichée | **à revalider** |
+| D-20 | 24/10 | bouton plein écran introuvable | icône distincte, infobulle explicite, raccourci Entrée, bouton rouge quand actif | **à revalider** |
+| D-22 | 24/10 | PDF refusé dans la visionneuse | `X-Frame-Options: deny` global s'appliquait à l'aperçu ; `SAMEORIGIN` + `frame-ancestors 'self'` | **à revalider** |
+| D-23 | 24/10 | cases des pièces jointes invisibles | révélation refaite à chaque injection du volet, pastille lisible sur la vignette | **à revalider** |
+| E-06 | 24/10 | `=?utf-8?q?St…` dans les champs de réponse | `FormatList` réencodait les noms non ASCII ; mise en forme lisible | **à revalider** |
+| G-10 | 24/10 | pourquoi 5 dossiers surveillés ? | relevé en une commande (LIST-STATUS), limite portée à 20 | **à revalider** |
+| I-13 | 24/10 | pastille des comptes à la ligne | entrée de menu en flex, adresse tronquée par ellipsis | **à revalider** |
+| J-01 à J-04 | 24/10 | « à toi de tester » | quatre tests automatiques ajoutés (message piégé, CSRF, SSRF, en-têtes) | validé |
+| — | 25/10 | menu « plus d'actions » trop étroit | largeur suivant le contenu, bornée à l'écran | **à revalider** |
+| — | 25/10 | panneau « détails » translucide illisible | sorti de la surcouche, placé dans le flux comme la bande des pièces jointes | **à revalider** |
 
 ## Points livrés depuis la dernière session de test
 
