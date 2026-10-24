@@ -40,6 +40,11 @@ var staticFS embed.FS
 
 const cookieName = "wmail_session"
 
+// hostCookieName : en HTTPS, le cookie de session prend le préfixe « __Host- ». Le navigateur refuse alors tout
+// cookie de ce nom qui ne serait pas Secure, de portée « / » et sans domaine : un sous-domaine compromis ne peut
+// plus en poser un à notre place.
+const hostCookieName = "__Host-" + cookieName
+
 var themeNameRe = regexp.MustCompile(`^[a-z0-9_-]{1,32}$`)
 
 // Server regroupe les dépendances du serveur HTTP.
@@ -268,6 +273,10 @@ func (s *Server) secure(next http.Handler) http.Handler {
 		h.Set("X-Content-Type-Options", "nosniff")
 		h.Set("X-Frame-Options", "DENY")
 		h.Set("Referrer-Policy", "no-referrer")
+		// Aucune de ces interfaces n'est utilisée : les refuser réduit ce qu'un script injecté pourrait tenter.
+		h.Set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=(), midi=(), magnetometer=(), gyroscope=(), accelerometer=(), display-capture=(), browsing-topics=()")
+		h.Set("Cross-Origin-Opener-Policy", "same-origin")   // pas de lien window.opener avec une autre origine
+		h.Set("Cross-Origin-Resource-Policy", "same-origin") // nos ressources ne sont pas chargeables ailleurs
 		if s.isHTTPS(r) {
 			// Le proxy termine TLS : demander au navigateur de ne plus jamais tenter le HTTP en clair.
 			h.Set("Strict-Transport-Security", "max-age=31536000")
@@ -373,21 +382,31 @@ func (s *Server) sameOrigin(r *http.Request) bool {
 }
 
 func (s *Server) currentSession(r *http.Request) *session.Session {
-	c, err := r.Cookie(cookieName)
-	if err != nil {
-		return nil
+	for _, name := range []string{hostCookieName, cookieName} {
+		if c, err := r.Cookie(name); err == nil {
+			if sess := s.sessions.Get(c.Value); sess != nil {
+				return sess
+			}
+		}
 	}
-	return s.sessions.Get(c.Value)
+	return nil
 }
 
 func (s *Server) setSessionCookie(w http.ResponseWriter, r *http.Request, id string) {
-	http.SetCookie(w, &http.Cookie{Name: cookieName, Value: id, Path: "/", HttpOnly: true,
-		SameSite: http.SameSiteStrictMode, Secure: s.isHTTPS(r)})
+	name, secure := cookieName, s.isHTTPS(r)
+	if secure {
+		name = hostCookieName
+	}
+	http.SetCookie(w, &http.Cookie{Name: name, Value: id, Path: "/", HttpOnly: true,
+		SameSite: http.SameSiteStrictMode, Secure: secure})
 }
 
 func (s *Server) clearSessionCookie(w http.ResponseWriter, r *http.Request) {
-	http.SetCookie(w, &http.Cookie{Name: cookieName, Value: "", Path: "/", MaxAge: -1, HttpOnly: true,
-		SameSite: http.SameSiteStrictMode, Secure: s.isHTTPS(r)})
+	secure := s.isHTTPS(r)
+	for _, name := range []string{cookieName, hostCookieName} { // les deux formes, pour ne rien laisser traîner
+		http.SetCookie(w, &http.Cookie{Name: name, Value: "", Path: "/", MaxAge: -1, HttpOnly: true,
+			SameSite: http.SameSiteStrictMode, Secure: secure})
+	}
 }
 
 // startSession ouvre une session pour un compte et pose le cookie.

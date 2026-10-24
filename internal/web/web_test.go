@@ -484,14 +484,14 @@ func TestSessionCookieSecureBehindProxy(t *testing.T) {
 	resp, _ := e.do(e.client(), "POST", "/register", url.Values{"login": {"alice"}, "password": {pw}, "password2": {pw}},
 		map[string]string{"X-Forwarded-Proto": "https"})
 	e.expect(resp, 303, "/recovery-key")
-	var secure bool
+	var secure, hostPrefix bool
 	for _, ck := range resp.Cookies() {
-		if ck.Name == cookieName {
-			secure = ck.Secure
+		if ck.Name == hostCookieName { // en HTTPS, le cookie prend le préfixe __Host-
+			secure, hostPrefix = ck.Secure, ck.Path == "/" && ck.Domain == ""
 		}
 	}
-	if !secure {
-		t.Error("cookie Secure attendu derrière un proxy HTTPS")
+	if !secure || !hostPrefix {
+		t.Errorf("cookie __Host- attendu derrière un proxy HTTPS (secure=%v, portée=%v)", secure, hostPrefix)
 	}
 }
 
