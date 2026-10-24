@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"github.com/emersion/go-imap/v2"
+
+	"wmail-go/internal/mailview"
 )
 
 // Tests d'intégration contre un vrai Dovecot (make sieve-up). Ignorés si DOVECOT_IMAP n'est pas défini ou injoignable.
@@ -384,5 +386,61 @@ func TestRealDovecotImportantAndForwardedFlags(t *testing.T) {
 	normal, urgent := res.Messages[0], res.Messages[1]
 	if !urgent.Important || normal.Important || !urgent.Forwarded || normal.Forwarded || len(urgent.To) != 1 || urgent.To[0].Email != "moi@example.org" {
 		t.Errorf("urgent=%+v normal=%+v", urgent, normal)
+	}
+}
+
+// Les pièces jointes listées d'après la structure IMAP doivent correspondre, dans le même ordre et avec les mêmes noms,
+// à celles qu'on obtient en analysant le message entier : c'est ce qui permet de n'en télécharger qu'une.
+func TestRealDovecotPartListMatchesFullParse(t *testing.T) {
+	p, e := dovecot(t)
+	body := "From: a@x.fr\r\nTo: moi@example.org\r\nSubject: Parties\r\nDate: Mon, 05 Oct 2026 09:00:00 +0000\r\nMessage-ID: <parts@test>\r\nMIME-Version: 1.0\r\n" +
+		"Content-Type: multipart/mixed; boundary=M\r\n\r\n" +
+		"--M\r\nContent-Type: multipart/alternative; boundary=A\r\n\r\n" +
+		"--A\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\ncorps texte\r\n" +
+		"--A\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n<p>corps html</p>\r\n--A--\r\n" +
+		"--M\r\nContent-Type: image/png\r\nContent-ID: <logo@x>\r\nContent-Transfer-Encoding: base64\r\n\r\niVBORw0KGgo=\r\n" +
+		"--M\r\nContent-Type: text/calendar; method=REQUEST\r\n\r\nBEGIN:VCALENDAR\r\nEND:VCALENDAR\r\n" +
+		"--M\r\nContent-Type: application/pdf; name=\"devis.pdf\"\r\nContent-Disposition: attachment; filename=\"devis.pdf\"\r\nContent-Transfer-Encoding: base64\r\n\r\nJVBERi0xLjQK\r\n" +
+		"--M\r\nContent-Type: application/pkcs7-signature; name=smime.p7s\r\nContent-Transfer-Encoding: base64\r\n\r\nAAAA\r\n--M--\r\n"
+	var uid uint32
+	dv(t, p, e, func(c *Conn) (err error) {
+		uid, err = c.Append("INBOX", []byte(body), "parts@test", imap.FlagSeen)
+		return
+	})
+	var parts []mailview.PartDesc
+	var full *mailview.Message
+	var pdf []byte
+	dv(t, p, e, func(c *Conn) error {
+		var err error
+		if parts, err = c.Structure("INBOX", uid); err != nil {
+			return err
+		}
+		raw, err := c.FetchMessage("INBOX", uid, true, 0)
+		if err != nil {
+			return err
+		}
+		if full, err = mailview.Parse(raw.Raw); err != nil {
+			return err
+		}
+		list := mailview.AttachmentParts(parts)
+		for _, a := range list {
+			if a.Name == "devis.pdf" {
+				pdf, err = c.FetchPart("INBOX", uid, a.Path, a.Encoding, 0)
+				return err
+			}
+		}
+		return nil
+	})
+	got := mailview.AttachmentParts(parts)
+	if len(got) != len(full.Attachments) {
+		t.Fatalf("%d pièces d'après la structure, %d d'après le message : %+v / %+v", len(got), len(full.Attachments), got, full.Attachments)
+	}
+	for i, a := range got {
+		if a.Name != full.Attachments[i].Name {
+			t.Errorf("pièce %d : %q d'après la structure, %q d'après le message", i, a.Name, full.Attachments[i].Name)
+		}
+	}
+	if string(pdf) != "%PDF-1.4\n" {
+		t.Errorf("contenu de la pièce téléchargée seule : %q", pdf)
 	}
 }

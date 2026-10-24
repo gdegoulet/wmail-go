@@ -29,12 +29,14 @@ import (
 
 const (
 	maxMessageBytes = 30 << 20
-	maxActionUIDs   = 500
-	mailTimeout     = 30 * time.Second
-	maxPageSize     = 500
-	maxThumbnails   = 12      // miniatures calculées par message
-	maxThumbSource  = 8 << 20 // taille maximale d'une image décodée pour sa miniature
-	thumbSize       = 72      // côté des miniatures (affichées à 36 px, nettes sur écrans à forte densité)
+	// maxAttachmentBytes : taille maximale d'une pièce jointe téléchargée seule (le message entier n'est pas lu).
+	maxAttachmentBytes = 200 << 20
+	maxActionUIDs      = 500
+	mailTimeout        = 30 * time.Second
+	maxPageSize        = 500
+	maxThumbnails      = 12      // miniatures calculées par message
+	maxThumbSource     = 8 << 20 // taille maximale d'une image décodée pour sa miniature
+	thumbSize          = 72      // côté des miniatures (affichées à 36 px, nettes sur écrans à forte densité)
 )
 
 // pageSizes sont les tailles de page proposées dans la liste (50 par défaut).
@@ -1136,6 +1138,28 @@ func composeMailtoURL(mailto string) string {
 	return "/compose?" + url.Values{"mailto": {mailto}}.Encode()
 }
 
+// fetchAttachmentPart télécharge la pièce jointe n° idx sans charger le message entier.
+func (s *Server) fetchAttachmentPart(ctx context.Context, sess *session.Session, acc userdata.MailAccount, folder string, uid uint32, idx int) (name, ctype string, data []byte, err error) {
+	err = s.pool.Do(ctx, s.poolKey(sess, acc), imapEndpoint(acc), func(c *mailconn.Conn) error {
+		parts, err := c.Structure(folder, uid)
+		if err != nil {
+			return err
+		}
+		list := mailview.AttachmentParts(parts)
+		if idx < 0 || idx >= len(list) {
+			return mailconn.ErrNotFound
+		}
+		a := list[idx]
+		body, err := c.FetchPart(folder, uid, a.Path, a.Encoding, maxAttachmentBytes)
+		if err != nil {
+			return err
+		}
+		name, ctype, data = a.Name, a.Type, body
+		return nil
+	})
+	return name, ctype, data, err
+}
+
 var safeMediaType = regexp.MustCompile(`^[a-z0-9][a-z0-9.+-]*/[a-z0-9][a-z0-9.+-]*$`)
 
 // mailAttachment télécharge une pièce jointe (toujours en téléchargement, jamais affichée dans la page).
@@ -1157,27 +1181,33 @@ func (s *Server) mailAttachment(w http.ResponseWriter, r *http.Request, sess *se
 	}
 	ctx, cancel := s.mailCtx(r)
 	defer cancel()
-	_, m, err := s.fetchMessage(ctx, sess, acc, folder, uid, false)
+	// La pièce est téléchargée seule, d'après la structure annoncée par le serveur : un message de 100 Mo ne passe pas
+	// par la mémoire pour en extraire un fichier de 2 Mo. Si le serveur ne s'y prête pas, le message entier est relu.
+	name, ctype, data, err := s.fetchAttachmentPart(ctx, sess, acc, folder, uid, idx)
 	if err != nil {
-		s.mailErr(w, r, sess, err)
-		return
+		_, m, ferr := s.fetchMessage(ctx, sess, acc, folder, uid, false)
+		if ferr != nil {
+			s.mailErr(w, r, sess, ferr)
+			return
+		}
+		att, body, ok := m.Attachment(idx)
+		if !ok {
+			s.message(w, r, sess, http.StatusNotFound, "", "mail.err.not_found")
+			return
+		}
+		name, ctype, data = att.Name, att.ContentType, body
 	}
-	att, data, ok := m.Attachment(idx)
-	if !ok {
-		s.message(w, r, sess, http.StatusNotFound, "", "mail.err.not_found")
-		return
-	}
-	ct := strings.ToLower(att.ContentType)
+	ct := strings.ToLower(ctype)
 	switch {
 	case !safeMediaType.MatchString(ct), strings.Contains(ct, "html"), strings.Contains(ct, "xml"), strings.Contains(ct, "svg"), strings.Contains(ct, "javascript"):
 		ct = "application/octet-stream"
 	}
-	name := safeFileName(att.Name)
+	name = safeFileName(name)
 	h := w.Header()
 	disposition := "attachment"
 	if q.Get("inline") == "1" {
 		// Aperçu : seulement pour les types sûrs, reconnus d'après le contenu lui-même (jamais d'après l'étiquette).
-		if kind := previewKind(att.ContentType, data); kind != "" {
+		if kind := previewKind(ctype, data); kind != "" {
 			disposition = "inline"
 			ct = http.DetectContentType(data)
 			if kind == "text" {
