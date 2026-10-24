@@ -22,7 +22,9 @@ type FolderSetting struct {
 	Indent     int
 	Role       string // clé de traduction du rôle (vide : aucun)
 	Subscribed bool
-	Protected  bool // INBOX : ni renommée ni supprimée
+	Protected  bool // INBOX ou dossier système configuré : ni renommé ni supprimé
+	HasChild   bool // un sous-dossier existe : la suppression est refusée
+	Removable  bool // la suppression est proposée (dossier ordinaire, vide, sans sous-dossier)
 	Leaf       string
 	Parent     string
 }
@@ -94,6 +96,12 @@ func (s *Server) foldersPage(w http.ResponseWriter, r *http.Request, sess *sessi
 			v.DelimDefault = string(f.Delim)
 		}
 		row := FolderSetting{Folder: f, Indent: min(f.Depth(), 5), Subscribed: !known || sub[f.Name], Protected: strings.EqualFold(f.Name, "INBOX"), Leaf: f.Leaf()}
+		for _, o := range folders {
+			if o.Name != f.Name && strings.HasPrefix(o.Name, f.Name+string(f.Delim)) {
+				row.HasChild = true
+				break
+			}
+		}
 		switch {
 		case row.Protected:
 			row.Role = "folder.inbox"
@@ -108,6 +116,8 @@ func (s *Server) foldersPage(w http.ResponseWriter, r *http.Request, sess *sessi
 		case f.HasAttr(imap.MailboxAttrArchive):
 			row.Role = "folder.archive"
 		}
+		row.Protected = row.Protected || systemFolder(acc.Options.Folders, folders, f.Name)
+		row.Removable = !row.Protected && !row.HasChild && !(f.HasCount && f.Total > 0)
 		if f.Selectable() {
 			v.Names = append(v.Names, f.Name)
 			if !strings.EqualFold(f.Name, "INBOX") {
@@ -189,7 +199,26 @@ func (s *Server) foldersAction(w http.ResponseWriter, r *http.Request, sess *ses
 			s.foldersPage(w, r, sess, http.StatusBadRequest, "folders.err.protected")
 			return
 		}
-		run = func(c *mailconn.Conn) error { return c.DeleteFolder(name) }
+		run = func(c *mailconn.Conn) error {
+			// Comme RainLoop : un dossier système, un dossier qui contient des messages ou des sous-dossiers n'est pas
+			// supprimé (le contenu serait perdu sans retour possible).
+			folders, err := c.Folders(true)
+			if err != nil {
+				return err
+			}
+			if systemFolder(acc.Options.Folders, folders, name) {
+				return errFolderProtected
+			}
+			for _, f := range folders {
+				if f.Name != name && strings.HasPrefix(f.Name, name+string(f.Delim)) {
+					return errFolderHasChildren
+				}
+				if f.Name == name && f.HasCount && f.Total > 0 {
+					return errFolderNotEmpty
+				}
+			}
+			return c.DeleteFolder(name)
+		}
 	case "subscribe", "unsubscribe":
 		if !mailconn.ValidFolderName(name) {
 			s.foldersPage(w, r, sess, http.StatusBadRequest, "folders.err.name")
@@ -203,6 +232,17 @@ func (s *Server) foldersAction(w http.ResponseWriter, r *http.Request, sess *ses
 	ctx, cancel := s.mailCtx(r)
 	defer cancel()
 	if err := s.pool.Do(ctx, s.poolKey(sess, acc), imapEndpoint(acc), run); err != nil {
+		switch {
+		case errors.Is(err, errFolderProtected):
+			s.foldersPage(w, r, sess, http.StatusBadRequest, "folders.err.system_delete")
+			return
+		case errors.Is(err, errFolderHasChildren):
+			s.foldersPage(w, r, sess, http.StatusBadRequest, "folders.err.has_children")
+			return
+		case errors.Is(err, errFolderNotEmpty):
+			s.foldersPage(w, r, sess, http.StatusBadRequest, "folders.err.not_empty")
+			return
+		}
 		s.log.Warn("action sur un dossier refusée", "login", store.ReduceLogin(sess.Account.Login), "action", action, "err", shortErr(err))
 		s.foldersPage(w, r, sess, http.StatusBadGateway, "folders.err.server", shortErr(err))
 		return
@@ -342,5 +382,30 @@ func (s *Server) foldersCheck(w http.ResponseWriter, r *http.Request, sess *sess
 	s.setFlash(sess, "folders.done.check")
 	http.Redirect(w, r, "/settings/folders?box="+url.QueryEscape(acc.ID), http.StatusSeeOther)
 }
+
+// systemFolder dit si le dossier joue un rôle système pour cette boîte (corbeille, envoyés, brouillons, indésirables, archive).
+func systemFolder(cfg userdata.Folders, folders []mailconn.Folder, name string) bool {
+	for _, r := range []struct {
+		configured string
+		resolve    func([]mailconn.Folder, string) string
+	}{
+		{cfg.Sent, mailconn.ResolveSent}, {cfg.Drafts, mailconn.ResolveDrafts},
+		{cfg.Junk, mailconn.ResolveJunk}, {cfg.Trash, mailconn.ResolveTrash}, {cfg.Archive, mailconn.ResolveArchive},
+	} {
+		if r.configured == userdata.NoFolder {
+			continue
+		}
+		if strings.EqualFold(name, r.resolve(folders, r.configured)) {
+			return true
+		}
+	}
+	return strings.EqualFold(name, "INBOX")
+}
+
+var (
+	errFolderProtected   = errors.New("dossier système")
+	errFolderHasChildren = errors.New("dossier avec des sous-dossiers")
+	errFolderNotEmpty    = errors.New("dossier non vide")
+)
 
 var _ = context.Background

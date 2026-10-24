@@ -171,10 +171,15 @@ func TestFoldersSystemChoice(t *testing.T) {
 	if st := post(url.Values{"sent": {"Fantome"}}); st != 400 {
 		t.Errorf("dossier inexistant : %d", st)
 	}
-	// un dossier désigné qui est supprimé retombe sur la détection automatique
+	// un dossier désigné ne se supprime pas depuis les réglages (rôle système)
 	e.do(c, "POST", "/settings/folders/action", url.Values{"csrf": {tok}, "action": {"delete"}, "name": {"Projets/2026"}}, nil)
 	post(url.Values{"sent": {"Projets"}, "drafts": {""}, "trash": {""}})
-	e.do(c, "POST", "/settings/folders/action", url.Values{"csrf": {tok}, "action": {"delete"}, "name": {"Projets"}}, nil)
+	if resp, _ := e.do(c, "POST", "/settings/folders/action", url.Values{"csrf": {tok}, "action": {"delete"}, "name": {"Projets"}}, nil); resp.StatusCode != 400 {
+		t.Errorf("un dossier système ne doit pas être supprimable : %d", resp.StatusCode)
+	}
+	// renommé ailleurs (autre client) : le réglage retombe sur la détection automatique
+	post(url.Values{"sent": {"Projets"}, "drafts": {""}, "trash": {""}})
+	e.do(c, "POST", "/settings/folders/action", url.Values{"csrf": {tok}, "action": {"rename"}, "name": {"Projets"}, "new_name": {"Ailleurs"}, "delim": {"/"}}, nil)
 	_, edit = e.do(c, "GET", "/accounts/"+id+"/edit", nil, nil)
 	if selectedValue(edit, "sent_folder") != "" {
 		t.Errorf("dossier supprimé encore désigné : %q", selectedValue(edit, "sent_folder"))
@@ -568,5 +573,43 @@ func TestUserLocPrefersUserThenConfigThenSystem(t *testing.T) {
 	e.srv.cfg.Timezone = "n'existe pas"
 	if got := e.srv.userLoc(nil); got != time.Local {
 		t.Errorf("repli système : %v", got)
+	}
+}
+
+func TestFolderDeleteGuards(t *testing.T) {
+	e, c, tok, _ := composeEnv(t, nil)
+	_, page := e.do(c, "GET", "/settings/folders", nil, nil)
+	box := regexp.MustCompile(`name="box" value="([^"]+)"`).FindStringSubmatch(page)[1]
+	// dossiers système et dossiers avec des messages : pas de bouton supprimer
+	rowOfFolder := func(page, name string) string {
+		for _, row := range strings.Split(page, "<tr>") {
+			if i := strings.Index(row, "</tr>"); i >= 0 && strings.Contains(row[:i], `value="`+name+`"`) {
+				return row[:i]
+			}
+		}
+		return ""
+	}
+	for _, name := range []string{"Trash", "Sent", "Drafts"} {
+		if r := rowOfFolder(page, name); r != "" && strings.Contains(r, `value="delete"`) {
+			t.Errorf("%s : suppression proposée pour un dossier système", name)
+		}
+	}
+	del := func(name string) (int, string) {
+		resp, body := e.do(c, "POST", "/settings/folders/action", url.Values{"csrf": {tok}, "box": {box}, "action": {"delete"}, "name": {name}}, nil)
+		return resp.StatusCode, body
+	}
+	if code, body := del("Trash"); code != 400 || !strings.Contains(body, "rôle système") {
+		t.Errorf("suppression de la corbeille : %d", code)
+	}
+	if code, body := del("Projets"); code != 400 || !strings.Contains(body, "sous-dossiers") {
+		t.Errorf("dossier avec sous-dossiers : %d %s", code, body[:min(len(body), 200)])
+	}
+	if code, body := del("INBOX"); code != 400 || !strings.Contains(body, "protégé") && !strings.Contains(body, "système") {
+		t.Errorf("INBOX : %d", code)
+	}
+	// un dossier vide et sans enfant se supprime
+	e.do(c, "POST", "/settings/folders/action", url.Values{"csrf": {tok}, "box": {box}, "action": {"create"}, "new_name": {"Jetable"}, "delim": {"/"}}, nil)
+	if code, body := del("Jetable"); code != 303 {
+		t.Errorf("dossier vide : %d %s", code, body[:min(len(body), 200)])
 	}
 }
