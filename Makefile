@@ -103,6 +103,10 @@ user-recover:
 user-delete:
 	$(CLI) user delete $(LOGIN)
 
+# Retire l'image de fond personnelle : le thème revient à l'image livrée (background.svg).
+theme-background-reset:
+	podman run --rm -v wmail-go_wmail-go-data:/data --user 0 docker.io/library/alpine:3 sh -c 'rm -f /data/themes/rainloop/background.jpg /data/themes/rainloop/background.png'
+
 # Pose une image de fond pour le thème « rainloop » dans le volume de données (dossier externe des thèmes).
 theme-background:
 	@test -f "$(FILE)" || { echo "usage : make theme-background FILE=chemin/image.jpg"; exit 1; }

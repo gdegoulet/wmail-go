@@ -583,3 +583,20 @@ func TestSafeNext(t *testing.T) {
 		}
 	}
 }
+
+// Les URL d'images d'un thème doivent être absolues : dans une variable CSS, une URL relative est résolue
+// d'après la feuille qui l'utilise (/static/app.css), pas d'après le fichier du thème.
+func TestThemeImageURLsAreAbsolute(t *testing.T) {
+	css, err := staticFS.ReadFile("static/themes/rainloop/theme.css")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{`url("/themes/rainloop/background.jpg")`, `url("/themes/rainloop/background.svg")`} {
+		if !strings.Contains(string(css), want) {
+			t.Errorf("%s absent du thème", want)
+		}
+	}
+	if strings.Contains(string(css), `url("background.`) {
+		t.Error("URL relative dans le thème : elle serait résolue depuis /static/")
+	}
+}

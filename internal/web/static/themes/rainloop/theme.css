@@ -1,9 +1,12 @@
 /* Thème « rainloop » : reprend les couleurs du thème DarkShine de RainLoop 1.17 (valeurs de son fichier styles.less), recréées en CSS.
-   Fond d'écran : posez votre propre image dans <data_dir>/themes/rainloop/background.jpg (ou .png) ; à défaut, un dégradé qui en approche. */
+   Fond d'écran : posez votre propre image dans <data_dir>/themes/rainloop/background.jpg ; sinon l'image livrée
+   (background.svg) s'affiche, et à défaut un dégradé. Les chemins doivent être absolus : une URL relative dans une
+   variable CSS est résolue d'après la feuille qui l'utilise (/static/app.css), pas d'après ce fichier. */
 :root {
   color-scheme: light;
   --wall:
-    url("background.jpg") left top / cover no-repeat,
+    url("/themes/rainloop/background.jpg") left top / cover no-repeat,  /* votre image, si vous en posez une dans data/themes/rainloop/ */
+    url("/themes/rainloop/background.svg") left top / cover no-repeat,  /* image livrée : bokeh vectoriel (tools/theme/gen_background.py) */
     radial-gradient(ellipse 13% 26% at 21% 47%, #fff8ee 0%, #f4be62 42%, rgba(244,190,98,0) 100%),
     radial-gradient(ellipse 34% 52% at 30% 50%, rgba(205,82,28,.95) 0%, rgba(205,82,28,0) 100%),
     radial-gradient(ellipse 22% 24% at 26% 0%, #d4609a 0%, rgba(212,96,154,0) 100%),

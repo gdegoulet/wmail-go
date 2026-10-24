@@ -438,7 +438,7 @@ func (s *Server) themeNames() []string {
 	return out
 }
 
-var themeFileRe = regexp.MustCompile(`^(theme\.css|background\.(jpe?g|png|webp))$`)
+var themeFileRe = regexp.MustCompile(`^(theme\.css|background\.(jpe?g|png|webp|svg))$`)
 
 // themeFile sert theme.css (dossier externe d'abord, puis thème embarqué) et l'image de fond background.* du dossier externe
 // <data_dir>/themes/<nom>/ : chacun peut y poser sa propre image sans recompiler.
@@ -448,9 +448,10 @@ func (s *Server) themeFile(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
+	// Fichier posé par l'utilisateur dans data/themes/<thème>/, sinon celui livré avec l'application.
 	data, err := os.ReadFile(filepath.Join(s.cfg.DataDir, "themes", name, file))
-	if err != nil && file == "theme.css" {
-		data, err = fs.ReadFile(staticFS, "static/themes/"+name+"/theme.css")
+	if err != nil {
+		data, err = fs.ReadFile(staticFS, "static/themes/"+name+"/"+file)
 	}
 	if err != nil {
 		http.NotFound(w, r)
@@ -464,6 +465,8 @@ func (s *Server) themeFile(w http.ResponseWriter, r *http.Request) {
 		ct = "image/webp"
 	case strings.HasSuffix(file, ".jpg"), strings.HasSuffix(file, ".jpeg"):
 		ct = "image/jpeg"
+	case strings.HasSuffix(file, ".svg"):
+		ct = "image/svg+xml"
 	}
 	w.Header().Set("Content-Type", ct)
 	w.Header().Set("Cache-Control", "no-cache")
