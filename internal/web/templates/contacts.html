@@ -7,9 +7,20 @@
 <input type="search" name="q" value="{{.Q}}" placeholder="{{$.T "contacts.search"}}" maxlength="100">
 {{if .AllTags}}<select name="tag"><option value="">{{$.T "contacts.all_tags"}}</option>{{range .AllTags}}<option{{if eq . $.Contacts.Tag}} selected{{end}}>{{.}}</option>{{end}}</select>{{end}}
 <button type="submit">{{$.T "contacts.search_go"}}</button>
+</form>
+<!-- Barre d'actions dans l'ordre de RainLoop : ajouter, écrire, supprimer, puis le menu « Plus ». -->
+<p class="contacts-actions">
 <a class="button" href="/contacts?new=1">{{$.T "contacts.new"}}</a>
 <button type="submit" form="clist" formaction="/contacts/compose" formmethod="post" data-needs-contacts>{{$.T "contacts.write_selection"}}</button>
-</form>
+<a class="button danger" href="#delete">{{$.T "contacts.delete_selected"}}</a>
+<details class="dropdown" data-dropdown><summary class="button">{{$.T "mail.more"}}</summary>
+<div class="menu">
+<a href="#import">{{$.T "contacts.import"}}</a>
+<a href="{{.ExportURL}}&amp;format=vcf">{{$.T "contacts.export_vcf"}}</a>
+<a href="{{.ExportURL}}&amp;format=csv">{{$.T "contacts.export_csv"}}</a>
+<a href="#sync">{{$.T "contacts.sync.title"}}</a>
+</div></details>
+</p>
 <div class="ct-two">
 <div class="ct-left">
 <form method="post" action="/contacts/delete" id="clist">
@@ -21,11 +32,11 @@
 <a href="/contacts?edit={{.ID}}#edit"><span class="ct-name">{{if .Name}}{{.Name}}{{else}}—{{end}}</span><span class="ct-mail">{{.Email}}</span></a>
 </li>{{end}}
 </ul>
+<details class="danger" id="delete"><summary>{{$.T "contacts.delete_selected"}}</summary>
+<p>{{$.T "contacts.delete_confirm"}}</p>
+<button type="submit" class="danger" data-needs-contacts>{{$.T "accounts.delete_yes"}}</button></details>
 <p class="muted ct-count">{{$.T "contacts.count" .Total}}
 {{if .PrevURL}} <a href="{{.PrevURL}}">« {{$.T "contacts.prev"}}</a>{{end}}{{if gt .Pages 1}} {{.Page}} / {{.Pages}}{{end}}{{if .NextURL}} <a href="{{.NextURL}}">{{$.T "contacts.next"}} »</a>{{end}}</p>
-<details class="danger"><summary>{{$.T "contacts.delete_selected"}}</summary>
-<p>{{$.T "contacts.delete_confirm"}}</p>
-<button type="submit" class="danger">{{$.T "accounts.delete_yes"}}</button></details>
 {{else}}<p class="muted">{{$.T "contacts.none"}}</p>{{end}}
 </form>
 </div>
@@ -75,7 +86,7 @@
 </div>
 </div>
 
-<section>
+<section id="import">
 <h2>{{$.T "contacts.import_export"}}</h2>
 <form method="post" action="/contacts/import" enctype="multipart/form-data">
 <input type="hidden" name="csrf" value="{{$.CSRF}}">
