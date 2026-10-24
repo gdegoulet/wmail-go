@@ -35,12 +35,15 @@ body.mailpage { height: 100vh; overflow: hidden; display: flex; flex-direction: 
 details.dropdown { position: relative; display: inline-block; }
 details.dropdown > summary { list-style: none; cursor: pointer; }
 details.dropdown > summary::-webkit-details-marker { display: none; }
-.menu { position: absolute; z-index: 60; top: calc(100% + .143rem); left: 0; min-width: 11.43rem; max-width: 21.4rem; display: flex; flex-direction: column; padding: .357rem 0;
+/* La largeur suit le contenu : les libellés ne se replient pas (white-space: nowrap plus bas) et les plus longs
+   (« Marquer tous les messages du dossier comme non lus ») ne débordent plus du cadre. Le menu reste dans l'écran. */
+.menu { position: absolute; z-index: 60; top: calc(100% + .143rem); left: 0; min-width: 11.43rem; max-width: min(34rem, calc(100vw - 1.4rem)); width: max-content; display: flex; flex-direction: column; padding: .357rem 0;
   background: var(--menu-bg); color: var(--menu-fg); border: 1px solid rgba(0,0,0,.2); border-radius: 0; box-shadow: 0 1px 2px rgba(0,0,0,.2); }
 details.right > .menu { left: auto; right: 0; }
 .menu.scroll { max-height: 28.6rem; overflow: auto; }
 .menu a, .menu button { display: block; width: 100%; margin: 0; padding: .214rem 1.429rem; text-align: left; background: none; color: inherit; border: 0; border-radius: 0;
-  font: inherit; line-height: 1.4286; text-decoration: none; white-space: nowrap; cursor: pointer; text-shadow: none; }
+  font: inherit; line-height: 1.4286; text-decoration: none; white-space: nowrap; cursor: pointer; text-shadow: none;
+  overflow: hidden; text-overflow: ellipsis; } /* garde-fou : un nom de dossier démesuré se tronque au lieu de déborder */
 .menu a:hover, .menu button:hover:not(:disabled), .menu a:focus, .menu button:focus { background: var(--menu-hover-bg); color: var(--menu-hover-fg); }
 .menu .current { font-weight: 700; }
 .menu button:disabled { color: #999; cursor: not-allowed; }
@@ -164,7 +167,7 @@ form.search details.adv { position: absolute; right: 0; top: 0; bottom: 0; }
 @media (max-width: 60rem) { .ct-two { flex-direction: column; } .ct-left { width: 100%; } }
 /* Sélecteur de comptes : l'adresse et la pastille tiennent sur une ligne (l'adresse se tronque si besoin). */
 .mb-right .menu { min-width: 17rem; max-width: min(26rem, calc(100vw - 2rem)); }
-.acc-list button { display: flex; align-items: center; gap: .4rem; }
+.menu form.acc-list button { display: flex; align-items: center; gap: .4rem; width: 100%; text-align: left; }
 .acc-list .acc-mail { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .menu .acc-badge { flex: none; float: none; margin-left: .4rem; }
 .atts li { position: relative; }
@@ -222,13 +225,17 @@ form.search details.adv { position: absolute; right: 0; top: 0; bottom: 0; }
 .msgview { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .mh { flex: none; position: relative; padding: .714rem; background: #f8f8f8; border-bottom: 1px solid #ddd; border-top-left-radius: .357rem; border-top-right-radius: .357rem; }
 .mh-top { display: flex; align-items: center; gap: .357rem; margin-bottom: .571rem; min-height: 1.571rem; }
-.msg-info { position: relative; flex: none; margin: 0 .143rem 0 .357rem; opacity: .3; }
-.msg-info:hover, .msg-info[open] { opacity: .6; }
-.msg-info > summary { list-style: none; width: 1rem; text-align: center; color: #333; font: italic 1.2rem Georgia, serif; cursor: pointer; line-height: 1; }
+/* Bouton « i » : l'opacité ne porte que sur le bouton. Elle était posée sur tout le <details>, donc aussi sur le
+   panneau des détails — d'où le texte délavé et illisible. */
+.msg-info { flex: none; margin: 0 .143rem 0 .357rem; }
+.msg-info > summary { list-style: none; width: 1rem; text-align: center; color: #333; font: italic 1.2rem Georgia, serif; cursor: pointer; line-height: 1; opacity: .35; }
+.msg-info > summary:hover, .msg-info[open] > summary { opacity: .8; }
 .msg-info > summary::-webkit-details-marker { display: none; }
-.msg-info[open] .headers { position: absolute; z-index: 20; top: 1.8rem; left: -.4rem; min-width: 24rem; margin: 0; padding: .6rem .8rem;
-  background: #fff; color: #333; border: 1px solid #ddd; border-radius: .357rem; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
-dl.headers { display: grid; grid-template-columns: max-content 1fr; gap: .2rem 1rem; }
+/* Détails du message : bande opaque dans le flux, sous l'en-tête, comme la bande des pièces jointes.
+   Repliée par défaut ; un navigateur sans :has() la laisse simplement dépliée, rien n'est perdu. */
+.infobar { display: block; }
+.msgview:has(.msg-info:not([open])) > .infobar { display: none; }
+dl.headers { display: grid; grid-template-columns: max-content 1fr; gap: .2rem 1rem; margin: 0; width: 100%; }
 dl.headers dt { color: #999; }
 dl.headers dd { margin: 0; overflow-wrap: anywhere; }
 .starform { display: inline-flex; margin: 0 1.429rem 0 .143rem; }
