@@ -64,9 +64,9 @@ func (s *Server) mailPoll(w http.ResponseWriter, r *http.Request, sess *session.
 		if res, err = c.Poll("INBOX", uint32(since64)); err != nil {
 			return err
 		}
-		for _, f := range acc.CheckFolders {
-			if r, e := c.Poll(f, 0); e == nil { // un dossier disparu ou illisible n'empêche pas le reste
-				watched[f] = r.Unseen
+		if len(acc.CheckFolders) > 0 { // une seule commande quand le serveur annonce LIST-STATUS
+			if m, e := c.UnseenMany(acc.CheckFolders); e == nil {
+				watched = m
 			}
 		}
 		return nil

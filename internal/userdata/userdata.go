@@ -161,11 +161,12 @@ type MailAccount struct {
 	Signature       string     `json:"signature"`
 	SignatureBefore bool       `json:"signature_before"`
 	Identities      []Identity `json:"identities"`    // identités supplémentaires
-	CheckFolders    []string   `json:"check_folders"` // dossiers dont le compteur de non lus est relevé en arrière-plan (INBOX l'est toujours), 5 au plus
+	CheckFolders    []string   `json:"check_folders"` // dossiers dont le compteur de non lus est relevé en arrière-plan (INBOX l'est toujours), MaxCheckFolders au plus
 }
 
-// MaxCheckFolders est le nombre de dossiers surveillés en plus de la boîte de réception.
-const MaxCheckFolders = 5
+// MaxCheckFolders est le nombre de dossiers surveillés en plus de la boîte de réception. Leur relevé tient en une
+// seule commande quand le serveur annonce LIST-STATUS, d'où une limite confortable.
+const MaxCheckFolders = 20
 
 // AllIdentities renvoie l'identité principale puis les identités supplémentaires. L'identifiant de la principale
 // est celui de la boîte.

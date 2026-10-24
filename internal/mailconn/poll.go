@@ -2,6 +2,7 @@ package mailconn
 
 import (
 	"github.com/emersion/go-imap/v2"
+	"github.com/emersion/go-imap/v2/imapclient"
 )
 
 // PollResult décrit l'état d'un dossier pour le sondage périodique du navigateur.
@@ -16,6 +17,44 @@ type PollResult struct {
 const maxNewPolled = 10
 
 // Poll renvoie les compteurs du dossier et, si sinceUID > 0, les nouveaux messages non lus d'UID >= sinceUID.
+// UnseenMany renvoie le nombre de non lus de plusieurs dossiers. Avec LIST-STATUS (ou IMAP4rev2), une seule
+// commande suffit pour tous ; sinon un STATUS par dossier est envoyé, les réponses étant attendues ensemble.
+func (c *Conn) UnseenMany(folders []string) (_ map[string]uint32, err error) {
+	if len(folders) == 0 {
+		return map[string]uint32{}, nil
+	}
+	defer c.trace("non-lus", false, "dossiers", len(folders))(&err)
+	out := make(map[string]uint32, len(folders))
+	caps := c.Client.Caps()
+	if caps.Has(imap.CapListStatus) || caps.Has(imap.CapIMAP4rev2) {
+		want := make(map[string]bool, len(folders))
+		for _, f := range folders {
+			want[f] = true
+		}
+		list, err := c.Client.List("", "*", &imap.ListOptions{ReturnStatus: &imap.StatusOptions{NumUnseen: true}}).Collect()
+		if err != nil {
+			return nil, err
+		}
+		for _, d := range list {
+			if want[d.Mailbox] && d.Status != nil && d.Status.NumUnseen != nil {
+				out[d.Mailbox] = *d.Status.NumUnseen
+			}
+		}
+		return out, nil
+	}
+	cmds := make([]*imapclient.StatusCommand, len(folders))
+	for i, f := range folders {
+		cmds[i] = c.Client.Status(f, &imap.StatusOptions{NumUnseen: true})
+	}
+	for i, cmd := range cmds {
+		st, err := cmd.Wait() // un dossier disparu n'empêche pas les autres
+		if err == nil && st.NumUnseen != nil {
+			out[folders[i]] = *st.NumUnseen
+		}
+	}
+	return out, nil
+}
+
 func (c *Conn) Poll(folder string, sinceUID uint32) (_ *PollResult, err error) {
 	defer c.trace("sondage", false, "dossier", folder, "depuis", sinceUID)(&err)
 	st, err := c.Client.Status(folder, &imap.StatusOptions{NumMessages: true, NumUnseen: true, UIDNext: true}).Wait()
