@@ -30,6 +30,20 @@ d'adresses tolérante, punycode, en-têtes d'adresses tolérants, touche `i` en 
 l'identité principale, éditeur riche des signatures et modèles, « Écrire à la sélection », finitions visuelles
 (barres de défilement, boutons, champs, liste vide).
 
+## 2 bis. Fait dans la session du 24 octobre (après-midi)
+
+Contacts : propriétés vCard inconnues conservées, types normalisés, en-têtes CSV typés, recherche par numéro
+(chiffres seuls, zéro de tête ignoré). Web : favicon, ETag et cache des fichiers statiques, HSTS en HTTPS, retour à
+la page demandée après reconnexion (2FA comprise). IMAP : tri naturel des dossiers, PERMANENTFLAGS respecté,
+création automatique d'un dossier système absent (MOVE/COPY/APPEND). SMTP : EHLO avec le vrai nom d'hôte.
+Lecture : X-Confirm-Reading-To et Return-Receipt-To, brouillons RainLoop (X-Draft-Info). Liste : suppression
+définitive (Maj+Suppr), « tout marquer non lu », 20 suggestions d'adresses.
+
+Reste des P2/P3 : fidélité visuelle DarkShine (icônes pleines, boutons des réglages, aperçu « N sélectionnés »,
+fond des conversations non lues, icônes de pièces jointes par type), vue contacts en deux volets, disposition
+« aperçu en bas », drapeaux rafraîchis au sondage, avertissements d'envoi côté navigateur, navigation clavier entre
+volets, **matrice de test à produire**.
+
 ## 3. À tester et valider par vous
 
 1. Thème « DarkShine » et fuseau horaire dans Réglages > Général.
