@@ -5,10 +5,10 @@
 {{template "messages" .}}
 <form class="authbox" method="post" action="/login">
 <input type="hidden" name="next" value="{{.Next}}">
-<label><span class="sr">{{.T "login.login"}}</span>
-<input placeholder="{{.T "login.login"}}" name="login" type="text" autocomplete="username" required autofocus value="{{.Login}}"></label>
-<label><span class="sr">{{.T "login.password"}}</span>
-<input placeholder="{{.T "login.password"}}" name="password" type="password" autocomplete="current-password" required></label>
+<label class="withicon"><span class="sr">{{.T "login.login"}}</span>
+<input placeholder="{{.T "login.login"}}" name="login" type="text" autocomplete="username" required autofocus value="{{.Login}}">{{template "icon" "mail"}}</label>
+<label class="withicon"><span class="sr">{{.T "login.password"}}</span>
+<input placeholder="{{.T "login.password"}}" name="password" type="password" autocomplete="current-password" required>{{template "icon" "key"}}</label>
 <button type="submit">{{.T "login.submit"}}</button>
 </form>
 <p class="authlinks">

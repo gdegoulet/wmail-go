@@ -274,6 +274,9 @@ body:has(.authpage) { margin: 0; }
   background: var(--login-bg, var(--card-bg)); color: var(--login-fg, var(--fg)); border: var(--login-border, 1px solid var(--border)); border-radius: var(--login-radius, .36rem); box-shadow: var(--login-shadow, none); }
 .authbox label { margin: 0 0 1.79rem; }
 .authbox input[type=text], .authbox input[type=password], .authbox input[type=email] { box-sizing: border-box; height: 2.86rem; margin: 0; padding: 0 .86rem; font-size: 1.29rem; line-height: 1.43rem; color: #333; background: #fff; border: 1px solid #ccc; border-radius: .21rem; }
+.authbox label.withicon { position: relative; display: block; }
+.authbox label.withicon input { width: 100%; padding-right: 2.5rem; }
+.authbox label.withicon .i { position: absolute; right: .86rem; top: 50%; transform: translateY(-50%); width: 1.21rem; height: 1.21rem; color: #999; pointer-events: none; }
 .authbox small { display: block; margin: -1.2rem 0 1.4rem; color: var(--login-fg, var(--muted)); opacity: .8; }
 .authbox button { display: block; width: 100%; box-sizing: border-box; margin: 0 0 1.43rem; padding: .64rem 0; font-size: 1.14rem; line-height: normal; border-radius: .36rem; color: var(--btn-fg); background: var(--btn-bg); border: 1px solid var(--btn-bd); }
 .authbox button:hover { background: var(--btn-hover); }

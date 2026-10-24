@@ -78,6 +78,10 @@
   }
   fields.forEach(attach);
 
+  // Dernier champ d'adresses utilisé : le sélecteur de contacts écrit dedans (À, Cc ou Cci).
+  var lastField = null;
+  fields.forEach(function (f) { f.addEventListener("focus", function () { lastField = f; }); });
+
   // --- sélecteur de contacts ---
   var btn = document.getElementById("cp-pick"), to = fields[0] && fields[0].id.indexOf("cp-to") === 0 ? fields[0] : document.getElementById("cp-to");
   if (!btn || !to || typeof HTMLDialogElement === "undefined") return;
@@ -101,9 +105,10 @@
           a.type = "button"; a.className = "link";
           a.textContent = (it.name ? it.name + " " : "") + "<" + it.email + ">";
           a.addEventListener("click", function () {
-            var v = to.value.trim();
-            to.value = (v && !/[,;]\s*$/.test(v) ? v + ", " : v ? v + " " : "") + it.label + ", ";
-            to.dispatchEvent(new Event("input", { bubbles: true }));
+            var dest = lastField && document.body.contains(lastField) && !lastField.closest("[hidden]") ? lastField : to;
+            var v = dest.value.trim();
+            dest.value = (v && !/[,;]\s*$/.test(v) ? v + ", " : v ? v + " " : "") + it.label + ", ";
+            dest.dispatchEvent(new Event("input", { bubbles: true }));
             a.disabled = true;
           });
           li.appendChild(a); ul.appendChild(li);
