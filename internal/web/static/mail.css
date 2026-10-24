@@ -164,6 +164,9 @@ form.search details.adv { position: absolute; right: 0; top: 0; bottom: 0; }
 .atts li { position: relative; }
 .att-pick { position: absolute; left: .15rem; top: .15rem; z-index: 2; margin: 0; padding: 0; }
 .att-pick input { margin: 0; }
+.att-src { position: absolute; right: .2rem; bottom: .2rem; z-index: 2; color: #888; line-height: 1; }
+.att-src:hover { color: #333; }
+.att-src .i { width: .9rem; height: .9rem; }
 .backtop { position: fixed; right: 1.6rem; bottom: 1.2rem; z-index: 5; display: inline-flex; align-items: center; justify-content: center;
   width: 2.4rem; height: 2.4rem; margin: 0; padding: 0; color: #fff; background: rgba(0,0,0,.45); border: 0; border-radius: 50%; box-shadow: none; text-shadow: none; }
 .backtop:hover { background: rgba(0,0,0,.65); }

@@ -224,6 +224,7 @@
   "mail.to_label": "To:",
   "mail.att.zip": "Download all (.zip)",
   "mail.att.pick": "Select this attachment",
+  "mail.att.source": "View this part's source",
   "mail.att.zip_selected": "Download selection (ZIP)",
   "mail.att.options": "Attachment options",
   "mail.fullscreen": "Full screen",

@@ -5,6 +5,7 @@ import (
 	"html"
 	"mime"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -26,7 +27,7 @@ func (s *Server) mailSource(w http.ResponseWriter, r *http.Request, sess *sessio
 		return
 	}
 	view := q.Get("view")
-	if view != "source" && view != "headers" && view != "eml" {
+	if view != "source" && view != "headers" && view != "eml" && view != "part" {
 		s.message(w, r, sess, http.StatusBadRequest, "", "mail.err.bad_request")
 		return
 	}
@@ -51,6 +52,17 @@ func (s *Server) mailSource(w http.ResponseWriter, r *http.Request, sess *sessio
 		h.Set("Content-Disposition", mime.FormatMediaType("attachment", map[string]string{"filename": name}))
 		h.Set("Accept-Ranges", "bytes")
 		http.ServeContent(w, r, "message.eml", time.Time{}, bytes.NewReader(data))
+		return
+	}
+	if view == "part" { // source d'une partie MIME : son contenu décodé, en texte brut
+		idx, err := strconv.Atoi(q.Get("index"))
+		if err != nil || idx < 0 || idx >= len(m.Attachments) {
+			s.message(w, r, sess, http.StatusNotFound, "", "mail.err.not_found")
+			return
+		}
+		a := m.Attachments[idx]
+		h.Set("Content-Type", "text/plain; charset=utf-8")
+		_, _ = w.Write([]byte(strings.ToValidUTF8(string(a.Data()), "\uFFFD")))
 		return
 	}
 	if view == "headers" {

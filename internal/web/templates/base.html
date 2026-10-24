@@ -335,7 +335,7 @@
 <ul class="atts">{{range .Attachments}}<li><label class="att-pick" data-js-only hidden title="{{$.T "mail.att.pick"}}"><input type="checkbox" class="att-check" value="{{.Index}}" aria-label="{{$.T "mail.att.pick"}}"></label><a class="att" href="{{.URL}}" title="{{.Name}} ({{.Size}})">
 <span class="thumb">{{if .Thumb}}<img src="{{.Thumb}}" alt="" width="36" height="36">{{else}}<span class="ext">{{template "icon" .Icon}}</span>{{end}}</span>
 <span class="meta"><span class="name">{{.Name}}</span><span class="size">{{.Size}}</span></span>
-</a>{{if .PreviewURL}}<a class="preview" href="{{.PreviewURL}}" data-kind="{{.PreviewKind}}" data-name="{{.Name}}" target="_blank" rel="noopener" title="{{$.T "mail.att.preview"}}" aria-label="{{$.T "mail.att.preview"}}">{{template "icon" "eye"}}</a>{{end}}</li>{{end}}</ul>
+</a>{{if .SourceURL}}<a class="att-src" href="{{.SourceURL}}" target="_blank" rel="noopener" title="{{$.T "mail.att.source"}}" aria-label="{{$.T "mail.att.source"}}">{{template "icon" "info"}}</a>{{end}}{{if .PreviewURL}}<a class="preview" href="{{.PreviewURL}}" data-kind="{{.PreviewKind}}" data-name="{{.Name}}" target="_blank" rel="noopener" title="{{$.T "mail.att.preview"}}" aria-label="{{$.T "mail.att.preview"}}">{{template "icon" "eye"}}</a>{{end}}</li>{{end}}</ul>
 {{if .ZipURL}}<details class="dropdown right gear" data-dropdown><summary title="{{$.T "mail.att.options"}}" aria-label="{{$.T "mail.att.options"}}">{{template "icon" "gear"}}</summary>
 <div class="menu"><a href="{{.ZipURL}}">{{$.T "mail.att.zip"}}</a>
 <a href="{{.ZipURL}}" data-zip-selected data-js-only hidden>{{$.T "mail.att.zip_selected"}}</a></div></details>{{end}}

@@ -350,6 +350,11 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
   attendu : identiques à RainLoop, y compris les noms engendrés (calendar1.3.ics)
   réponse :
 
+[D-24] Source d'une pièce jointe
+  tester  : cliquer le petit « i » en bas à droite d'une vignette
+  attendu : contenu décodé de la partie, en texte brut, dans un nouvel onglet
+  réponse :
+
 [D-23] ZIP des pièces jointes sélectionnées
   tester  : cocher la case en haut à gauche de deux vignettes, menu de l'engrenage > « Télécharger la sélection »
   attendu : archive contenant seulement ces deux fichiers
@@ -752,4 +757,4 @@ Je remplis ce tableau à partir de vos réponses : un retour `KO` y reste jusqu'
 ## Points livrés depuis la dernière session de test
 
 Ajoutés aux points ci-dessus, à valider en priorité : `C-12`, `C-13`, `C-14`, `C-15`, `C-30`, `C-31`, `D-10`, `D-15`, `D-16`,
-`D-21`, `D-22`, `E-03`, `F-01`, `F-05`, `G-02`, `G-07`, `I-01`, `I-05`, `I-09`, `I-11`, `A-08`, `C-24`, `B-08`, `B-09`, `C-32`, `I-12`, `I-13`, `D-23`, `A-11`, `B-10`, `A-12`.
+`D-21`, `D-22`, `E-03`, `F-01`, `F-05`, `G-02`, `G-07`, `I-01`, `I-05`, `I-09`, `I-11`, `A-08`, `C-24`, `B-08`, `B-09`, `C-32`, `I-12`, `I-13`, `D-23`, `A-11`, `B-10`, `A-12`, `D-24`.

@@ -101,6 +101,7 @@ type AttachmentView struct {
 	Ext                     string       // extension en capitales (autres fichiers)
 	Name, Type, Size, URL   string
 	Index                   int    // position de la partie dans le message (ZIP partiel)
+	SourceURL               string // contenu de la partie, en texte brut
 	Icon                    string // symbole du sprite, selon le type de fichier
 	PreviewURL, PreviewKind string // aperçu dans le navigateur : « image » ou « text » ; vide : téléchargement seulement
 }
@@ -1061,6 +1062,7 @@ func (s *Server) buildMessageView(sess *session.Session, acc userdata.MailAccoun
 		if kind := previewKind(a.ContentType, a.Data()); kind != "" {
 			av.PreviewURL, av.PreviewKind = av.URL+"&inline=1", kind
 		}
+		av.SourceURL = "/mail/source?" + url.Values{"folder": {folder}, "uid": {uidStr}, "view": {"part"}, "index": {strconv.Itoa(a.Index)}}.Encode()
 		if a.IsImage() && thumbs < maxThumbnails && a.Size <= maxThumbSource {
 			if uri, ok := mailview.Thumbnail(a.Data(), thumbSize); ok {
 				av.Thumb = template.URL(uri) // html/template refuserait sinon le schéma data: (« #ZgotmplZ »)
