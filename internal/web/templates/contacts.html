@@ -10,26 +10,26 @@
 <a class="button" href="/contacts?new=1">{{$.T "contacts.new"}}</a>
 <button type="submit" form="clist" formaction="/contacts/compose" formmethod="post" data-needs-contacts>{{$.T "contacts.write_selection"}}</button>
 </form>
+<div class="ct-two">
+<div class="ct-left">
 <form method="post" action="/contacts/delete" id="clist">
 <input type="hidden" name="csrf" value="{{$.CSRF}}">
 {{if .Rows}}
-<table class="folders-table contacts-table">
-<thead><tr><th></th><th>{{$.T "contacts.name"}}</th><th>{{$.T "contacts.email"}}</th><th>{{$.T "contacts.phone"}}</th><th>{{$.T "contacts.tags"}}</th></tr></thead>
-<tbody>
-{{range .Rows}}<tr>
-<td><input type="checkbox" name="id" value="{{.ID}}" aria-label="{{$.T "contacts.select"}}"></td>
-<td><a href="/contacts?edit={{.ID}}">{{if .Name}}{{.Name}}{{else}}—{{end}}</a></td>
-<td>{{if .Email}}<a href="/compose?to={{urlquery .Email}}">{{.Email}}</a>{{end}}</td>
-<td>{{.Phone}}</td><td>{{.Tags}}</td></tr>{{end}}
-</tbody></table>
-<p class="muted">{{$.T "contacts.count" .Total}}
+<ul class="ct-rows">
+{{range .Rows}}<li class="ct-row{{if and $.Contacts.Editing (eq .ID $.Contacts.Edit.ID)}} current{{end}}">
+<input type="checkbox" name="id" value="{{.ID}}" aria-label="{{$.T "contacts.select"}}">
+<a href="/contacts?edit={{.ID}}#edit"><span class="ct-name">{{if .Name}}{{.Name}}{{else}}—{{end}}</span><span class="ct-mail">{{.Email}}</span></a>
+</li>{{end}}
+</ul>
+<p class="muted ct-count">{{$.T "contacts.count" .Total}}
 {{if .PrevURL}} <a href="{{.PrevURL}}">« {{$.T "contacts.prev"}}</a>{{end}}{{if gt .Pages 1}} {{.Page}} / {{.Pages}}{{end}}{{if .NextURL}} <a href="{{.NextURL}}">{{$.T "contacts.next"}} »</a>{{end}}</p>
 <details class="danger"><summary>{{$.T "contacts.delete_selected"}}</summary>
 <p>{{$.T "contacts.delete_confirm"}}</p>
 <button type="submit" class="danger">{{$.T "accounts.delete_yes"}}</button></details>
 {{else}}<p class="muted">{{$.T "contacts.none"}}</p>{{end}}
 </form>
-
+</div>
+<div class="ct-right">
 {{if .Editing}}
 <section id="edit">
 <h2>{{if .Edit.ID}}{{$.T "contacts.edit"}}{{else}}{{$.T "contacts.new"}}{{end}}</h2>
@@ -71,7 +71,9 @@
 {{if and .Edit.ID .Edit.Emails}}{{with index .Edit.Emails 0}} <a class="button" href="/compose?to={{urlquery .Value}}">{{$.T "contacts.write"}}</a>{{end}}{{end}}
 </form>
 </section>
-{{end}}
+{{else}}<p class="pane-empty">{{$.T "contacts.placeholder"}}</p>{{end}}
+</div>
+</div>
 
 <section>
 <h2>{{$.T "contacts.import_export"}}</h2>

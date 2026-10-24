@@ -126,6 +126,21 @@ form.search details.adv { position: absolute; right: 0; top: 0; bottom: 0; }
 .msgrow.unread { background: var(--unread-bg); }
 .msgrow.unread .sidebar { background: var(--unread-bar); }
 .msgrow.unread .from, .msgrow.unread .subj { font-weight: 700; }
+/* Carnet d'adresses en deux volets (RainLoop) : liste étroite à gauche, fiche à droite. */
+.ct-two { display: flex; gap: 1.43rem; align-items: flex-start; }
+.ct-left { flex: none; width: 17.1rem; }
+.ct-right { flex: 1; min-width: 0; }
+.ct-rows { list-style: none; margin: 0 0 .7rem; padding: 0; border: 1px solid #e5e5e5; border-radius: .21rem; max-height: 32rem; overflow: auto; }
+.ct-row { display: flex; align-items: center; gap: .4rem; padding: .3rem .5rem; border-bottom: 1px solid #f0f0f0; }
+.ct-row:last-child { border-bottom: 0; }
+.ct-row:hover { background: #f5f5f5; }
+.ct-row.current { background: #e9f0f8; }
+.ct-row a { flex: 1; min-width: 0; text-decoration: none; color: inherit; }
+.ct-row .ct-name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ct-row .ct-mail { display: block; font-size: .857rem; color: #888; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ct-count { margin: 0 0 .7rem; font-size: .857rem; }
+.ct-right .pane-empty { margin: 3rem auto; }
+@media (max-width: 60rem) { .ct-two { flex-direction: column; } .ct-left { width: 100%; } }
 .mh-nav { display: inline-flex; align-items: center; color: #777; text-decoration: none; padding: 0 .2rem; }
 .mh-nav:hover { color: #333; }
 .mh-nav.off { opacity: .3; cursor: default; }

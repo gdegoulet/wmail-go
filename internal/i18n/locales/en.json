@@ -523,6 +523,7 @@
   "contacts.prev": "Previous",
   "contacts.next": "Next",
   "contacts.none": "No contacts.",
+  "contacts.placeholder": "Pick a contact, or create a new one.",
   "contacts.delete_selected": "Delete selection",
   "contacts.delete_confirm": "Permanently delete the checked contacts?",
   "contacts.prefix": "Title",
