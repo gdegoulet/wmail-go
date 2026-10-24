@@ -252,7 +252,7 @@
 </div>
 </aside>{{end}}
 
-{{define "msgview"}}{{with .Msg}}<div class="msgview" data-uid="{{.UID}}"{{if .JustRead}} data-just-read="1"{{end}}>
+{{define "msgview"}}{{with .Msg}}<button type="button" class="backtop" data-backtop hidden title="{{$.T "mail.back_top"}}" aria-label="{{$.T "mail.back_top"}}">{{template "icon" "up-arrow"}}</button><div class="msgview" data-uid="{{.UID}}"{{if .JustRead}} data-just-read="1"{{end}}>
 <header class="mh">
 <div class="mh-top">
 <details class="msg-info"><summary title="{{$.T "mail.details"}}" aria-label="{{$.T "mail.details"}}">i</summary>

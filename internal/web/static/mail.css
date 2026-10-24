@@ -52,7 +52,9 @@ details.right > .menu { left: auto; right: 0; }
 
 /* ---------- grille ---------- */
 .mailbox { flex: 1; min-height: 0; display: grid; padding: 0 .571rem .357rem 0; overflow: hidden; }
-.mailbox.three { grid-template-columns: var(--folders-w, 17.643rem) .429rem var(--list-w, 35.714rem) .429rem minmax(0, 1fr); }
+.mailbox { --list-w-default: 35.714rem; } /* 500 px ; 400 px sur un écran étroit, comme RainLoop */
+@media (max-width: 87.5rem) { .mailbox { --list-w-default: 28.571rem; } }
+.mailbox.three { grid-template-columns: var(--folders-w, 17.643rem) .429rem var(--list-w, var(--list-w-default)) .429rem minmax(0, 1fr); }
 .mailbox.listonly, .mailbox.standalone { grid-template-columns: var(--folders-w, 17.643rem) .429rem minmax(0, 1fr); }
 .mailbox > .folders { grid-column: 1; }
 .mailbox > .splitter.a { grid-column: 2; }
@@ -129,6 +131,16 @@ form.search details.adv { position: absolute; right: 0; top: 0; bottom: 0; }
 .msgrow .delimiter { display: block; height: 1px; background: #999; opacity: .2; }
 .msgrow .sidebar { float: left; display: inline-block; width: .429rem; height: 100%; background: #eee; }
 .msgrow .wrapper { padding: .357rem 0; }
+/* Disposition « liste seule » : une ligne de 35 px, expéditeur à largeur fixe, objet extensible (RainLoop). */
+.mailbox.listonly .msgrow { height: 2.5rem; max-height: 2.5rem; }
+.mailbox.listonly .msgrow .wrapper { display: flex; align-items: center; gap: .4rem; height: 100%; padding: 0 .4rem 0 0; }
+.mailbox.listonly .msgrow .checkedParent { order: 1; float: none; margin: 0; padding: 0 .3rem 0 .4rem; }
+.mailbox.listonly .msgrow .flagParent { order: 2; float: none; padding: 0; line-height: 1; }
+.mailbox.listonly .msgrow .rowlink { order: 3; flex: 1; min-width: 0; display: flex; align-items: center; gap: .6rem; }
+.mailbox.listonly .msgrow .dateParent { order: 4; float: none; margin: 0; }
+.mailbox.listonly .msgrow .senderParent { flex: 0 0 14.286rem; }
+.mailbox.listonly .msgrow .subjectParent { flex: 1; min-width: 0; }
+.mailbox.listonly .msgrow .attachmentParent { float: none; margin: 0; }
 .msgrow:hover { background: var(--row-hover); }
 .msgrow.unread { background: var(--unread-bg); }
 .msgrow.unread .sidebar { background: var(--unread-bar); }
@@ -148,6 +160,10 @@ form.search details.adv { position: absolute; right: 0; top: 0; bottom: 0; }
 .ct-count { margin: 0 0 .7rem; font-size: .857rem; }
 .ct-right .pane-empty { margin: 3rem auto; }
 @media (max-width: 60rem) { .ct-two { flex-direction: column; } .ct-left { width: 100%; } }
+.backtop { position: fixed; right: 1.6rem; bottom: 1.2rem; z-index: 5; display: inline-flex; align-items: center; justify-content: center;
+  width: 2.4rem; height: 2.4rem; margin: 0; padding: 0; color: #fff; background: rgba(0,0,0,.45); border: 0; border-radius: 50%; box-shadow: none; text-shadow: none; }
+.backtop:hover { background: rgba(0,0,0,.65); }
+.backtop .i { width: 1.2rem; height: 1.2rem; }
 .mh-nav { display: inline-flex; align-items: center; color: #777; text-decoration: none; padding: 0 .2rem; }
 .mh-nav:hover { color: #333; }
 .mh-nav.off { opacity: .3; cursor: default; }
@@ -410,7 +426,7 @@ body:has(.authpage) { margin: 0; }
 .raw-script { width: 100%; box-sizing: border-box; font: .93rem/1.4 "Courier New", Consolas, monospace; }
 
 /* Aide des raccourcis clavier */
-.keyhelp { position: fixed; inset: 5vh auto auto 50%; transform: translateX(-50%); z-index: 200; width: min(34rem, 94vw); max-height: 88vh; overflow: auto; box-sizing: border-box; padding: 1rem 1.4rem; background: var(--card-bg, #fff); color: var(--fg, #333); border-radius: .43rem; box-shadow: 0 4px 24px rgba(0,0,0,.6); }
+.keyhelp { box-shadow: 0 4px 24px rgba(0,0,0,.6), 0 0 0 100vmax rgba(0,0,0,.2); position: fixed; inset: 5vh auto auto 50%; transform: translateX(-50%); z-index: 200; width: min(34rem, 94vw); max-height: 88vh; overflow: auto; box-sizing: border-box; padding: 1rem 1.4rem; background: var(--card-bg, #fff); color: var(--fg, #333); border-radius: .43rem; box-shadow: 0 4px 24px rgba(0,0,0,.6); }
 .keyhelp[hidden] { display: none; }
 .keyhelp h2 { margin: 0 0 .6rem; font-size: 1.3rem; }
 .keyhelp table { width: 100%; border-collapse: collapse; }

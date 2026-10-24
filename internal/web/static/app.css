@@ -68,6 +68,7 @@ details.danger summary { cursor: pointer; color: var(--danger-fg); }
 .muted { color: var(--muted); }
 .pad { padding: .6rem .8rem; }
 button:disabled { opacity: .5; cursor: not-allowed; }
+input[type=checkbox], input[type=radio] { accent-color: #0f9d58; } /* cases vertes comme RainLoop */
 .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 .i { width: 1.15em; height: 1.15em; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: -.2em; }
 form.inline-reset { margin-top: 1rem; }
