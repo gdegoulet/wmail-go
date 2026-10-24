@@ -333,9 +333,10 @@
     timer = setTimeout(function () { var v = {}; v[name] = width(name); save(v); }, 400);
   }
 
+  var bottom = mailbox.classList.contains("bottom"); // aperçu en bas : la liste ne se redimensionne pas en largeur
   splitters.forEach(function (sp) {
     var name = sp.getAttribute("data-pane");
-    if (!spec[name] || !pane(name)) return;
+    if (!spec[name] || !pane(name) || (bottom && name === "list")) return;
     describe(name, width(name));
     var startX = 0, startW = 0, dragging = false;
 

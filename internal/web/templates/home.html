@@ -1,5 +1,5 @@
 {{define "content"}}
-<div class="mailbox{{if .List.ThreePane}} three{{else}} listonly{{end}}{{if .Msg}} has-message{{end}}" data-csrf="{{.CSRF}}">
+<div class="mailbox{{if .List.ThreePane}} three{{if .List.BottomPane}} bottom{{end}}{{else}} listonly{{end}}{{if .Msg}} has-message{{end}}" data-csrf="{{.CSRF}}">
 {{template "folderpanel" .}}
 <div class="splitter a" data-pane="folders" role="separator" aria-orientation="vertical" tabindex="0" title="{{.T "mailbox.splitter"}}" aria-label="{{.T "mailbox.splitter.folders"}}"></div>
 

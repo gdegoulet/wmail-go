@@ -73,6 +73,7 @@ type ListView struct {
 	PageSize                       int
 	PageSizes                      []int
 	ThreePane                      bool
+	BottomPane                     bool // disposition « aperçu en bas »
 	Selected                       uint32
 	PaneError                      string // clé de message : le message demandé n'a pas pu être chargé
 	FilterAllURL                   string
@@ -529,6 +530,7 @@ func (s *Server) home(w http.ResponseWriter, r *http.Request, sess *session.Sess
 		pageSize = 50
 	}
 	threePane := set.Layout != "list"
+	bottomPane := set.Layout == "bottom" // volet de lecture sous la liste
 	var selUID uint32
 	if threePane {
 		selUID, _ = parseUID(q.Get("uid"))
@@ -536,7 +538,7 @@ func (s *Server) home(w http.ResponseWriter, r *http.Request, sess *session.Sess
 
 	p := &Page{TitleKey: "home.title", Accounts: accountViews(list), ActiveID: acc.ID, Mail: true, TopUser: acc.Email}
 	lv := &ListView{Folder: lp.Folder, Query: lp.Q, Scope: lp.Scope, Filter: lp.Filter, Sort: lp.Sort, Back: lp.URL(),
-		SortURLs: map[string]string{}, SortMark: map[string]string{}, ThreePane: threePane, Selected: selUID}
+		SortURLs: map[string]string{}, SortMark: map[string]string{}, ThreePane: threePane, BottomPane: bottomPane, Selected: selUID}
 	p.List = lv
 	lv.PageSize = pageSize
 	lv.PageSizes = pageSizeChoices(pageSize)

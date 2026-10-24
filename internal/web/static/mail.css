@@ -60,6 +60,13 @@ details.right > .menu { left: auto; right: 0; }
 .mailbox > .splitter.b { grid-column: 4; }
 .mailbox.three > .readpane { grid-column: 5; }
 .mailbox.standalone > .readpane { grid-column: 3; }
+/* Disposition « aperçu en bas » : liste au-dessus (hauteur réglable), lecture dessous. */
+.mailbox.bottom { grid-template-columns: var(--folders-w, 17.643rem) .429rem minmax(0, 1fr); grid-template-rows: var(--list-h, 21.4rem) .429rem minmax(0, 1fr); }
+.mailbox.bottom > .folders { grid-column: 1; grid-row: 1 / -1; }
+.mailbox.bottom > .splitter.a { grid-column: 2; grid-row: 1 / -1; }
+.mailbox.bottom > .listpane { grid-column: 3; grid-row: 1; }
+.mailbox.bottom > .splitter.b { grid-column: 3; grid-row: 2; min-height: .429rem; cursor: default; }
+.mailbox.bottom > .readpane { grid-column: 3; grid-row: 3; margin-left: 0; }
 .splitter { background: transparent; min-width: 0; outline-offset: -2px; touch-action: none; }
 .mailbox.resizable > .splitter { cursor: col-resize; }
 .mailbox.resizable > .splitter:hover, .splitter:focus-visible, body.dragging .splitter.active { background: rgba(255,255,255,.3); }

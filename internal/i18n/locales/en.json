@@ -189,6 +189,7 @@
   "settings.prefs.layout": "Mail layout",
   "settings.layout.three": "3 panes: folders, list and reading",
   "settings.layout.list": "List only (the message opens on its own page)",
+  "settings.layout.bottom": "3 panes: folders, list on top and reading below",
   "mail.select_all": "Select all",
   "mail.selected": "%d selected",
   "mail.err.no_selection": "No message selected.",

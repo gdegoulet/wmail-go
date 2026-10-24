@@ -189,6 +189,7 @@
   "settings.prefs.layout": "Affichage du courrier",
   "settings.layout.three": "3 volets : dossiers, liste et lecture",
   "settings.layout.list": "Liste seule (le message s'ouvre sur une page)",
+  "settings.layout.bottom": "3 volets : dossiers, liste en haut et lecture en bas",
   "mail.select_all": "Tout sélectionner",
   "mail.selected": "%d sélectionné(s)",
   "mail.err.no_selection": "Aucun message sélectionné.",

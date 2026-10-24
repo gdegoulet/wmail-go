@@ -19,6 +19,7 @@
 <label>{{.T "settings.prefs.layout"}}
 <select name="layout">
 <option value="three"{{if eq .Prefs.Layout "three"}} selected{{end}}>{{.T "settings.layout.three"}}</option>
+<option value="bottom"{{if eq .Prefs.Layout "bottom"}} selected{{end}}>{{.T "settings.layout.bottom"}}</option>
 <option value="list"{{if eq .Prefs.Layout "list"}} selected{{end}}>{{.T "settings.layout.list"}}</option>
 </select></label>
 <label>{{.T "settings.prefs.page_size"}}

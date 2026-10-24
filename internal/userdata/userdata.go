@@ -48,7 +48,7 @@ type Settings struct {
 	SessionAbsoluteHours int                 `json:"session_absolute_hours"`
 	MarkReadOnOpen       bool                `json:"mark_read_on_open"`
 	PageSize             int                 `json:"page_size"`
-	Layout               string              `json:"layout"`               // three (3 volets, défaut) ou list (liste seule)
+	Layout               string              `json:"layout"`               // three (3 volets, défaut), bottom (lecture sous la liste) ou list (liste seule)
 	FontSize             int                 `json:"font_size"`            // taille du texte de l'interface en pixels (0 = défaut)
 	FoldersWidth         int                 `json:"folders_width"`        // largeur du volet des dossiers en pixels (0 = défaut)
 	ListWidth            int                 `json:"list_width"`           // largeur du volet de la liste en pixels (0 = défaut)

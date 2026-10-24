@@ -304,7 +304,7 @@ func (s *Server) settingsPage(sess *session.Session) *Page {
 	if p.Prefs.PageSize < 10 {
 		p.Prefs.PageSize = 50
 	}
-	if p.Prefs.Layout != "list" {
+	if p.Prefs.Layout != "list" && p.Prefs.Layout != "bottom" {
 		p.Prefs.Layout = "three"
 	}
 	return p
@@ -404,7 +404,7 @@ func (s *Server) settingsPrefs(w http.ResponseWriter, r *http.Request, sess *ses
 		fontSize = n
 	}
 	layout := r.PostFormValue("layout") // facultatif : absent = valeur actuelle
-	if layout != "" && layout != "three" && layout != "list" {
+	if layout != "" && layout != "three" && layout != "list" && layout != "bottom" {
 		ok3 = false
 	}
 	tz := strings.TrimSpace(r.PostFormValue("timezone")) // vide : fuseau du serveur
