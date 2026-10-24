@@ -45,10 +45,12 @@
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (d) {
         failures = 0;
-        var first = since === 0;
+        var first = since === 0, before = unseen;
         unseen = d.unseen; title();
         if (!first && d.new && d.new.length) notify(d.new);
-        if (!first && d.uidnext > since) document.dispatchEvent(new Event("wmail:newmail")); // UIDNEXT a changé : nouveaux messages, lus ou non
+        // UIDNEXT a changé (nouveaux messages) ou le nombre de non lus a bougé (un autre client a lu ou marqué
+        // des messages) : la liste est rechargée pour que les drapeaux affichés soient à jour.
+        if (!first && (d.uidnext > since || d.unseen !== before)) document.dispatchEvent(new Event("wmail:newmail"));
         since = d.uidnext || since;
         Object.keys(d.folders || {}).forEach(function (name) {
           var n = d.folders[name], row = null;

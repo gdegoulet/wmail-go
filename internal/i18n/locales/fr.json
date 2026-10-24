@@ -671,6 +671,7 @@
   "keys.navigate": "Parcourir la liste (ouvre le message)",
   "keys.check": "Cocher le message (Maj : en parcourant)",
   "keys.thread": "Ouvrir la conversation",
+  "keys.panes": "Passer de la liste au volet de lecture",
   "mail.important": "Priorité haute",
   "accounts.move_up": "Monter",
   "accounts.move_down": "Descendre",

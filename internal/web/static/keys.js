@@ -32,6 +32,23 @@
     return click('button[form=bulk][name=action][value=' + (allOn ? "unflag" : "flag") + ']');
   }
 
+  // Bascule du focus entre la liste et le volet de lecture (flèches gauche et droite, comme RainLoop).
+  function movePane(toRead) {
+    var read = document.querySelector(".readpane");
+    if (!read) return false;
+    var inRead = document.activeElement && document.activeElement.closest && document.activeElement.closest(".readpane");
+    if (toRead) {
+      if (inRead || !document.querySelector(".msgview")) return false;
+      read.setAttribute("tabindex", "-1");
+      read.focus();
+      return true;
+    }
+    if (!inRead) return false;
+    var row = document.querySelector(".msgrow.focused a.rowlink, .msgrow.selected a.rowlink, .msgrow a.rowlink");
+    if (row) row.focus(); else read.blur();
+    return true;
+  }
+
   function toggleHelp(show) {
     if (!help) return;
     help.hidden = !(show === undefined ? help.hidden : show);
@@ -57,6 +74,8 @@
       var q = document.getElementById("q");
       handled = !!q;
       if (q) q.focus();
+    } else if (k === "ArrowRight" || k === "ArrowLeft") {
+      handled = movePane(k === "ArrowRight");
     } else if (k === "Delete" && e.shiftKey) {
       handled = click("button[data-purge]"); // Maj+Suppr : suppression définitive (avec confirmation)
     } else if (k === "Delete" || k === "#") {

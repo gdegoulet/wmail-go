@@ -37,6 +37,9 @@
 
   document.addEventListener("keydown", function (e) {
     if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey || typing(e.target)) return;
+    // Le volet de lecture a le focus (flèche droite) : les flèches y défilent au lieu de parcourir la liste.
+    var act = document.activeElement;
+    if (act && act.closest && act.closest(".readpane")) return;
     var all = rows();
     if (!all.length) return;
     var cur = focused(), i = cur ? all.indexOf(cur) : -1, to = -1, k = e.key;

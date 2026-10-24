@@ -671,6 +671,7 @@
   "keys.navigate": "Move through the list (opens the message)",
   "keys.check": "Check the message (Shift: while moving)",
   "keys.thread": "Open the conversation",
+  "keys.panes": "Switch between the list and the reading pane",
   "mail.important": "High priority",
   "accounts.move_up": "Move up",
   "accounts.move_down": "Move down",
