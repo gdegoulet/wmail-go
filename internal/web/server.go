@@ -285,10 +285,12 @@ func (s *Server) auth(h func(http.ResponseWriter, *http.Request, *session.Sessio
 		if sess == nil {
 			to := "/login"
 			if r.Method == http.MethodGet {
-				// La session a expiré : revenir où l'utilisateur était après la reconnexion.
+				// La session a expiré : le dire, et revenir où l'utilisateur était après la reconnexion.
+				q := url.Values{"expired": {"1"}}
 				if n := safeNext(r.URL.RequestURI()); n != "/" {
-					to += "?next=" + url.QueryEscape(n)
+					q.Set("next", n)
 				}
+				to += "?" + q.Encode()
 			}
 			http.Redirect(w, r, to, http.StatusSeeOther)
 			return

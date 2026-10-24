@@ -5,6 +5,7 @@
   "lang.fr": "Français",
   "lang.en": "English",
   "login.title": "Connexion",
+  "login.expired": "Votre session a expiré : reconnectez-vous.",
   "login.login": "Identifiant",
   "login.password": "Mot de passe",
   "login.submit": "Se connecter",

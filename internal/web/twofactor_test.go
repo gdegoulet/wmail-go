@@ -55,7 +55,7 @@ func TestTwoFactorFullFlow(t *testing.T) {
 	if resp.StatusCode != 200 || !strings.Contains(page, `action="/login/2fa"`) || !pendingRe.MatchString(strings.Join(resp.Header.Values("Set-Cookie"), ";")) {
 		t.Fatalf("étape du code absente : %d", resp.StatusCode)
 	}
-	if r, _ := e.do(c2, "GET", "/", nil, nil); r.StatusCode != 303 || r.Header.Get("Location") != "/login" {
+	if r, _ := e.do(c2, "GET", "/", nil, nil); r.StatusCode != 303 || !strings.HasPrefix(r.Header.Get("Location"), "/login") {
 		t.Error("session ouverte sans le second facteur")
 	}
 	resp, page = e.do(c2, "POST", "/login/2fa", url.Values{"code": {"123456"}}, nil)

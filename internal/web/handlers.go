@@ -65,7 +65,11 @@ func (s *Server) loginForm(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
-	s.render(w, r, nil, http.StatusOK, "login", &Page{TitleKey: "login.title", Next: safeNext(r.URL.Query().Get("next"))})
+	p := &Page{TitleKey: "login.title", Next: safeNext(r.URL.Query().Get("next"))}
+	if r.URL.Query().Get("expired") == "1" {
+		p.InfoKey = "login.expired"
+	}
+	s.render(w, r, nil, http.StatusOK, "login", p)
 }
 
 func (s *Server) loginPost(w http.ResponseWriter, r *http.Request) {

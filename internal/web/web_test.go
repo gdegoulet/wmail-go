@@ -90,8 +90,8 @@ func (e *env) expect(resp *http.Response, status int, loc string) {
 	if resp.StatusCode != status {
 		e.t.Fatalf("statut %d, attendu %d (%s %s)", resp.StatusCode, status, resp.Request.Method, resp.Request.URL.Path)
 	}
-	// « /login » accepte « /login?next=… » : la redirection garde la page demandée.
-	if got := resp.Header.Get("Location"); loc != "" && got != loc && !(loc == "/login" && strings.HasPrefix(got, "/login?next=")) {
+	// « /login » accepte « /login?… » : la redirection garde la page demandée et signale l'expiration.
+	if got := resp.Header.Get("Location"); loc != "" && got != loc && !(loc == "/login" && strings.HasPrefix(got, "/login?")) {
 		e.t.Fatalf("redirection vers %q, attendu %q", got, loc)
 	}
 }
