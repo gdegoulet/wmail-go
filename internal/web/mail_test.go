@@ -948,8 +948,8 @@ func TestSelectAllMarkupAndEmptySelection(t *testing.T) {
 	if !regexp.MustCompile(`<label class="chk" data-js-only hidden`).MatchString(page) {
 		t.Error("le bouton « Tout sélectionner » doit rester caché sans JavaScript")
 	}
-	if n := strings.Count(page, "data-needs-selection"); n != 8 {
-		t.Errorf("%d boutons d'action à griser sans sélection, attendu 8", n)
+	if n := strings.Count(page, "data-needs-selection"); n != 9 {
+		t.Errorf("%d boutons d'action à griser sans sélection, attendu 9", n)
 	}
 	resp, body := e.do(c, "POST", "/mail/action", url.Values{"csrf": {tok}, "action": {"delete"}, "folder": {"INBOX"}, "back": {"/"}}, nil)
 	e.expect(resp, 400, "")

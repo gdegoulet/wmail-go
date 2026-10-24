@@ -235,6 +235,7 @@
   "compose.send": "Envoyer",
   "compose.send_hint": "Envoyer le message (Ctrl+Entrée)",
   "compose.save": "Enregistrer",
+  "compose.forward_many": "Fwd : %d messages",
   "compose.save_hint": "Enregistrer dans les brouillons (Ctrl+S)",
   "compose.discard": "Abandonner et supprimer le brouillon",
   "compose.close": "Fermer",

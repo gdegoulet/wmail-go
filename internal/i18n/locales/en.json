@@ -235,6 +235,7 @@
   "compose.send": "Send",
   "compose.send_hint": "Send the message (Ctrl+Enter)",
   "compose.save": "Save",
+  "compose.forward_many": "Fwd: %d messages",
   "compose.save_hint": "Save to drafts (Ctrl+S)",
   "compose.discard": "Discard and delete the draft",
   "compose.close": "Close",

@@ -100,6 +100,16 @@
     refresh();
   }
 
+  // Transfert groupé : les messages cochés partent en pièces jointes d'un nouveau message.
+  var fwdAtt = document.querySelector("[data-forward-att]");
+  if (fwdAtt) {
+    fwdAtt.addEventListener("click", function () {
+      var ids = boxes().filter(function (c) { return c.checked; }).map(function (c) { return c.value; });
+      if (!ids.length) return;
+      location.href = fwdAtt.getAttribute("data-url") + "&uid=" + encodeURIComponent(ids[0]) + "&uids=" + encodeURIComponent(ids.join(","));
+    });
+  }
+
   if (selectAll) selectAll.addEventListener("change", function () { setAll(selectAll.checked); });
 
   // Sélection par critère (menu à côté de la case « tout sélectionner »).

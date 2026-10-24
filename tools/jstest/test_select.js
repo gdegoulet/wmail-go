@@ -17,7 +17,7 @@ const actions = [...document.querySelectorAll("[data-needs-selection]")];
 
 const N = boxes().length; ok(N > 10, N + " cases à cocher dans la liste");
 ok(selAll.closest("label").hidden === false, "« Tout sélectionner » devient visible avec JavaScript");
-ok(actions.length === 8 && actions.every(b => b.disabled), actions.length + " boutons d'action (barre d'outils) grisés sans sélection ni message ouvert");
+ok(actions.length === 9 && actions.every(b => b.disabled), actions.length + " boutons d'action (barre d'outils) grisés sans sélection ni message ouvert");
 
 let e = key(document.body, { key: "a", ctrlKey: true });
 ok(e.defaultPrevented, "Ctrl+A est intercepté (pas de sélection de texte de la page)");

@@ -896,7 +896,6 @@ func (s *Server) messageParams(w http.ResponseWriter, r *http.Request, sess *ses
 	return folder, uid, true
 }
 
-// attachmentExt renvoie l'extension d'un nom de fichier en capitales (4 caractères au plus).
 // attachmentIcon choisit le symbole du sprite selon le type MIME, et à défaut l'extension du nom.
 func attachmentIcon(ct, name string) string {
 	mt, _, _ := strings.Cut(strings.ToLower(ct), ";")
@@ -950,6 +949,7 @@ func attachmentIcon(ct, name string) string {
 	return "doc"
 }
 
+// attachmentExt renvoie l'extension d'un nom de fichier en capitales (4 caractères au plus).
 func attachmentExt(name string) string {
 	i := strings.LastIndexByte(name, '.')
 	if i < 0 || i == len(name)-1 {

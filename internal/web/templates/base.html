@@ -34,9 +34,9 @@
 <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7"/></symbol>
 <symbol id="i-star-o" viewBox="0 0 24 24"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></symbol>
 <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></symbol>
-<symbol id="i-reply" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M10 6 3 12l7 6v-3.6c5 0 8 1.4 11 5.1-.7-6.2-4.3-10.5-11-10.500z"/></symbol>
-<symbol id="i-reply-all" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M8 7 2 12l6 5v-3c4.2 0 6.8 1.2 9.3 4.3C16.7 13 13.7 9.4 8 9.4z"/><path fill="currentColor" stroke="none" d="M14 7 8.6 11.5l1.2 1 4.2-3.4z"/></symbol>
-<symbol id="i-forward" viewBox="0 0 24 24"><path transform="matrix(-1 0 0 1 24 0)" fill="currentColor" stroke="none" d="M10 6 3 12l7 6v-3.6c5 0 8 1.4 11 5.1-.7-6.2-4.3-10.5-11-10.500z"/></symbol>
+<symbol id="i-reply" viewBox="0 0 24 24"><g transform="translate(0 22.5) scale(.046875 -.046875)"><path fill="currentColor" stroke="none" d="M486 82c-29 52-64 85-106 101-42 15-98 23-169 23 0 0 0-112 0-112 0 0-185 171-185 171 0 0 185 165 185 165 0 0 0-98 0-98 31 0 59-5 86-14 27-9 49-21 67-36 18-15 35-31 49-49 15-17 27-35 36-53 8-18 16-34 22-48 6-15 10-27 12-36 0 0 3-14 3-14"/></g></symbol>
+<symbol id="i-reply-all" viewBox="0 0 24 24"><g transform="translate(0 22.5) scale(.046875 -.046875)"><path fill="currentColor" stroke="none" d="M185 361c0 0-108-96-108-96 0 0 108-100 108-100 0 0 0-71 0-71 0 0-185 171-185 171 0 0 185 165 185 165 0 0 0-69 0-69m128-29c36 0 67-9 94-26 26-17 46-38 58-62 13-25 23-49 31-74 8-25 13-45 14-62 0 0 2-26 2-26-29 52-58 86-86 101-28 15-66 23-113 23 0 0 0-112 0-112 0 0-185 171-185 171 0 0 185 165 185 165 0 0 0-98 0-98"/></g></symbol>
+<symbol id="i-forward" viewBox="0 0 24 24"><g transform="translate(0 22.5) scale(.046875 -.046875)"><path fill="currentColor" stroke="none" d="M302 206c-72 0-128-8-170-23-42-16-77-49-106-101 1 7 3 16 6 27 3 11 12 31 26 60 14 29 30 54 49 76 19 22 45 42 80 60 34 18 73 27 115 27 0 0 0 98 0 98 0 0 184-165 184-165 0 0-184-171-184-171 0 0 0 112 0 112"/></g></symbol>
 <symbol id="i-attach" viewBox="0 0 24 24"><path d="m20 11-8.5 8.5a5 5 0 0 1-7-7L13 4a3.3 3.3 0 0 1 4.7 4.7l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4L14 7.5"/></symbol>
 <symbol id="i-save" viewBox="0 0 24 24"><path d="M4 4h13l3 3v13H4z"/><path d="M8 4v6h8V4M8 20v-6h8v6"/></symbol>
 <symbol id="i-back" viewBox="0 0 24 24"><path d="m14 6-6 6 6 6"/></symbol>
@@ -136,6 +136,8 @@
 <button type="submit" form="bulk" name="action" value="unflag" data-needs-selection>{{.T "mail.act.unflag"}}</button>
 <button type="submit" form="bulk" name="action" value="readall">{{.T "mail.act.read_all"}}</button>
 <button type="submit" form="bulk" name="action" value="unreadall">{{.T "mail.act.unread_all"}}</button>
+<hr>
+<button type="button" data-forward-att data-needs-selection data-url="/compose?mode=forwardatt&amp;back={{urlquery .List.Back}}&amp;folder={{urlquery .List.Folder}}">{{.T "mail.forward_att"}}</button>
 <hr>
 <button type="submit" form="bulk" name="action" value="purge" data-needs-selection data-confirm="{{.T "mail.delete_forever_confirm"}}" data-purge>{{.T "mail.act.delete_permanent"}}</button>
 {{if .List.SortURLs}}

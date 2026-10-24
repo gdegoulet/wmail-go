@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/mail"
 	"net/url"
+	"slices"
 	"regexp"
 	"strconv"
 	"strings"
@@ -276,6 +277,11 @@ func (s *Server) composeGet(w http.ResponseWriter, r *http.Request, sess *sessio
 	var orig *mailview.Message
 	var rawOrig *mailconn.RawMessage
 	var folder string
+	type fwdMsg struct {
+		raw     *mailconn.RawMessage
+		subject string
+	}
+	var moreRaw []fwdMsg // transfert groupé : messages suivants, joints en .eml
 	if mode != modeNew {
 		var uid uint32
 		var okp bool
@@ -291,6 +297,17 @@ func (s *Server) composeGet(w http.ResponseWriter, r *http.Request, sess *sessio
 			return
 		}
 		v.OrigFolder, v.OrigUID = folder, fmt.Sprint(uid)
+		if mode == modeForwardAt {
+			// « uids » : plusieurs messages transférés d'un coup, chacun en pièce jointe.
+			for _, u := range extraUIDs(q.Get("uids"), uid) {
+				rm, pm, err := s.fetchMessage(ctx, sess, acc, folder, u, false)
+				if err != nil {
+					s.mailErr(w, r, sess, err)
+					return
+				}
+				moreRaw = append(moreRaw, fwdMsg{raw: rm, subject: pm.Subject})
+			}
+		}
 	}
 	selected := pickIdentity(ids, orig, mode)
 	ident, _ := findIdentity(ids, selected)
@@ -360,6 +377,16 @@ func (s *Server) composeGet(w http.ResponseWriter, r *http.Request, sess *sessio
 			name = "message"
 		}
 		addAtt(safeEMLName(name), "message/rfc822", rawOrig.Raw, true)
+		for i, fm := range moreRaw {
+			n := strings.TrimSpace(fm.subject)
+			if n == "" {
+				n = fmt.Sprintf("message-%d", i+2)
+			}
+			addAtt(safeEMLName(n), "message/rfc822", fm.raw.Raw, true)
+		}
+		if len(moreRaw) > 0 {
+			v.Subject = s.i18n.T(lang, "compose.forward_many", len(moreRaw)+1)
+		}
 	case modeDraft, modeEditNew:
 		v.To, v.Cc, v.Bcc = compose.FormatList(netAddrs(orig.To)), compose.FormatList(netAddrs(orig.Cc)), compose.FormatList(netAddrs(orig.Bcc))
 		v.ReplyTo = compose.FormatList(netAddrs(orig.ReplyTo))
@@ -430,6 +457,22 @@ func clipBody(s string) string {
 		return s[:20000]
 	}
 	return s
+}
+
+// extraUIDs lit la liste « uids » (séparés par des virgules) sans le message déjà chargé ; 20 au plus.
+func extraUIDs(list string, first uint32) []uint32 {
+	var out []uint32
+	for _, part := range strings.Split(list, ",") {
+		u, ok := parseUID(strings.TrimSpace(part))
+		if !ok || u == first || slices.Contains(out, u) {
+			continue
+		}
+		out = append(out, u)
+		if len(out) >= 20 {
+			break
+		}
+	}
+	return out
 }
 
 func safeEMLName(subject string) string {
