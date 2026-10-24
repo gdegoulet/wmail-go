@@ -6,8 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	"os"
 	"net/netip"
+	"os"
 	"slices"
 	"sort"
 	"strconv"
@@ -145,12 +145,22 @@ func (g *Guard) LoginIMAP(ctx context.Context, e Endpoint) (*imapclient.Client, 
 	if err != nil {
 		return nil, err
 	}
-	if err := c.Login(e.Login, e.Password).Wait(); err != nil {
+	if err := authIMAP(c, e); err != nil {
 		c.Close()
 		return nil, &authStage{err}
 	}
 	enableUTF8(c)
 	return c, nil
+}
+
+// authIMAP s'authentifie : LOGIN d'ordinaire, AUTHENTICATE PLAIN quand le serveur annonce LOGINDISABLED
+// (certains serveurs refusent LOGIN même sur une connexion chiffrée).
+func authIMAP(c *imapclient.Client, e Endpoint) error {
+	caps := c.Caps()
+	if caps.Has(imap.CapLoginDisabled) && caps.Has(imap.AuthCap("PLAIN")) {
+		return c.Authenticate(sasl.NewPlainClient("", e.Login, e.Password))
+	}
+	return c.Login(e.Login, e.Password).Wait()
 }
 
 // LoginIMAPDetached se connecte et s'authentifie sous la limite de ctx, puis détache la connexion
@@ -160,7 +170,7 @@ func (g *Guard) LoginIMAPDetached(ctx context.Context, e Endpoint) (*imapclient.
 	if err != nil {
 		return nil, err
 	}
-	if err := c.Login(e.Login, e.Password).Wait(); err != nil {
+	if err := authIMAP(c, e); err != nil {
 		stop()
 		c.Close()
 		return nil, &authStage{err}

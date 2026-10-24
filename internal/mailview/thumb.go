@@ -34,6 +34,9 @@ func Thumbnail(data []byte, size int) (string, bool) {
 	if err != nil {
 		return "", false
 	}
+	if format == "jpeg" { // photo prise à la verticale : l'orientation EXIF la redresse
+		img = applyOrientation(img, exifOrientation(data))
+	}
 	b := img.Bounds()
 	side := min(b.Dx(), b.Dy())
 	x0, y0 := b.Min.X+(b.Dx()-side)/2, b.Min.Y+(b.Dy()-side)/2

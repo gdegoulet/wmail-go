@@ -1302,7 +1302,7 @@ func (s *Server) mailAttachment(w http.ResponseWriter, r *http.Request, sess *se
 				h.Set("Accept-Ranges", "bytes")
 				h.Set("Content-Type", ct)
 				h.Set("Content-Disposition", mime.FormatMediaType(disposition, map[string]string{"filename": name}))
-				h.Set("Cache-Control", "private, no-store")
+				h.Set("Cache-Control", "private, max-age=300")
 				http.ServeContent(w, r, name, time.Time{}, bytes.NewReader(data))
 				return
 			}
@@ -1311,7 +1311,11 @@ func (s *Server) mailAttachment(w http.ResponseWriter, r *http.Request, sess *se
 	h.Set("Content-Type", ct)
 	h.Set("Content-Disposition", mime.FormatMediaType(disposition, map[string]string{"filename": name}))
 	h.Set("Content-Security-Policy", "sandbox")
-	h.Set("Cache-Control", "private, no-store")
+	if disposition == "inline" { // aperçu : cache privé et court, pour ne pas retélécharger à chaque ouverture
+		h.Set("Cache-Control", "private, max-age=300")
+	} else {
+		h.Set("Cache-Control", "private, no-store")
+	}
 	h.Set("Accept-Ranges", "bytes")
 	http.ServeContent(w, r, name, time.Time{}, bytes.NewReader(data)) // gère aussi les requêtes partielles (reprise d'un téléchargement)
 }

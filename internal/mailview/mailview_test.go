@@ -521,7 +521,6 @@ func TestMalformedAddressHeaderKeepsReadableRecipients(t *testing.T) {
 	}
 }
 
-
 // Mots encodés RFC 2047 laissés dans un nom entre guillemets : décodés quand même (comme RainLoop).
 func TestQuotedEncodedWordSender(t *testing.T) {
 	raw := "From: \"=?utf-8?q?Pinterest?=\" <no-reply@pinterest.com>\r\n" +
@@ -539,5 +538,26 @@ func TestQuotedEncodedWordSender(t *testing.T) {
 	}
 	if m.Subject != "Idée Déco" {
 		t.Errorf("objet : %q", m.Subject)
+	}
+}
+
+func TestExifOrientationRotatesThumbnail(t *testing.T) {
+	// Image 2×1 : pixel gauche rouge, droit bleu. Orientation 6 (quart de tour horaire) : le rouge passe en haut.
+	src := image.NewRGBA(image.Rect(0, 0, 2, 1))
+	src.Set(0, 0, color.RGBA{255, 0, 0, 255})
+	src.Set(1, 0, color.RGBA{0, 0, 255, 255})
+	out := applyOrientation(src, 6)
+	if out.Bounds().Dx() != 1 || out.Bounds().Dy() != 2 {
+		t.Fatalf("dimensions après rotation : %v", out.Bounds())
+	}
+	r, _, _, _ := out.At(0, 0).RGBA()
+	if r < 0x8000 {
+		t.Error("le pixel rouge doit se retrouver en haut")
+	}
+	if applyOrientation(src, 1).Bounds() != src.Bounds() {
+		t.Error("orientation 1 : image inchangée")
+	}
+	if n := exifOrientation([]byte("pas un jpeg")); n != 0 {
+		t.Errorf("données non JPEG : %d", n)
 	}
 }
