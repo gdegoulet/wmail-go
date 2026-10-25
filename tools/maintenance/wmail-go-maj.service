@@ -1,0 +1,20 @@
+# Unité systemd « utilisateur » : la mise à jour tourne avec votre session Podman sans privilèges.
+# Installation :
+#   mkdir -p ~/.config/systemd/user
+#   cp tools/maintenance/wmail-go-maj.{service,timer} ~/.config/systemd/user/
+#   systemctl --user daemon-reload && systemctl --user enable --now wmail-go-maj.timer
+#   loginctl enable-linger $USER      # pour que le minuteur tourne sans session ouverte
+[Unit]
+Description=wmail-go : mise à jour quotidienne des dépendances
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/Work/webmail_project
+ExecStart=%h/Work/webmail_project/tools/maintenance/maj-dependances.sh
+# Réglages : décommentez et adaptez, ou utilisez un fichier d'environnement.
+# Environment=CLE_SSH=%h/.ssh/id_wmail_go_maj
+# Environment=REMOTES=origin gitea
+# Environment=NOTIFIER=changes
+# EnvironmentFile=%h/.config/wmail-go-maj.env
+TimeoutStartSec=3600

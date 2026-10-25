@@ -140,6 +140,10 @@ deps-update:
 	$(DEV) sh -c "go get -u ./... && go mod tidy && go build ./... && go test ./... -count=1"
 	@echo "relisez le diff de go.mod et go.sum, puis relancez make test-race et make test-js"
 
+# Mise à jour automatique des dépendances (voir tools/maintenance/README.md).
+deps-cron:
+	./tools/maintenance/maj-dependances.sh
+
 # --- sauvegarde et restauration du volume de données ---
 BACKUP_DIR ?= .
 VOLUME ?= wmail-go_wmail-go-data
