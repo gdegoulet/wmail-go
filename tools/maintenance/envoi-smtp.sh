@@ -28,15 +28,27 @@ chmod 600 "$MESSAGE" "$CONF"
 cat > "$MESSAGE"
 
 entete() { sed -n "s/^$1: *//Ip" "$MESSAGE" | head -1 | tr -d '\r'; }
-FROM=${SMTP_FROM:-$(entete From)}
-TO=${SMTP_TO:-$(entete To)}
+
+# adresses « nues » : « Nom <a@b> , "c" <c@d> » devient « a@b c@d ».
+# Un serveur refuse l'adresse avec un 504 si elle garde ses guillemets, ses chevrons ou son nom d'affichage.
+adresses() {
+	printf '%s\n' "$1" | tr ',;' '\n\n' | while IFS= read -r part; do   # \n final : sinon « read » perd la dernière adresse
+		case "$part" in
+			*"<"*">"*) printf '%s\n' "$part" | sed -n 's/.*<\([^>]*\)>.*/\1/p' ;;
+			*) printf '%s\n' "$part" | tr -d '"'"'"'<> \t' ;;
+		esac
+	done | grep '@' || true
+}
+
+FROM=$(adresses "${SMTP_FROM:-$(entete From)}" | head -1)
+TO=$(adresses "${SMTP_TO:-$(entete To)}" | tr '\n' ' ')
 [ -n "$FROM" ] || { echo "envoi-smtp : expéditeur inconnu" >&2; exit 1; }
 [ -n "$TO" ] || { echo "envoi-smtp : destinataire inconnu" >&2; exit 1; }
 
 {
 	printf 'url = "%s"\n' "$SMTP_URL"
 	printf 'mail-from = "%s"\n' "$FROM"
-	for d in $TO; do printf 'mail-rcpt = "%s"\n' "$(printf '%s' "$d" | tr -d ',')"; done
+	for d in $TO; do printf 'mail-rcpt = "%s"\n' "$d"; done
 	printf 'upload-file = "%s"\n' "$MESSAGE"
 	printf 'silent\nshow-error\n'
 	case "$SMTP_URL" in
@@ -45,4 +57,7 @@ TO=${SMTP_TO:-$(entete To)}
 	[ -n "${SMTP_USER:-}" ] && printf 'user = "%s:%s"\n' "$SMTP_USER" "${SMTP_PASS:-}"
 } > "$CONF"
 
-curl --config "$CONF"
+if ! curl --config "$CONF"; then
+	echo "envoi-smtp : échec pour « $TO » depuis « $FROM » via $SMTP_URL" >&2
+	exit 1
+fi
