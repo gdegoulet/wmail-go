@@ -11,6 +11,8 @@ set -eu
 ICI=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 DEPOT=${DEPOT:-$(CDPATH= cd -- "$ICI/../.." && pwd)}
 [ -n "${WMAIL_MAJ_CONF:-}" ] && [ -f "$WMAIL_MAJ_CONF" ] && . "$WMAIL_MAJ_CONF"
+# Projet compose distinct : l'automate ne doit pas toucher aux conteneurs ni aux volumes du webmail en service.
+export COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-wmail-go-ci}
 DESTINATAIRE=${DESTINATAIRE:-wmail-go@degoulet.net}
 EXPEDITEUR=${EXPEDITEUR:-wmail-go@$(hostname -f 2>/dev/null || hostname)}
 MAILER=${MAILER:-"sendmail -t"}

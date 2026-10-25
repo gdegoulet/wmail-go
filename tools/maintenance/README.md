@@ -142,6 +142,7 @@ Une clé de déploiement ne donne accès qu'à **ce** dépôt : si elle fuit, le
 | `SANS_PUSH` | — | `1` : tout faire sauf pousser |
 | `SANS_JS` | — | `1` : sauter `make test-js` (gagne plusieurs minutes) |
 | `JOURNAL` | `.maj-dependances.log` | journal complet |
+| `COMPOSE_PROJECT_NAME` | `wmail-go-ci` | projet compose de l'automate, distinct du webmail en service |
 
 ## Essai à blanc
 
