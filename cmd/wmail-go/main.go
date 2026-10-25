@@ -21,7 +21,9 @@ import (
 	"github.com/gdegoulet/wmail-go/internal/web"
 )
 
-const version = "0.0.2-dev"
+// version est remplacée à la compilation de l'image publiée :
+// go build -ldflags "-X main.version=0.0.2-20261025-1a2b3c4"
+var version = "0.0.2-dev"
 
 const usage = `Usage : wmail-go <commande> [options]
 

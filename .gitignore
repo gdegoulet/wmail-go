@@ -16,3 +16,7 @@ users.idx
 /.maj-dependances.lock
 /.deps.json
 /.deps.plan
+
+# Secrets de publication et de maintenance (jetons de registre, clés)
+tools/release/publier.env
+tools/maintenance/maj.env

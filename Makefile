@@ -1,8 +1,9 @@
 # wmail-go – toutes les commandes passent par des conteneurs (jamais de `go` sur l'hôte).
+.DEFAULT_GOAL := help
 COMPOSE ?= docker compose
 DEV     := $(COMPOSE) --profile dev run --rm dev
 
-.PHONY: sieve-up sieve-down test-sieve test-e2e theme-background help build up down logs ps test test-race vet fmt shell mail-up mail-down mail-seed user-add user-list user-passwd user-recover user-delete clean
+.PHONY: image-publish image-publish-essai sieve-up sieve-down test-sieve test-e2e theme-background help build up down logs ps test test-race vet fmt shell mail-up mail-down mail-seed user-add user-list user-passwd user-recover user-delete clean
 
 help:
 	@echo "make build     construit l'image wmail-go"
@@ -32,6 +33,7 @@ help:
 	@echo "make tls-up    démarre nginx + wmail-go (https://localhost:8443) ; tls-up-dev partage les données de make up"
 	@echo "make tls-user-add LOGIN=nom        crée un compte dans le volume du déploiement"
 	@echo "make tls-logs|tls-ps|tls-down      journaux, état, arrêt"
+	@echo "make image-publish   construit et publie l'image sur Docker Hub"
 	@echo "make backup [BACKUP_DIR=rep]       archive datée du volume de données"
 	@echo "make restore FILE=archive.tar.gz   restauration (serveur arrêté)"
 
@@ -169,6 +171,15 @@ VOLUME ?= wmail-go_wmail-go-data
 backup:
 	docker run --rm -v $(VOLUME):/data:ro -v "$(abspath $(BACKUP_DIR))":/sauvegarde --user 0 docker.io/library/alpine:3 		sh -c 'tar czf /sauvegarde/wmail-go-$$(date +%Y%m%d-%H%M%S).tar.gz -C /data .'
 	@ls -1t $(BACKUP_DIR)/wmail-go-*.tar.gz | head -1
+
+# Publication de l'image sur Docker Hub : étiquettes « AAAAMMJJ-commit » et « latest ».
+# Réglages (identifiant et jeton) dans tools/release/publier.env, copié de publier.env.exemple.
+ENV_PUBLI ?= tools/release/publier.env
+image-publish:
+	./tools/release/publier-image.sh $(if $(wildcard $(ENV_PUBLI)),--env=$(ENV_PUBLI),)
+
+image-publish-essai:
+	./tools/release/publier-image.sh --essai $(if $(wildcard $(ENV_PUBLI)),--env=$(ENV_PUBLI),)
 
 # Restauration : make restore FILE=wmail-go-20261024-220000.tar.gz (le serveur doit être arrêté).
 restore:

@@ -129,6 +129,21 @@ make backup            # avant toute mise à jour
 `make user-add LOGIN=…`, puis gardez-la fermée. Les sessions vivent en mémoire : un redémarrage déconnecte, sans
 perte de données.
 
+## Publier l'image sur un registre
+
+```
+make image-publish-essai      # construit et contrôle, ne publie rien
+make image-publish            # publie après confirmation
+```
+
+Le script `tools/release/publier-image.sh` refuse un arbre de travail modifié, passe la mise en forme, `go vet` et les
+tests dans le conteneur de développement, vérifie que le binaire de l'image annonce bien la version attendue, puis
+publie deux étiquettes : **`AAAAMMJJ-commit`** (par exemple `20261025-9b52b74`) et **`latest`**.
+
+L'identifiant et le jeton du registre se placent dans `tools/release/publier.env`, copié de `publier.env.exemple` et
+jamais versionné. Sur Docker Hub, créez un *personal access token* en lecture-écriture plutôt que d'utiliser votre mot
+de passe. Sans jeton, le script compte sur un `docker login` déjà fait.
+
 ## Tests
 
 ```
