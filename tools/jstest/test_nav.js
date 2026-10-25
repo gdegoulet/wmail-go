@@ -5,10 +5,11 @@ const html = fs.readFileSync("home3.html", "utf8").replace(/<script src="[^"]*"[
 let fails = 0;
 const ok = (c, m) => { console.log((c ? "OK   " : "ECHEC") + " " + m); if (!c) fails++; };
 
-function boot(scripts) {
+function boot(scripts, prep) {
   const dom = new JSDOM(html, { url: "http://127.0.0.1:8080/", runScripts: "outside-only", pretendToBeVisual: true });
   const w = dom.window, d = w.document;
   w.Element.prototype.scrollIntoView = function () {};
+  if (prep) prep(w, d);
   const opened = [];
   d.querySelectorAll("a.rowlink").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); opened.push(a.getAttribute("href")); }));
   scripts.forEach((s) => w.eval(fs.readFileSync(s, "utf8")));
@@ -97,6 +98,36 @@ const key = (w, k, o) => { const e = new w.KeyboardEvent("keydown", Object.assig
   // dépôt sur le dossier déjà affiché : ignoré
   const active = d.querySelector("[data-drop].active");
   if (active) { submitted = null; form.querySelectorAll("input[type=hidden][name$=_to]").forEach((i) => i.remove()); active.dispatchEvent(ev("dragover")); active.dispatchEvent(ev("drop")); ok(submitted === null, "dépôt sur le dossier courant ignoré"); }
+}
+
+// Curseur conservé au travers d'une suppression : la page est rechargée, le curseur doit se poser
+// sur la ligne qui suivait celle qui vient de disparaître.
+{
+  const { w, d } = boot(["listnav.js"]);
+  const rows = d.querySelectorAll(".msgrow");
+  const uid = (r) => r.querySelector("input[name=uid]").value;
+  key(w, "Home"); key(w, "ArrowDown"); key(w, "ArrowDown"); // curseur sur la troisième ligne
+  ok(rows[2].classList.contains("focused"), "curseur posé avant l'action");
+  rows[2].querySelector("input[name=uid]").checked = true;
+  d.getElementById("bulk").dispatchEvent(new w.Event("submit", { bubbles: true, cancelable: true }));
+  const note = JSON.parse(w.sessionStorage.getItem("wmail.listCursor") || "null");
+  ok(note && note.uid === uid(rows[2]) && note.suivant === uid(rows[3]), "l'envoi note la ligne visée et sa suivante");
+
+  // Rechargement : la ligne supprimée a disparu de la liste, son UID n'existe plus.
+  const suivant = uid(rows[3]);
+  const rejoue = boot(["listnav.js"], (w2) => {
+    w2.sessionStorage.setItem("wmail.listCursor", JSON.stringify({ sig: "/?", uid: "999999", suivant: suivant, idx: 2 }));
+  });
+  const apres = rejoue.d.getElementById("m" + suivant);
+  ok(apres && apres.classList.contains("focused"), "après suppression, le curseur passe au message suivant");
+  ok(!rejoue.w.sessionStorage.getItem("wmail.listCursor"), "la note ne sert qu'une fois");
+
+  // Marquer lu ne retire pas la ligne : le curseur reste là où il était.
+  const memeLigne = uid(rows[1]);
+  const garde = boot(["listnav.js"], (w2) => {
+    w2.sessionStorage.setItem("wmail.listCursor", JSON.stringify({ sig: "/?", uid: memeLigne, suivant: suivant, idx: 1 }));
+  });
+  ok(garde.d.getElementById("m" + memeLigne).classList.contains("focused"), "ligne toujours présente : le curseur ne bouge pas");
 }
 
 })().then(() => {

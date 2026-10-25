@@ -53,6 +53,61 @@
   // Un clic dans la liste repart d'une nouvelle ancre pour Maj+flèches.
   list.addEventListener("click", function () { anchor = -1; before = null; });
 
+  // --- curseur conservé au travers des actions de la barre d'outils ---
+  // Supprimer, archiver ou déplacer recharge la page : la classe « focused » disparaît et le curseur
+  // revenait au début de la liste. On note donc, avant l'envoi, la ligne du curseur et la première ligne
+  // qui lui survivra ; au chargement suivant, le curseur se repose sur l'une des deux, comme dans RainLoop.
+  var curseurCle = "wmail.listCursor";
+
+  function signature() {
+    var p = new URLSearchParams(location.search);
+    ["uid", "view", "remote"].forEach(function (k) { p.delete(k); });
+    p.sort();
+    return location.pathname + "?" + p.toString();
+  }
+  function ligneDe(uid) { return uid ? document.getElementById("m" + uid) : null; }
+
+  function memoriser() {
+    var all = rows(), cur = focused();
+    if (!cur) return;
+    var i = all.indexOf(cur);
+    // Lignes que l'action va traiter : celles qui sont cochées, ou à défaut celle du curseur.
+    var vises = {};
+    var coches = all.filter(function (r) { var c = r.querySelector("input[name=uid]"); return c && c.checked; });
+    (coches.length ? coches : [cur]).forEach(function (r) { vises[uidOf(r)] = true; });
+    var survivant = "", j;
+    for (j = i + 1; j < all.length && !survivant; j++) if (!vises[uidOf(all[j])]) survivant = uidOf(all[j]);
+    for (j = i - 1; j >= 0 && !survivant; j--) if (!vises[uidOf(all[j])]) survivant = uidOf(all[j]); // fin de liste
+    try {
+      sessionStorage.setItem(curseurCle, JSON.stringify({ sig: signature(), uid: uidOf(cur), suivant: survivant, idx: i }));
+    } catch (e) { /* stockage indisponible : le curseur repartira du début */ }
+  }
+
+  function restaurer() {
+    var brut = null;
+    try {
+      brut = sessionStorage.getItem(curseurCle);
+      sessionStorage.removeItem(curseurCle); // valable pour le seul chargement qui suit l'action
+    } catch (e) { return; }
+    if (!brut) return;
+    var etat = null;
+    try { etat = JSON.parse(brut); } catch (e) { return; }
+    if (!etat || etat.sig !== signature()) return; // autre dossier, autre recherche : on ne force rien
+    var all = rows();
+    if (!all.length) return;
+    // La ligne d'origine existe encore (marquer lu, suivre…) : le curseur ne bouge pas. Sinon on prend
+    // la ligne qui la suivait, et en dernier recours la place qu'elle occupait.
+    var cible = ligneDe(etat.uid) || ligneDe(etat.suivant);
+    if (!cible || all.indexOf(cible) < 0) cible = all[Math.min(Math.max(etat.idx | 0, 0), all.length - 1)];
+    setFocus(cible);
+  }
+
+  // En phase de capture : le gestionnaire doit lire la liste avant que la page ne parte.
+  document.addEventListener("submit", function (e) {
+    if (e.target && e.target.id === "bulk") memoriser();
+  }, true);
+  restaurer();
+
   document.addEventListener("keydown", function (e) {
     if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey || typing(e.target)) return;
     // Le volet de lecture a le focus (flèche droite) : les flèches y défilent au lieu de parcourir la liste.
