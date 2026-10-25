@@ -52,6 +52,11 @@ sauvegarde se trouvent dans le dépôt (`config/`, `deploy/`, `README.md`).
 
 - **wmail-go ne sert que du HTTP** : la terminaison TLS revient à un proxy. Derrière un proxy, posez
   `trusted_proxy: true` dans la configuration, sinon les cookies ne seront pas marqués `Secure`.
+- Le conteneur tourne sous **UID 65532 / GID 65532** (`nonroot`). Un volume nommé créé vide par un démon Docker
+  *rootful* appartient à `root:root`, et le serveur s'arrête sur `erreur : open /data/server.key: permission denied`.
+  Donnez-le à 65532 avant le premier démarrage :
+  `docker run --rm -v wmail-go-data:/data --user 0 alpine:3 chown -R 65532:65532 /data`. Rien à faire avec Podman
+  *rootless*.
 - Le volume `/data` contient les comptes chiffrés et les carnets d'adresses. Le perdre coûte les comptes, jamais
   le courrier, qui reste sur le serveur IMAP. Sauvegardez-le.
 - Les sessions vivent en mémoire : une mise à jour de l'image déconnecte les utilisateurs, sans perte de données.

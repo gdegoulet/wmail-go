@@ -163,6 +163,23 @@ docker run --rm -it -v wmail-go-data:/data \
 En service, préférez l'étiquette datée (`20261025-af4debf`) à `latest` : elle ne bouge pas. Et placez un proxy TLS
 devant, comme ci-dessus.
 
+**Droits du volume `/data`.** Le conteneur tourne sous l'utilisateur `nonroot` de l'image *distroless*, soit
+**UID 65532, GID 65532** (`USER nonroot:nonroot` dans le `Dockerfile`). Un volume nommé créé vide par un démon
+Docker *rootful* appartient à `root:root` : le serveur ne peut alors ni lire ni créer sa clé et s'arrête sur
+
+```
+erreur : open /data/server.key: permission denied
+```
+
+Donnez le volume à 65532 une fois pour toutes, avant le premier démarrage :
+
+```
+docker run --rm -v wmail-go-data:/data --user 0 docker.io/library/alpine:3 chown -R 65532:65532 /data
+```
+
+Avec Podman *rootless*, le mappage est automatique et il n'y a rien à faire. `make restore` repose ces droits
+lui-même après une restauration.
+
 ## Tests
 
 ```
