@@ -18,7 +18,7 @@ Un agent qui reprend le projet lit d'abord `AGENTS.md`, puis `docs/architecture.
 | Sécurité : 2FA, clé de récupération, limitation de débit, anti-SSRF, mandataire d'images, HSTS, cache, **journal d'activité** | ~100 % | oui | non | essai avec votre application TOTP |
 | Vos plug-ins : ICS, X-Originating-IP | 100 % | oui | à valider | réponse accepter/refuser à une invitation |
 | **Fidélité visuelle DarkShine** | **~90 %** | captures | **à revalider** | icônes pleines restantes, animations, largeurs par taille d'écran |
-| Exploitation : image publiée, CI maison, documentation | ~95 % | CI au vert | non | **publication effective sur Docker Hub jamais faite** |
+| Exploitation : image publiée, CI maison, documentation | ~100 % | CI au vert | **oui** | description du dépôt à coller sur Docker Hub |
 | Analyse de RainLoop | 100 % lue | — | — | P1 : 2/2 ; P2 : ~95 % ; P3 : ~50 % |
 
 **Avancement global : environ 97 %** (fonctions 40 %, fidélité visuelle 25 %, validation sur vos boîtes 20 %,
@@ -53,6 +53,10 @@ survenus depuis. Les échecs sont écrits **compte fermé** grâce à une paire 
 journal **ne peut pas être effacé depuis l'interface** : un intrus qui détient le mot de passe effacerait ses
 propres traces.
 
+**Publication.** L'image est sur Docker Hub (`gdegoulet/wmail-go`) depuis le 25/10 : étiquettes
+`20261025-af4debf`, `20261025-c37de65`, `20261025-d1536ee` et `latest`, 6,8 Mio compressés. `latest` pointe sur
+`d1536ee` ; les commits postérieurs ne touchent que la documentation.
+
 **Documentation.** `docs/routes.md` (les 96 routes, paramètres et filtres compris), `AGENTS.md` (règles de
 travail pour un agent), `docs/architecture.md` (carte des paquets, chemin d'une requête, invariants, chaîne de
 chiffrement, inventaire du répertoire de données).
@@ -63,13 +67,11 @@ forcé.
 
 ## 4. Ce qui reste, par ordre d'utilité
 
-1. **Valider les 70 points vierges de la matrice** et les 14 retours « à revalider ». C'est ce qui fait le
-   plus avancer le pourcentage réel.
-2. **Publier l'image sur Docker Hub** : `make image-publish` n'a jamais été lancé. `tools/release/publier.env`
-   est en place. Il restera à coller la description de `docs/dockerhub.md` dans Repository → General.
-3. **Point d'étape après une semaine d'usage réel** — demandé, pas encore fait.
-4. Fidélité visuelle : icônes pleines restantes, animations, largeurs par taille d'écran.
-5. P3 cosmétiques, et les points de refonte signalés par l'audit (`home`, `buildMessageView`, voir
+1. **Semaine d'usage réel en cours.** À son terme : point d'étape, puis remplissage des 70 points vierges de
+   la matrice et des 14 retours « à revalider ». C'est ce qui fera le plus avancer le pourcentage réel.
+2. Coller la description de `docs/dockerhub.md` dans Repository → General sur Docker Hub.
+3. Fidélité visuelle : icônes pleines restantes, animations, largeurs par taille d'écran.
+4. P3 cosmétiques, et les points de refonte signalés par l'audit (`home`, `buildMessageView`, voir
    `docs/architecture.md` § 9).
 
 ## 5. Propositions discutées, non engagées
