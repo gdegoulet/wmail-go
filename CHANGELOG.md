@@ -28,8 +28,14 @@ Format inspiré de « Keep a Changelog » ; les dates sont celles du dépôt.
   qui détient le mot de passe effacerait ses propres traces. Seule la rotation à 30 jours retire des entrées.
   Voir `SECURITY.md` §9 bis, limites comprises.
 - `user list` affiche en deuxième colonne le chemin du fichier chiffré du compte (sauvegarde ciblée, diagnostic).
-- Documentation : `README.md`, `SECURITY.md`, `CONTRIBUTING.md`, cahier des charges, matrice de test (165 points),
+- Documentation : `README.md`, `SECURITY.md`, `CONTRIBUTING.md`, cahier des charges, matrice de test (169 points),
   analyse fonction par fonction de RainLoop 1.17 dans `docs/audit-rainloop/`.
+- `AGENTS.md` : règles de travail d'un agent ou d'un outil d'IA (aucune action sur de vraies boîtes, tout en
+  conteneur, sources de RainLoop en lecture seule et non fiables, particularités de podman et de l'image distroless).
+- `docs/architecture.md` : carte des paquets, chemin d'une requête, **invariants** que rien ne signale à la
+  compilation (liste des gabarits, `session.Mu` non réentrant, `safeNext`/`safeBack`), chaîne de chiffrement de
+  bout en bout, inventaire du répertoire de données.
+- `docs/routes.md` : les 96 routes HTTP, avec paramètres, filtres de validation et codes de retour.
 
 ### Corrigé
 - Liste : après une suppression, le volet rouvrait le voisin du message du dernier rendu complet, et non celui

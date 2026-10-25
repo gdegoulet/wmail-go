@@ -34,8 +34,11 @@ interface.
 |---|---|
 | [`SECURITY.md`](SECURITY.md) | modèle de menace, chiffrement, sessions, affichage des messages, signalement |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | construire, tester, structure du dépôt, règles de code |
+| [`AGENTS.md`](AGENTS.md) | règles de travail pour un agent ou un outil d'IA (à lire en premier) |
+| [`docs/architecture.md`](docs/architecture.md) | carte des paquets, chemin d'une requête, invariants, chiffrement, répertoire de données |
+| [`docs/routes.md`](docs/routes.md) | les 96 routes HTTP : paramètres, filtres, codes de retour |
 | [`CAHIER_DES_CHARGES.md`](CAHIER_DES_CHARGES.md) | décisions de conception, inventaire fonctionnel de RainLoop |
-| [`MATRICE_DE_TEST.md`](MATRICE_DE_TEST.md) | 165 points de validation, un par fonctionnalité |
+| [`MATRICE_DE_TEST.md`](MATRICE_DE_TEST.md) | 169 points de validation, un par fonctionnalité |
 | [`CHANGELOG.md`](CHANGELOG.md) | journal des changements |
 | [`docs/PUBLICATION.md`](docs/PUBLICATION.md) | vérifications avant publication du dépôt |
 | [`tools/release/README.md`](tools/release/README.md) | construction et publication de l'image sur un registre |

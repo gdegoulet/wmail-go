@@ -44,6 +44,10 @@ Les tâches reproduisent exactement les cibles du Makefile ; un échec se rejoue
 | Contrôles JavaScript | `make test-js` | démarre webmail et GreenMail ; sur une machine froide, l'attente des services peut dépasser la limite. Les journaux des conteneurs sont versés dans la sortie en cas d'échec |
 | Image de conteneur | `make build` | tout fichier non ignoré par `.dockerignore` alourdit le contexte |
 
+Si vous êtes un agent ou un outil d'IA, lisez d'abord [`AGENTS.md`](AGENTS.md) : il porte les contraintes
+d'exécution (aucune action sur de vraies boîtes mail, tout en conteneur, sources de RainLoop en lecture seule).
+Le détail de l'architecture et les invariants sont dans [`docs/architecture.md`](docs/architecture.md).
+
 ## Structure du dépôt
 
 ```
@@ -62,6 +66,8 @@ internal/i18n/       traductions (fr, en)
 deploy/              déploiement derrière nginx (TLS)
 tools/               outils de test (jsdom, Chromium, Dovecot, GreenMail, captures)
 docs/audit-rainloop/ analyse fonction par fonction de RainLoop 1.17
+docs/architecture.md invariants, chaîne de chiffrement, répertoire de données
+docs/routes.md       les 96 routes HTTP
 ```
 
 ## Règles de code
