@@ -13,11 +13,12 @@ jobs:
   go:
     name: Go (vet, tests, course)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.26'
+          go-version-file: go.mod
           check-latest: true
       - name: Format
         run: test -z "$(gofmt -l ./cmd ./internal)" || { gofmt -l ./cmd ./internal; exit 1; }
@@ -29,20 +30,22 @@ jobs:
   js:
     name: Contrôles JavaScript (jsdom)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.26'
+          go-version-file: go.mod
       - name: Contrôles jsdom sur les pages réelles (conteneurs)
         run: make test-js
 
   image:
     name: Image de conteneur
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - name: Construction
         run: docker build --target runtime -t wmail-go:ci .
       - name: Taille de l'image
-        run: docker image inspect wmail-go:ci --format 'taille : {{.Size}} octets'
+        run: docker image inspect wmail-go:ci --format 'Taille (octets) = {{.Size}}'
