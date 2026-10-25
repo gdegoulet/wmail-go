@@ -81,6 +81,7 @@ test-e2e:
 	docker run --rm --user 0 --network host -e NODE_PATH=/usr/src/app/node_modules -v $(CURDIR)/tools/e2e:/e2e:Z zenika/alpine-chrome:with-puppeteer node /e2e/filters.js /tmp
 	docker run --rm --user 0 --network host -e NODE_PATH=/usr/src/app/node_modules -v $(CURDIR)/tools/e2e:/e2e:Z zenika/alpine-chrome:with-puppeteer node /e2e/folders.js /tmp
 	docker run --rm --user 0 --network host -e NODE_PATH=/usr/src/app/node_modules -v $(CURDIR)/tools/e2e:/e2e:Z zenika/alpine-chrome:with-puppeteer node /e2e/contacts.js /tmp
+	docker run --rm --user 0 --network host -e NODE_PATH=/usr/src/app/node_modules -v $(CURDIR)/tools/e2e:/e2e:Z zenika/alpine-chrome:with-puppeteer node /e2e/liste.js /tmp
 
 mail-seed:
 	$(DEV) go run ./tools/seedmail -addr greenmail:3025 -to test@localhost -n 40
