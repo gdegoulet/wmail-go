@@ -48,17 +48,12 @@ ssh-keygen -t ed25519 -N '' -C 'wmail-go maj auto' -f /root/.ssh/id_wmail_go_maj
 #    Gitea  : Paramètres → Clés de déploiement, droit d'écriture
 
 # 3. réglages
-cat > /data/Work/wmail-go/.maj.env <<'FIN'
-CLE_SSH=/root/.ssh/id_wmail_go_maj
-REMOTES=origin gitea
-DESTINATAIRE=wmail-go@degoulet.net
-MAILER=sendmail -t
-NOTIFIER=changes
-QUARANTAINE=5
-COMPOSE_PROJECT_NAME=wmail-go-ci
-JOURNAL=/data/Work/logs/wmail-go.log
-FIN
-chmod 600 /data/Work/wmail-go/.maj.env
+install -m 600 tools/maintenance/maj.env.exemple /data/Work/wmail-go/.maj.env
+$EDITOR /data/Work/wmail-go/.maj.env     # adresses, relais SMTP, mot de passe
+
+# Le fichier est lu par « . » (sh) : toute valeur contenant une espace doit être entre guillemets.
+# « REMOTES=origin gitea » exécuterait la commande « gitea » ; écrivez REMOTES="origin gitea".
+sh -n /data/Work/wmail-go/.maj.env && echo "fichier de réglages valide"
 
 # 4. essais, avant d'activer quoi que ce soit
 cd /data/Work/wmail-go
@@ -143,7 +138,7 @@ Si la machine n'a ni `sendmail` ni `msmtp`, utilisez l'envoi par curl fourni :
 MAILER=/data/Work/wmail-go/tools/maintenance/envoi-smtp.sh
 SMTP_URL=smtp://mail.degoulet.net:587      # ou smtps://mail.degoulet.net:465
 SMTP_USER=wmail-go@degoulet.net            # facultatif
-SMTP_PASS=…                                # facultatif ; le fichier est en mode 0600
+SMTP_PASS="mot de passe"                   # entre guillemets : le fichier est lu par sh
 ```
 
 Essai :

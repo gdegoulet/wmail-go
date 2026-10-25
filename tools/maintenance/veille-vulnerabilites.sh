@@ -10,7 +10,11 @@ set -eu
 
 ICI=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 DEPOT=${DEPOT:-$(CDPATH= cd -- "$ICI/../.." && pwd)}
-[ -n "${WMAIL_MAJ_CONF:-}" ] && [ -f "$WMAIL_MAJ_CONF" ] && . "$WMAIL_MAJ_CONF"
+if [ -n "${WMAIL_MAJ_CONF:-}" ] && [ -f "$WMAIL_MAJ_CONF" ]; then
+	# Lu par le shell : une valeur à espaces non protégée par des guillemets serait prise pour une commande.
+	sh -n "$WMAIL_MAJ_CONF" || { echo "réglages invalides : $WMAIL_MAJ_CONF (guillemets manquants ?)" >&2; exit 2; }
+	. "$WMAIL_MAJ_CONF"
+fi
 # Projet compose distinct : l'automate ne doit pas toucher aux conteneurs ni aux volumes du webmail en service.
 export COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-wmail-go-ci}
 DESTINATAIRE=${DESTINATAIRE:-wmail-go@degoulet.net}
