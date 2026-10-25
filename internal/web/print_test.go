@@ -93,7 +93,7 @@ func TestPrintPageHeadersAndAttachments(t *testing.T) {
 		}
 	}
 	// Corps assaini, feuille de style d'impression, aucune barre d'outils de l'application.
-	for _, want := range []string{`<div class="body">`, `href="/static/print.css"`, "ordre du jour"} {
+	for _, want := range []string{`<div class="body">`, `href="/static/print.css?v=`, "ordre du jour"} {
 		if !strings.Contains(pr, want) {
 			t.Errorf("%q absent de la version imprimable", want)
 		}
@@ -105,7 +105,7 @@ func TestPrintPageHeadersAndAttachments(t *testing.T) {
 	}
 	// Aucun script sauf celui de l'impression (ni script en ligne, ni script venu du message).
 	for _, m := range printScriptRe.FindAllStringSubmatch(pr, -1) {
-		if m[1] != "/static/print.js" {
+		if !strings.HasPrefix(m[1], "/static/print.js?v=") {
 			t.Errorf("script inattendu %q dans la version imprimable", m[0])
 		}
 	}
@@ -127,7 +127,7 @@ func TestPrintPageWithoutBody(t *testing.T) {
 			t.Errorf("%q absent de la version imprimable d'un message sans corps :\n%s", want, pr)
 		}
 	}
-	if strings.Count(pr, "<script") != 1 || !strings.Contains(pr, `src="/static/print.js"`) {
+	if strings.Count(pr, "<script") != 1 || !strings.Contains(pr, `src="/static/print.js?v=`) {
 		t.Errorf("scripts de la page : attendu le seul script d'impression :\n%s", pr)
 	}
 }

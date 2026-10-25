@@ -88,7 +88,7 @@ func New(cfg config.Config, st *store.Store, log *slog.Logger) (*Server, error) 
 	s.attach = newAttachStore(s.composeLimits())
 	s.sessions.OnClose = func(id string) { s.pool.Close(id + "/"); s.attach.ClearSession(id) }
 	for _, name := range []string{"login", "register", "recover", "recovery_key", "home", "settings", "message", "accounts", "account_form", "mail_message", "fragment", "compose", "folders_settings", "identities", "filters", "filter_edit", "filters_raw", "contacts", "login_2fa", "twofactor", "templates"} {
-		t, err := template.New(name).Funcs(template.FuncMap{"inList": func(l []string, v string) bool { return slices.Contains(l, v) }, "sub1": func(n int) int { return n - 1 }, "replykey": func(m string) string {
+		t, err := template.New(name).Funcs(template.FuncMap{"inList": func(l []string, v string) bool { return slices.Contains(l, v) }, "sub1": func(n int) int { return n - 1 }, "asset": assetURL, "replykey": func(m string) string {
 			return map[string]string{"reply": "reply", "replyall": "reply_all", "forward": "forward"}[m]
 		}}).ParseFS(templateFS, "templates/base.html", "templates/"+name+".html")
 		if err != nil {
@@ -688,23 +688,48 @@ func safeNext(v string) string {
 	return v
 }
 
-// staticCache ajoute un ETag (empreinte du contenu) et autorise la mise en cache des fichiers embarqués :
-// ils ne changent qu'avec le binaire, et le navigateur revalide avec If-None-Match.
+// assetTags garde l'empreinte de chaque fichier statique embarqué : elle sert d'ETag et de numéro de
+// version dans l'adresse. Les fichiers ne changent qu'avec le binaire, l'empreinte est donc calculée une fois.
+var assetTags sync.Map
+
+func assetTag(name string) string {
+	if v, ok := assetTags.Load(name); ok {
+		return v.(string)
+	}
+	b, err := fs.ReadFile(staticFS, "static/"+name)
+	if err != nil {
+		return ""
+	}
+	sum := sha256.Sum256(b)
+	v := hex.EncodeToString(sum[:8])
+	assetTags.Store(name, v)
+	return v
+}
+
+// assetURL est la fonction « asset » des gabarits : elle marque l'adresse d'un fichier statique de son
+// empreinte. Une nouvelle version du fichier change l'adresse, donc le navigateur la redemande au lieu de
+// servir l'ancienne depuis son cache — sans quoi une correction de JavaScript n'arrivait qu'au bout de
+// dix minutes, ou au rechargement forcé.
+func assetURL(name string) string {
+	if v := assetTag(name); v != "" {
+		return "/static/" + name + "?v=" + v
+	}
+	return "/static/" + name
+}
+
+// staticCache ajoute un ETag (empreinte du contenu) et règle la durée de cache. Une adresse marquée de
+// l'empreinte courante ne peut plus changer de contenu : elle est gardée un an. Une adresse sans marque
+// (page ouverte avant une mise à jour, lien écrit à la main) est revalidée à chaque fois.
 func staticCache(next http.Handler) http.Handler {
-	var tags sync.Map
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		name := strings.TrimPrefix(r.URL.Path, "/")
-		tag, ok := tags.Load(name)
-		if !ok {
-			if b, err := fs.ReadFile(staticFS, "static/"+name); err == nil {
-				sum := sha256.Sum256(b)
-				tag = `"` + hex.EncodeToString(sum[:8]) + `"`
-				tags.Store(name, tag)
+		if tag := assetTag(name); tag != "" {
+			w.Header().Set("ETag", `"`+tag+`"`)
+			if r.URL.Query().Get("v") == tag {
+				w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+			} else {
+				w.Header().Set("Cache-Control", "no-cache")
 			}
-		}
-		if t, _ := tag.(string); t != "" {
-			w.Header().Set("ETag", t)
-			w.Header().Set("Cache-Control", "public, max-age=600, must-revalidate")
 		}
 		next.ServeHTTP(w, r)
 	})

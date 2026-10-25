@@ -125,7 +125,7 @@ func (s *Server) mailPrint(w http.ResponseWriter, r *http.Request, sess *session
 	b.WriteString("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta name=\"color-scheme\" content=\"light\">")
 	b.WriteString("<meta name=\"referrer\" content=\"no-referrer\"><meta name=\"robots\" content=\"noindex, nofollow\">")
 	b.WriteString("<title>" + html.EscapeString(subject) + "</title>")
-	b.WriteString("<link rel=\"stylesheet\" href=\"/static/print.css\"></head><body>")
+	b.WriteString("<link rel=\"stylesheet\" href=\"" + assetURL("print.css") + "\"></head><body>")
 	// Seul élément de l'application sur la page : il disparaît à l'impression (aucune barre d'outils sur le papier).
 	b.WriteString("<p class=\"noprint\"><button type=\"button\" id=\"print-btn\">" + html.EscapeString(t("mail.print")) + "</button></p>")
 	b.WriteString("<table class=\"hdr\">")
@@ -155,7 +155,7 @@ func (s *Server) mailPrint(w http.ResponseWriter, r *http.Request, sess *session
 	if strings.TrimSpace(body) == "" { // message sans partie affichable : on l'écrit plutôt que d'imprimer une page vide
 		body = "<p class=\"nobody\">" + html.EscapeString(t("mail.no_body")) + "</p>"
 	}
-	b.WriteString("<div class=\"body\">" + body + "</div><script src=\"/static/print.js\"></script></body></html>")
+	b.WriteString("<div class=\"body\">" + body + "</div><script src=\"" + assetURL("print.js") + "\"></script></body></html>")
 	h := w.Header()
 	img := "img-src data:"
 	if !block {

@@ -670,7 +670,7 @@ func TestPageSizeSelector(t *testing.T) {
 	e, c, tok := mailEnv(t, true)
 	_, page := e.do(c, "GET", "/", nil, nil)
 	if !strings.Contains(page, `action="/mail/pagesize"`) || !strings.Contains(page, "Messages par page") ||
-		!strings.Contains(page, `<script src="/static/list.js" defer>`) {
+		!strings.Contains(page, `<script src="/static/list.js?v=`) {
 		t.Fatalf("sélecteur absent :\n%.2000s", page)
 	}
 	opts := regexp.MustCompile(`<button type="submit" name="size" value="(\d+)"( class="current")?>`).FindAllStringSubmatch(page, -1)
@@ -940,7 +940,7 @@ func TestLayoutPreference(t *testing.T) {
 func TestSelectAllMarkupAndEmptySelection(t *testing.T) {
 	e, c, tok := mailEnv(t, true)
 	_, page := e.do(c, "GET", "/", nil, nil)
-	for _, want := range []string{`id="select-all"`, `title="Ctrl+A"`, `src="/static/list.js"`, `aria-label="Tout sélectionner"`} {
+	for _, want := range []string{`id="select-all"`, `title="Ctrl+A"`, `src="/static/list.js?v=`, `aria-label="Tout sélectionner"`} {
 		if !strings.Contains(page, want) {
 			t.Errorf("%q absent", want)
 		}

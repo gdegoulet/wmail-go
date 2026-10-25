@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
 <title>{{.T "app.name"}} – {{.T .TitleKey}}</title>
-<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/static/app.css">
-<link rel="stylesheet" href="/static/mail.css">
-<noscript><link rel="stylesheet" href="/static/noscript.css"></noscript>
+<link rel="icon" href="{{asset "favicon.svg"}}" type="image/svg+xml">
+<link rel="stylesheet" href="{{asset "app.css"}}">
+<link rel="stylesheet" href="{{asset "mail.css"}}">
+<noscript><link rel="stylesheet" href="{{asset "noscript.css"}}"></noscript>
 <link rel="stylesheet" href="/themes/{{.Theme}}/theme.css">
 {{if .User}}<link rel="stylesheet" href="/user.css">{{end}}
 </head>
@@ -16,8 +16,8 @@
 {{template "icons"}}
 {{if and .User (not .HideNav)}}{{if .Mail}}{{template "mailbar" .}}{{else}}{{template "nav" .}}{{end}}{{end}}
 {{template "content" .}}
-{{with .Poll}}<div id="poll" hidden data-unseen="{{.Unseen}}" data-title="{{$.T "app.name"}} – {{$.T $.TitleKey}}" data-many="{{$.T "notify.many" 0}}"{{if .Desktop}} data-desktop{{end}}{{if .Sound}} data-sound{{end}}{{if .FaviconCount}} data-favicon{{end}}></div><script src="/static/poll.js" defer></script>{{end}}
-<script src="/static/menus.js" defer></script>
+{{with .Poll}}<div id="poll" hidden data-unseen="{{.Unseen}}" data-title="{{$.T "app.name"}} – {{$.T $.TitleKey}}" data-many="{{$.T "notify.many" 0}}"{{if .Desktop}} data-desktop{{end}}{{if .Sound}} data-sound{{end}}{{if .FaviconCount}} data-favicon{{end}}></div><script src="{{asset "poll.js"}}" defer></script>{{end}}
+<script src="{{asset "menus.js"}}" defer></script>
 {{block "scripts" .}}{{end}}
 </body>
 </html>{{end}}

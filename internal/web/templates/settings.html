@@ -118,4 +118,4 @@
 </section>
 {{end}}
 {{template "setclose" .}}{{end}}
-{{define "scripts"}}<link rel="stylesheet" href="/static/settings-auto.css"><script src="/static/mailto.js" defer></script><script src="/static/notify-setting.js" defer></script><script src="/static/settings-auto.js" defer></script>{{end}}
+{{define "scripts"}}<link rel="stylesheet" href="{{asset "settings-auto.css"}}"><script src="{{asset "mailto.js"}}" defer></script><script src="{{asset "notify-setting.js"}}" defer></script><script src="{{asset "settings-auto.js"}}" defer></script>{{end}}

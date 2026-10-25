@@ -48,7 +48,7 @@ func TestAccountsReorderDragDrop(t *testing.T) {
 	// La page porte bien les attributs attendus par le script.
 	_, page := e.do(c, "GET", "/accounts", nil, nil)
 	if !strings.Contains(page, `data-reorder="accounts"`) || !strings.Contains(page, `data-csrf="`+tok+`"`) ||
-		!strings.Contains(page, `src="/static/reorder.js"`) {
+		!strings.Contains(page, `src="/static/reorder.js?v=`) {
 		t.Errorf("attributs de réordonnancement absents :\n%s", page)
 	}
 
