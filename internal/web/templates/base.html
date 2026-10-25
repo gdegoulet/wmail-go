@@ -15,6 +15,7 @@
 <body class="{{if .Mail}}mailpage{{if .FoldersHidden}} folders-collapsed{{end}}{{end}}{{if .HideChecks}} hide-checks{{end}}{{if .NoAnim}} no-anim{{end}}">
 {{template "icons"}}
 {{if and .User (not .HideNav)}}{{if .Mail}}{{template "mailbar" .}}{{else}}{{template "nav" .}}{{end}}{{end}}
+{{template "loginnotice" .}}
 {{template "content" .}}
 {{with .Poll}}<div id="poll" hidden data-unseen="{{.Unseen}}" data-title="{{$.T "app.name"}} – {{$.T $.TitleKey}}" data-many="{{$.T "notify.many" 0}}"{{if .Desktop}} data-desktop{{end}}{{if .Sound}} data-sound{{end}}{{if .FaviconCount}} data-favicon{{end}}></div><script src="{{asset "poll.js"}}" defer></script>{{end}}
 <script src="{{asset "menus.js"}}" defer></script>
@@ -99,6 +100,7 @@
 <a class="e-item{{if eq .Section "templates"}} selected{{end}}" href="/settings/templates">{{.T "set.templates"}}</a>
 <a class="e-item{{if eq .Section "contacts"}} selected{{end}}" href="/contacts">{{.T "set.contacts"}}</a>
 <a class="e-item{{if eq .Section "security"}} selected{{end}}" href="/settings/security">{{.T "set.security"}}</a>
+<a class="e-item{{if eq .Section "activity"}} selected{{end}}" href="/settings/activity">{{.T "set.activity"}}</a>
 </nav>
 <div class="setright">
 <div class="settb">
@@ -217,6 +219,11 @@
 </header>{{if .InfoKey}}<p class="flashbar" role="status">{{.T .InfoKey}}</p>{{end}}{{end}}
 
 {{define "messages"}}{{if .ErrorKey}}<p class="msg error" role="alert">{{.Err}}</p>{{end}}{{if .InfoKey}}<p class="msg info" role="status">{{.T .InfoKey}}</p>{{end}}{{end}}
+
+{{define "loginnotice"}}{{with .Notice}}<p class="msg {{if .Failed}}warn{{else}}info{{end}} loginnotice" role="status">
+{{if .Last}}{{$.T "activity.notice.last" .Last}}{{else}}{{$.T "activity.notice.first"}}{{end}}
+{{if .Failed}}{{$.T "activity.notice.failed" .Failed}}{{end}}
+<a href="/settings/activity">{{$.T "activity.notice.see"}}</a></p>{{end}}{{end}}
 
 {{define "folderpanel"}}<aside class="folders">
 {{if .FolderError}}

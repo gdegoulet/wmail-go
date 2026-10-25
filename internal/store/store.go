@@ -526,7 +526,7 @@ func (s *Store) SaveData(acc *Account) error {
 
 // Données annexes chiffrées d'un compte (carnet d'adresses, fond d'écran…) : un fichier par usage à côté du fichier du
 // compte, chiffré avec une sous-clé de la clé de données et lié à l'identifiant du compte.
-var blobExtensions = map[string]string{"contacts": ".ctc", "background": ".bgd"}
+var blobExtensions = map[string]string{"contacts": ".ctc", "background": ".bgd", "activity": ".act"}
 
 func (s *Store) blobPath(id, kind string) string {
 	return strings.TrimSuffix(s.path(id), userFileExtension) + blobExtensions[kind]
@@ -598,6 +598,8 @@ func (s *Store) Delete(login string) error {
 		for kind := range blobExtensions {
 			_ = os.Remove(s.blobPath(id, kind))
 		}
+		_ = os.Remove(s.pubPath(id))
+		_ = os.Remove(s.evtPath(id))
 		// Supprime les dossiers de hash devenus vides (sans erreur s'ils ne le sont pas).
 		d2 := filepath.Dir(s.path(id))
 		os.Remove(d2)

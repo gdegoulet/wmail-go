@@ -478,6 +478,9 @@ func (s *Server) accountSave(w http.ResponseWriter, r *http.Request, sess *sessi
 	}
 	sess.Mu.Unlock()
 	s.log.Info("compte mail enregistré", "login", store.ReduceLogin(sess.Account.Login), "account", acc.ID, "nouveau", existing == nil)
+	if existing == nil {
+		s.traceSession(sess, userdata.EvMailAdd, r, acc.Email)
+	}
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
@@ -494,6 +497,7 @@ func (s *Server) accountDelete(w http.ResponseWriter, r *http.Request, sess *ses
 		return
 	}
 	s.log.Info("compte mail supprimé", "login", store.ReduceLogin(sess.Account.Login), "account", id)
+	s.traceSession(sess, userdata.EvMailDelete, r, "")
 	http.Redirect(w, r, "/accounts", http.StatusSeeOther)
 }
 

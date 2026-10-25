@@ -387,6 +387,7 @@ func (s *Server) filterSave(w http.ResponseWriter, r *http.Request, sess *sessio
 		return
 	}
 	s.log.Info("filtres enregistrés", "login", store.ReduceLogin(sess.Account.Login), "filtres", len(filters))
+	s.traceSession(sess, userdata.EvFilters, r, "")
 	s.setFlash(sess, "filters.saved")
 	http.Redirect(w, r, "/settings/filters?box="+url.QueryEscape(acc.ID), http.StatusSeeOther)
 }

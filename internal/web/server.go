@@ -87,7 +87,7 @@ func New(cfg config.Config, st *store.Store, log *slog.Logger) (*Server, error) 
 	}
 	s.attach = newAttachStore(s.composeLimits())
 	s.sessions.OnClose = func(id string) { s.pool.Close(id + "/"); s.attach.ClearSession(id) }
-	for _, name := range []string{"login", "register", "recover", "recovery_key", "home", "settings", "message", "accounts", "account_form", "mail_message", "fragment", "compose", "folders_settings", "identities", "filters", "filter_edit", "filters_raw", "contacts", "login_2fa", "twofactor", "templates"} {
+	for _, name := range []string{"login", "register", "recover", "recovery_key", "home", "settings", "message", "accounts", "account_form", "mail_message", "fragment", "compose", "folders_settings", "identities", "filters", "filter_edit", "filters_raw", "contacts", "login_2fa", "twofactor", "templates", "activity"} {
 		t, err := template.New(name).Funcs(template.FuncMap{"inList": func(l []string, v string) bool { return slices.Contains(l, v) }, "sub1": func(n int) int { return n - 1 }, "asset": assetURL, "replykey": func(m string) string {
 			return map[string]string{"reply": "reply", "replyall": "reply_all", "forward": "forward"}[m]
 		}}).ParseFS(templateFS, "templates/base.html", "templates/"+name+".html")
@@ -179,6 +179,8 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("POST /compose/discard", s.auth(s.composeDiscard))
 	mux.HandleFunc("GET /settings", s.auth(s.settingsGet))
 	mux.HandleFunc("GET /settings/security", s.auth(s.settingsSecurity))
+	mux.HandleFunc("GET /settings/activity", s.auth(s.activityGet))
+	mux.HandleFunc("POST /settings/activity/clear", s.auth(s.activityClear))
 	mux.HandleFunc("GET /settings/folders", s.auth(s.foldersGet))
 	mux.HandleFunc("POST /settings/folders/action", s.auth(s.foldersAction))
 	mux.HandleFunc("POST /settings/folders/system", s.auth(s.foldersSystem))
@@ -422,6 +424,10 @@ func (s *Server) startSession(w http.ResponseWriter, r *http.Request, acc *store
 	}
 	sess.PendingRecoveryKey = pendingKey
 	s.setSessionCookie(w, r, sess.ID)
+	// Journal d'activité : clés posées à la première connexion d'un compte ancien, puis versement de la file.
+	// Au pire le journal est incomplet ; jamais au prix de la connexion.
+	s.ensureEventKeys(acc)
+	s.noteLogin(sess, acc, r)
 	return nil
 }
 
@@ -577,6 +583,8 @@ type Page struct {
 	Poll          *PollInfo
 	Langs         []LangChoice // langues proposées sur les pages d'accueil (sans session)
 	TwoFactor     *TwoFactorView
+	Activity      *ActivityView
+	Notice        *LoginNotice // rappel de la connexion précédente, affiché une fois par session
 	Templates     *TemplatesView
 	HideChecks    bool   // cases à cocher de la liste masquées
 	NoAnim        bool   // animations désactivées
@@ -802,6 +810,7 @@ func (s *Server) prepare(r *http.Request, sess *session.Session, p *Page) {
 			p.InfoKey, sess.Flash = sess.Flash, ""
 			sess.Mu.Unlock()
 		}
+		p.Notice = s.loginNotice(sess)
 	}
 	if p.TitleKey == "" {
 		p.TitleKey = "app.name"

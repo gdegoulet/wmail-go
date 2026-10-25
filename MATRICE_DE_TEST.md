@@ -89,6 +89,26 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
   tester  : basculer fr / en
   attendu : toute l'interface suit, menus compris ; choix mémorisé
   réponse : OK
+
+[A-13] Journal d'activité
+  tester  : Réglages > Activité, après s'être connecté et déconnecté
+  attendu : connexions et déconnexions listées, avec date, adresse IP et navigateur
+  réponse :
+
+[A-14] Échecs de connexion consignés
+  tester  : se déconnecter, se tromper deux fois de mot de passe, puis se connecter
+  attendu : les deux échecs apparaissent dans le journal, signalés en couleur
+  réponse :
+
+[A-15] Rappel de la connexion précédente
+  tester  : après le test A-14, regarder le haut de la page
+  attendu : « Dernière connexion le … » et le nombre d'échecs depuis ; affiché une seule fois
+  réponse :
+
+[A-16] Effacement du journal
+  tester  : Réglages > Activité, « Effacer le journal », confirmer
+  attendu : « Journal effacé. », liste vide ; la connexion suivante repart de zéro
+  réponse :
 ```
 
 ## B. Boîtes mail (IMAP / SMTP)

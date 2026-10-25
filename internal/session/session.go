@@ -33,6 +33,9 @@ type Session struct {
 	TwoFactorReveal      string         // secret révélé après un code valide, protégé par Mu
 	TwoFactorRevealUntil time.Time      // fin de la période d'affichage du secret révélé
 	Flash                string         // clé d'un message à afficher une seule fois (protégée par Mu)
+	LastLogin            int64          // date de la connexion précédente (Unix, 0 si inconnue), protégée par Mu
+	FailedSince          int            // échecs de connexion depuis, protégé par Mu
+	NoticeSeen           bool           // la bannière de connexion a déjà été affichée, protégée par Mu
 }
 
 // Manager garde les sessions actives.

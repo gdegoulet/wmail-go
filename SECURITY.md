@@ -286,6 +286,48 @@ est écrit par un tiers).
 
 ---
 
+## 9 bis. Journal d'activité du compte (visible par l'utilisateur)
+
+Distinct des journaux serveur ci-dessus : il est **chiffré pour le seul utilisateur**, qui le consulte dans
+**Réglages → Activité**. Ni l'administrateur du serveur ni personne d'autre ne peut le lire.
+
+**Le problème résolu.** Le reste du coffre ne s'ouvre qu'avec la clé de données, donc après une connexion réussie.
+Or l'événement le plus utile — une tentative qui échoue — survient précisément compte fermé. D'où une paire de clés
+X25519 par compte : la privée vit dans le fichier chiffré, la publique en clair à côté (`<id>.pub`). Le serveur
+scelle un événement pour cette clé publique sans rien connaître du compte ; l'utilisateur seul le relit.
+
+**Les fichiers.**
+
+| Fichier | Rôle |
+|---|---|
+| `<id>.pub` | clé publique X25519, en clair — publier une clé publique ne coûte rien |
+| `<id>.evt` | file d'attente, ajout seul, une « sealed box » par événement |
+| `<id>.act` | historique compacté, chiffré par une sous-clé de la DEK, comme le carnet d'adresses |
+
+Tout événement passe d'abord par `.evt`. Le versement dans `.act` a lieu quand la clé de données est disponible :
+à la connexion et à l'affichage de la page. Conservation : **30 jours**, 2 000 entrées au plus.
+
+**Ce qui est consigné** : connexion réussie, échec, refus par la limitation de débit, second facteur refusé,
+déconnexion, changement de mot de passe, usage et régénération de la clé de récupération, activation/retrait du
+TOTP, ajout/retrait d'une boîte mail, modification des filtres. Avec la date, l'adresse IP et l'agent utilisateur
+tronqué. **Pas** les lectures de messages : trop de volume, et le journal deviendrait lui-même une cible.
+
+**À la connexion**, un rappel annonce la connexion précédente et le nombre d'échecs survenus depuis. Il s'affiche
+une fois par session.
+
+**Limites, à lire avant de s'y fier :**
+
+- **Ce journal n'est pas infalsifiable.** Qui a l'accès en écriture à `/data` détient la clé publique : il peut
+  forger des entrées, et surtout en supprimer. Il détecte l'**abus de compte à distance**, pas la **compromission
+  du serveur**. Les journaux serveur (§9) restent la source pour ce dernier cas.
+- La file `.evt` est alimentée par des tentatives de connexion, donc par n'importe qui. Elle est **plafonnée**
+  (400 entrées, 256 Kio) : au-delà, les entrées du milieu sont jetées et comptées, et le journal l'affiche. Sans ce
+  plafond, un attaquant remplirait le disque.
+- L'adresse IP est une donnée personnelle. Elle est ici chiffrée pour le seul utilisateur concerné, conservée
+  30 jours, et l'utilisateur peut effacer tout son journal depuis la page.
+
+---
+
 ## 10. Ce qui manque (honnêtement)
 
 Comparé à ce qu'on attend d'un webmail en 2026 :
@@ -294,7 +336,7 @@ Comparé à ce qu'on attend d'un webmail en 2026 :
 |---|---|---|
 | Chiffrement de bout en bout (PGP/S-MIME) | **absent** | choix assumé ; une signature est seulement reconnue pour ne pas l'afficher en pièce jointe |
 | Clés de sécurité / WebAuthn (passkeys) | **absent** | TOTP seulement ; WebAuthn serait le prochain ajout utile |
-| Journal des connexions visible par l'utilisateur | **absent** | les connexions sont journalisées côté serveur, pas montrées dans l'interface |
+| Journal des connexions visible par l'utilisateur | **présent** | chiffré pour l'utilisateur seul, 30 jours, échecs compris (§9 bis) |
 | Liste des sessions actives, déconnexion à distance | **partiel** | un changement de mot de passe ferme les autres sessions ; pas de liste consultable |
 | Expiration forcée du mot de passe, politique de complexité | **partiel** | longueur minimale configurable (12 par défaut), pas de règle de composition (choix délibéré) |
 | Détection de connexion depuis un lieu inhabituel | **absent** | aucune géolocalisation, aucune heuristique |

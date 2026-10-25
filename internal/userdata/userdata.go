@@ -12,7 +12,36 @@ type Data struct {
 	TwoFactor    TwoFactor     `json:"two_factor"`
 	Templates    []Template    `json:"templates"`
 	ContactsSync ContactsSync  `json:"contacts_sync"`
+	EventKey     string        `json:"event_key"` // clé privée X25519 du journal d'activité (base64), vide avant la première ouverture
 }
+
+// Event est une entrée du journal d'activité du compte. Les noms de champs sont courts : le journal est scellé
+// entrée par entrée, et chaque octet se paie en en-tête de chiffrement.
+type Event struct {
+	At     int64  `json:"t"` // date, en secondes Unix
+	Kind   string `json:"k"` // voir les constantes Ev*
+	IP     string `json:"ip,omitempty"`
+	Agent  string `json:"ua,omitempty"` // agent utilisateur, tronqué
+	Detail string `json:"d,omitempty"`  // précision courte, déjà sans donnée sensible
+}
+
+// Natures d'événement consignées dans le journal d'activité.
+const (
+	EvLoginOK      = "login_ok"
+	EvLoginFail    = "login_fail"
+	EvLoginBlocked = "login_blocked" // refus de la limitation de débit
+	EvTwoFactorKO  = "2fa_fail"
+	EvLogout       = "logout"
+	EvPassword     = "password" // mot de passe changé
+	EvRecovery     = "recovery" // clé de récupération utilisée
+	EvRecoveryNew  = "recovery_new"
+	EvTwoFactorOn  = "2fa_on"
+	EvTwoFactorOff = "2fa_off"
+	EvMailAdd      = "mail_add"
+	EvMailDelete   = "mail_del"
+	EvFilters      = "filters"
+	EvContactsOut  = "contacts_export"
+)
 
 // ContactsSync configure la synchronisation du carnet d'adresses avec un serveur CardDAV.
 type ContactsSync struct {

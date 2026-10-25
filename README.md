@@ -192,7 +192,8 @@ make test                # tous les tests Go, Dovecot compris
 
 ## Fonctions
 
-Carnet d'adresses chiffré (vCard, CSV, CardDAV), authentification en deux étapes (TOTP), modèles de message,
+Carnet d'adresses chiffré (vCard, CSV, CardDAV), authentification en deux étapes (TOTP), journal d'activité du
+compte chiffré pour son seul propriétaire (connexions réussies et échouées, 30 jours), modèles de message,
 conversations, recherche à la RainLoop, notifications, glisser-déposer, champs d'adresses en pastilles, visionneuse
 d'images et de PDF, images distantes bloquées ou mandatées, filtres Sieve, impression, fond d'écran du thème,
 réglages enregistrés à la volée, réordonnancement des comptes, identités et modèles.

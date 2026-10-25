@@ -13,6 +13,7 @@ import (
 
 	"github.com/gdegoulet/wmail-go/internal/contacts"
 	"github.com/gdegoulet/wmail-go/internal/session"
+	"github.com/gdegoulet/wmail-go/internal/userdata"
 )
 
 const maxContactsImport = 8 << 20
@@ -350,6 +351,7 @@ func (s *Server) contactsExport(w http.ResponseWriter, r *http.Request, sess *se
 		return
 	}
 	w.Header().Set("Cache-Control", "no-store")
+	s.traceSession(sess, userdata.EvContactsOut, r, strconv.Itoa(len(all)))
 	_, _ = w.Write(buf.Bytes())
 }
 

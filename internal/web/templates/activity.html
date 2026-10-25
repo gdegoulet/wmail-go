@@ -1,0 +1,26 @@
+{{define "content"}}{{with .Activity}}{{template "setopen" $}}
+<h1 class="legend">{{$.T "activity.title"}}</h1>
+{{template "messages" $}}
+<p class="muted">{{$.T "activity.intro" .Days}}</p>
+{{if .Rows}}
+<table class="activity">
+<thead><tr><th>{{$.T "activity.when"}}</th><th>{{$.T "activity.what"}}</th><th>{{$.T "activity.ip"}}</th><th>{{$.T "activity.agent"}}</th></tr></thead>
+<tbody>
+{{range .Rows}}<tr{{if .Warn}} class="warn"{{end}}>
+<td class="nowrap">{{.When}}</td>
+<td>{{$.T .Kind}}{{if .Detail}} <small>({{.Detail}})</small>{{end}}</td>
+<td class="nowrap">{{.IP}}</td>
+<td class="agent" title="{{.Agent}}">{{.Agent}}</td>
+</tr>{{end}}
+</tbody>
+</table>
+<details class="danger">
+<summary>{{$.T "activity.clear"}}</summary>
+<form method="post" action="/settings/activity/clear">
+<input type="hidden" name="csrf" value="{{$.CSRF}}">
+<p>{{$.T "activity.clear_confirm"}}</p>
+<button type="submit" class="danger">{{$.T "activity.clear_yes"}}</button>
+</form>
+</details>
+{{else}}<p>{{$.T "activity.empty"}}</p>{{end}}
+{{template "setclose" $}}{{end}}{{end}}

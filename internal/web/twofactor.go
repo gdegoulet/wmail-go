@@ -200,6 +200,7 @@ func (s *Server) login2FAPost(w http.ResponseWriter, r *http.Request) {
 	if !s.checkSecondFactor(acc, r.PostFormValue("code")) {
 		s.limiter.Add(ipKey, rule.PerIP)
 		s.log.Warn("échec du second facteur", "login", store.ReduceLogin(acc.Login), "ip", s.clientIP(r))
+		s.trace(acc.Login, userdata.EvTwoFactorKO, r, "")
 		s.render(w, r, nil, http.StatusUnauthorized, "login_2fa", &Page{TitleKey: "twofactor.login_title", ErrorKey: "twofactor.bad_code", Next: safeNext(r.PostFormValue("next"))})
 		return
 	}
@@ -352,6 +353,7 @@ func (s *Server) twoFactorEnable(w http.ResponseWriter, r *http.Request, sess *s
 		return
 	}
 	s.log.Info("authentification en deux étapes activée", "login", store.ReduceLogin(sess.Account.Login))
+	s.traceSession(sess, userdata.EvTwoFactorOn, r, "")
 	s.twoFactorPage(w, r, sess, http.StatusOK, codes, "")
 }
 
@@ -409,5 +411,6 @@ func (s *Server) twoFactorDisable(w http.ResponseWriter, r *http.Request, sess *
 		return
 	}
 	s.log.Info("authentification en deux étapes désactivée", "login", store.ReduceLogin(sess.Account.Login))
+	s.traceSession(sess, userdata.EvTwoFactorOff, r, "")
 	s.twoFactorPage(w, r, sess, http.StatusOK, nil, "")
 }

@@ -79,6 +79,7 @@ func (s *Server) loginPost(w http.ResponseWriter, r *http.Request) {
 	ipKey, userKey := s.limitKeys("login", r, login)
 	if wait, blocked := s.checkLimits(rule, ipKey, userKey); blocked {
 		s.log.Warn("connexion bloquée par la limitation de débit", "login", store.ReduceLogin(login), "ip", s.clientIP(r))
+		s.trace(login, userdata.EvLoginBlocked, r, "")
 		s.rateLimited(w, r, nil, wait)
 		return
 	}
@@ -87,6 +88,7 @@ func (s *Server) loginPost(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, store.ErrInvalidCredentials) {
 			s.addFailure(rule, ipKey, userKey)
 			s.log.Warn("échec de connexion", "login", store.ReduceLogin(login), "ip", s.clientIP(r))
+			s.trace(login, userdata.EvLoginFail, r, "")
 			s.render(w, r, nil, http.StatusUnauthorized, "login",
 				&Page{TitleKey: "login.title", ErrorKey: "login.error.invalid", Login: login, Next: safeNext(r.PostFormValue("next"))})
 			return
@@ -112,6 +114,7 @@ func (s *Server) loginPost(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) logout(w http.ResponseWriter, r *http.Request, sess *session.Session) {
 	s.log.Info("déconnexion", "login", store.ReduceLogin(sess.Account.Login))
+	s.traceSession(sess, userdata.EvLogout, r, "")
 	s.sessions.Delete(sess.ID)
 	s.clearSessionCookie(w, r)
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
@@ -239,6 +242,7 @@ func (s *Server) recoverPost(w http.ResponseWriter, r *http.Request) {
 	case errors.Is(err, store.ErrInvalidCredentials):
 		s.addFailure(rule, ipKey, userKey)
 		s.log.Warn("échec de récupération", "login", store.ReduceLogin(login), "ip", s.clientIP(r))
+		s.trace(login, userdata.EvLoginFail, r, "recover")
 		page.ErrorKey = "recover.error.invalid"
 		s.render(w, r, nil, http.StatusUnauthorized, "recover", page)
 		return
@@ -253,6 +257,7 @@ func (s *Server) recoverPost(w http.ResponseWriter, r *http.Request) {
 		s.limiter.Reset(userKey)
 	}
 	s.sessions.DeleteUser(acc.Login, "")
+	s.trace(acc.Login, userdata.EvRecovery, r, "")
 	// L'ancienne clé a servi : une nouvelle est générée et affichée avant de continuer.
 	if err := s.startSession(w, r, acc, newKey); err != nil {
 		acc.Wipe()
@@ -362,6 +367,7 @@ func (s *Server) settingsPassword(w http.ResponseWriter, r *http.Request, sess *
 	}
 	n := s.sessions.DeleteUser(login, sess.ID)
 	s.log.Info("mot de passe modifié", "login", store.ReduceLogin(login), "sessions_fermées", n)
+	s.traceSession(sess, userdata.EvPassword, r, "")
 	page.InfoKey = "settings.password.done"
 	s.render(w, r, sess, http.StatusOK, "settings", page)
 }
@@ -388,6 +394,7 @@ func (s *Server) settingsRecovery(w http.ResponseWriter, r *http.Request, sess *
 		return
 	}
 	s.log.Info("clé de récupération régénérée", "login", store.ReduceLogin(login))
+	s.traceSession(sess, userdata.EvRecoveryNew, r, "")
 	sess.Mu.Lock()
 	sess.PendingRecoveryKey = key
 	sess.Mu.Unlock()
