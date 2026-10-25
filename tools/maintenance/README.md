@@ -134,6 +134,51 @@ ssh-keygen -t ed25519 -N '' -C 'wmail-go maj auto' -f ~/.ssh/id_wmail_go_maj
 
 Une clé de déploiement ne donne accès qu'à **ce** dépôt : si elle fuit, le reste de vos comptes n'est pas exposé.
 
+## Envoi du courriel sans sendmail
+
+Si la machine n'a ni `sendmail` ni `msmtp`, utilisez l'envoi par curl fourni :
+
+```sh
+# dans .maj.env
+MAILER=/data/Work/wmail-go/tools/maintenance/envoi-smtp.sh
+SMTP_URL=smtp://mail.degoulet.net:587      # ou smtps://mail.degoulet.net:465
+SMTP_USER=wmail-go@degoulet.net            # facultatif
+SMTP_PASS=…                                # facultatif ; le fichier est en mode 0600
+```
+
+Essai :
+
+```sh
+printf 'From: wmail-go@degoulet.net
+To: wmail-go@degoulet.net
+Subject: essai
+
+bonjour
+' \
+  | WMAIL_MAJ_CONF=/data/Work/wmail-go/.maj.env ./tools/maintenance/envoi-smtp.sh
+```
+
+Autre possibilité : installer `msmtp` et mettre `MAILER=msmtp -t`.
+
+## Podman et podman-compose
+
+Les commandes passent par `$(COMPOSE)`, qui vaut `docker compose` par défaut. Sur une machine où seul
+`podman-compose` existe, deux possibilités :
+
+```sh
+# dans .maj.env, ou dans l'environnement du cron
+COMPOSE=podman-compose
+```
+
+…ou laisser le raccourci `docker` de Podman faire le travail (c'est ce que fait déjà une installation
+Podman avec le greffon compose externe : `docker compose version` affiche alors « podman-compose »).
+
+Vérifiez d'abord que les profils fonctionnent, car `make` s'en sert :
+
+```sh
+COMPOSE=podman-compose make deps-plan     # doit afficher un plan, ou « aucune mise à jour éligible »
+```
+
 ## Réglages
 
 | Variable | Défaut | Rôle |
@@ -148,6 +193,8 @@ Une clé de déploiement ne donne accès qu'à **ce** dépôt : si elle fuit, le
 | `SANS_JS` | — | `1` : sauter `make test-js` (gagne plusieurs minutes) |
 | `JOURNAL` | `.maj-dependances.log` | journal complet |
 | `COMPOSE_PROJECT_NAME` | `wmail-go-ci` | projet compose de l'automate, distinct du webmail en service |
+| `COMPOSE` | `docker compose` | commande compose (`podman-compose` si nécessaire) |
+| `SMTP_URL`, `SMTP_USER`, `SMTP_PASS` | — | envoi par curl (`envoi-smtp.sh`) quand sendmail manque |
 
 ## Essai à blanc
 
