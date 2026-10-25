@@ -20,3 +20,4 @@ users.idx
 # Secrets de publication et de maintenance (jetons de registre, clés)
 tools/release/publier.env
 tools/maintenance/maj.env
+/eml/
