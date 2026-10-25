@@ -33,6 +33,17 @@ tests est le même pour tout le monde.
 L'intégration continue rejoue `gofmt`, `go vet`, `go test -race`, les contrôles JavaScript et la construction de
 l'image. Une proposition qui ne passe pas ces étapes ne sera pas fusionnée.
 
+## Quand l'intégration continue échoue
+
+Les tâches reproduisent exactement les cibles du Makefile ; un échec se rejoue donc en local.
+
+| Tâche | À lancer chez vous | Pièges connus |
+|---|---|---|
+| Go (vet, tests, course) | `make fmt vet test-race` | une erreur de `gofmt` suffit à faire échouer la tâche |
+| Vulnérabilités | `make vuln` | la CI installe le **dernier correctif** de la série Go ; un avis visant la bibliothèque standard peut faire échouer la CI alors que votre conteneur est plus récent, ou l'inverse |
+| Contrôles JavaScript | `make test-js` | démarre webmail et GreenMail ; sur une machine froide, l'attente des services peut dépasser la limite. Les journaux des conteneurs sont versés dans la sortie en cas d'échec |
+| Image de conteneur | `make build` | tout fichier non ignoré par `.dockerignore` alourdit le contexte |
+
 ## Structure du dépôt
 
 ```
