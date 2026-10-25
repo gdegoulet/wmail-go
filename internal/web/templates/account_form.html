@@ -90,7 +90,7 @@
 <label>{{.T "accounts.form.login"}}
 <input name="sieve_login" type="text" maxlength="254" autocomplete="off" placeholder="{{.T "accounts.form.sieve_login_ph"}}" value="{{.Form.SieveLogin}}"></label>
 <label>{{.T "accounts.form.password"}}
-<input name="sieve_password" type="password" autocomplete="new-password"></label>
+<input name="sieve_password" type="password" autocomplete="new-password" value="{{.Form.SievePassword}}"></label>
 {{if .Form.HasSievePassword}}<small>{{.T "accounts.form.password_kept"}}</small>{{end}}
 <label class="check"><input name="sieve_verify" type="checkbox"{{if .Form.SieveVerify}} checked{{end}}> {{.T "accounts.form.verify"}}</label>
 <label class="check"><input name="sieve_legacy" type="checkbox"{{if .Form.SieveLegacy}} checked{{end}}> {{.T "accounts.form.legacy"}}</label>

@@ -255,6 +255,12 @@ func buildAccount(f *AccountForm, existing *userdata.MailAccount) (userdata.Mail
 	if acc.Sieve.Password == "" && existing != nil && f.SieveLogin == existing.Sieve.Login {
 		acc.Sieve.Password = existing.Sieve.Password
 	}
+	// Identifiant propre à ManageSieve mais pas de mot de passe : sieveEndpoint ne reprendrait pas ceux de
+	// l'IMAP (il ne le fait que si l'identifiant est vide), donc l'authentification échouerait à chaque
+	// connexion, sans que rien ne le signale au moment de l'enregistrement.
+	if !f.SieveDisabled && f.SieveLogin != "" && acc.Sieve.Password == "" {
+		errs = append(errs, "accounts.err.sieve_password")
+	}
 	acc.Signature, acc.SignatureBefore = f.Signature, f.SignatureBefore
 	acc.ReplyTo, acc.Bcc = f.ReplyTo, f.Bcc
 	if existing != nil {
@@ -410,6 +416,7 @@ func (s *Server) accountSave(w http.ResponseWriter, r *http.Request, sess *sessi
 	if existing != nil {
 		form.HasIMAPPassword = existing.IMAP.Password != ""
 		form.HasSMTPPassword = existing.SMTP.Password != ""
+		form.HasSievePassword = existing.Sieve.Password != ""
 	}
 
 	acc, errs := buildAccount(form, existing)

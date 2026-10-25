@@ -38,6 +38,11 @@ Format inspiré de « Keep a Changelog » ; les dates sont celles du dépôt.
 - `docs/routes.md` : les 96 routes HTTP, avec paramètres, filtres de validation et codes de retour.
 
 ### Corrigé
+- **Mot de passe ManageSieve perdu par le bouton « Test ».** Le champ du formulaire ne reportait pas la valeur
+  saisie, contrairement à ceux d'IMAP et de SMTP : après un test, il revenait vide, et l'enregistrement suivant
+  écrivait un mot de passe vide. Les filtres cessaient alors de fonctionner sans aucun message. Le champ reporte
+  désormais sa valeur, le rappel « laissez vide pour conserver » réapparaît au réaffichage, et un identifiant
+  ManageSieve sans mot de passe est refusé au lieu d'être enregistré (`accounts.err.sieve_password`).
 - Liste : après une suppression, le volet rouvrait le voisin du message du dernier rendu complet, et non celui
   du message réellement affiché (`open_next` n'était pas mis à jour quand le volet se charge sans recharger la
   page). Le curseur clavier, perdu au rechargement, se repose désormais sur le message qui prend la place.

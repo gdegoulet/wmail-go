@@ -419,6 +419,7 @@
   "accounts.err.sieve_host": "Serveur ManageSieve invalide.",
   "accounts.err.sieve_port": "Port ManageSieve invalide.",
   "accounts.err.sieve_security": "Sécurité ManageSieve invalide.",
+  "accounts.err.sieve_password": "Mot de passe ManageSieve manquant.",
   "filters.raw_active": "Un script brut est actif : les filtres de cette liste ne sont pas appliqués.",
   "filters.raw_edit": "Modifier le script brut",
   "filters.name": "Nom",

@@ -419,6 +419,7 @@
   "accounts.err.sieve_host": "Invalid ManageSieve server.",
   "accounts.err.sieve_port": "Invalid ManageSieve port.",
   "accounts.err.sieve_security": "Invalid ManageSieve security.",
+  "accounts.err.sieve_password": "ManageSieve password missing.",
   "filters.raw_active": "A raw script is active: the filters in this list are not applied.",
   "filters.raw_edit": "Edit the raw script",
   "filters.name": "Name",

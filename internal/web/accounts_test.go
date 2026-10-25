@@ -329,3 +329,67 @@ func TestSelfSignedCertificateOption(t *testing.T) {
 		t.Errorf("la boîte doit s'ouvrir sans vérification du certificat :\n%.1500s", home)
 	}
 }
+
+// Le mot de passe ManageSieve doit survivre au bouton « Test », qui réaffiche le formulaire sans rien
+// enregistrer. Sans « value » dans le gabarit, le champ revenait vide et l'enregistrement suivant
+// écrasait le mot de passe par une chaîne vide : les filtres cessaient de fonctionner sans message.
+func TestSievePasswordSurvitLeTest(t *testing.T) {
+	e := newEnv(t, nil)
+	ports := startMail(t)
+	c, tok := e.loggedIn("alice")
+
+	f := accountForm(tok, ports, "test")
+	f.Set("sieve_host", "sieve.example.test")
+	f.Set("sieve_login", "jean")
+	f.Set("sieve_password", "le-secret-sieve")
+
+	// Le test réaffiche le formulaire : le mot de passe saisi doit toujours y être.
+	resp, page := e.do(c, "POST", "/accounts/save", f, nil)
+	e.expect(resp, 200, "")
+	if !strings.Contains(page, `name="sieve_password" type="password" autocomplete="new-password" value="le-secret-sieve"`) {
+		t.Errorf("le mot de passe ManageSieve a disparu du formulaire après le test :\n%s", champSieve(page))
+	}
+
+	// Enregistrement, puis réouverture de la fiche : le mot de passe est conservé.
+	f.Set("action", "save")
+	resp, _ = e.do(c, "POST", "/accounts/save", f, nil)
+	e.expect(resp, 303, "/")
+
+	_, page = e.do(c, "GET", "/accounts", nil, nil)
+	ids := idsFrom(page)
+	if len(ids) != 1 {
+		t.Fatalf("%d compte(s), attendu 1", len(ids))
+	}
+	_, page = e.do(c, "GET", "/accounts/"+ids[0]+"/edit", nil, nil)
+	if !strings.Contains(page, "Laissez vide pour conserver le mot de passe enregistré.") {
+		t.Errorf("le mot de passe ManageSieve n'a pas été enregistré :\n%s", champSieve(page))
+	}
+}
+
+// Un identifiant ManageSieve sans mot de passe ne peut pas s'authentifier : le formulaire doit le refuser
+// au lieu d'enregistrer une configuration qui échouera silencieusement.
+func TestSieveLoginSansMotDePasse(t *testing.T) {
+	e := newEnv(t, nil)
+	ports := startMail(t)
+	c, tok := e.loggedIn("alice")
+
+	f := accountForm(tok, ports, "save")
+	f.Set("sieve_host", "sieve.example.test")
+	f.Set("sieve_login", "jean")
+	f.Set("sieve_password", "")
+	resp, page := e.do(c, "POST", "/accounts/save", f, nil)
+	e.expect(resp, 400, "")
+	if !strings.Contains(page, "Mot de passe ManageSieve manquant.") {
+		t.Errorf("erreur de mot de passe ManageSieve attendue :\n%s", champSieve(page))
+	}
+}
+
+// champSieve extrait la partie ManageSieve d'une page, pour des messages d'échec lisibles.
+func champSieve(page string) string {
+	i := strings.Index(page, "sieve_host")
+	if i < 0 {
+		return page
+	}
+	j := min(i+1200, len(page))
+	return page[i:j]
+}
