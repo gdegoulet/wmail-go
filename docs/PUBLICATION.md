@@ -51,3 +51,16 @@ make build          # l'image doit se construire depuis un dépôt propre
 - Intégration continue active (`.github/workflows/ci.yml`) ; sur Gitea, Actions compatibles ou pipeline équivalent.
 - Signalement des failles : la page de sécurité pointe sur `SECURITY.md`.
 - Dependabot activé (`.github/dependabot.yml`) pour les modules Go, les actions et l'image de base.
+
+## 7. Publier l'image sur Docker Hub
+
+- [ ] `make image-publish-essai` passe (barrières Go, construction, version du binaire conforme à l'étiquette).
+- [ ] `tools/release/publier.env` existe, en `chmod 600`, avec un *personal access token* en lecture-écriture —
+      jamais le mot de passe du compte. Le fichier est ignoré par `.gitignore` : vérifiez-le avec
+      `git check-ignore -v tools/release/publier.env`.
+- [ ] `make image-publish` : deux étiquettes partent, `AAAAMMJJ-commit` et `latest`.
+- [ ] La description de la page Docker Hub est à jour, à partir de [`dockerhub.md`](dockerhub.md)
+      (Repository → General → Description) : le script ne la met pas à jour.
+- [ ] Le `README.md` du dépôt renvoie bien vers l'image publiée.
+
+Mode d'emploi complet : [`tools/release/README.md`](../tools/release/README.md).

@@ -38,6 +38,8 @@ interface.
 | [`MATRICE_DE_TEST.md`](MATRICE_DE_TEST.md) | 165 points de validation, un par fonctionnalité |
 | [`CHANGELOG.md`](CHANGELOG.md) | journal des changements |
 | [`docs/PUBLICATION.md`](docs/PUBLICATION.md) | vérifications avant publication du dépôt |
+| [`tools/release/README.md`](tools/release/README.md) | construction et publication de l'image sur un registre |
+| [`tools/maintenance/README.md`](tools/maintenance/README.md) | veille de vulnérabilités et mise à jour des dépendances |
 | [`docs/audit-rainloop/`](docs/audit-rainloop/) | analyse fonction par fonction de RainLoop 1.17 (PHP, JS, gabarits, CSS) |
 
 ## Démarrer sur le poste de travail
@@ -143,6 +145,23 @@ publie deux étiquettes : **`AAAAMMJJ-commit`** (par exemple `20261025-9b52b74`)
 L'identifiant et le jeton du registre se placent dans `tools/release/publier.env`, copié de `publier.env.exemple` et
 jamais versionné. Sur Docker Hub, créez un *personal access token* en lecture-écriture plutôt que d'utiliser votre mot
 de passe. Sans jeton, le script compte sur un `docker login` déjà fait.
+
+Mode d'emploi complet, réglages et multi-architecture : [`tools/release/README.md`](tools/release/README.md).
+
+### Partir de l'image publiée
+
+```
+docker run -d --name wmail-go -p 127.0.0.1:8080:8080 \
+  -v wmail-go-data:/data -v "$PWD/config/config.json:/config/config.json:ro" \
+  --read-only --cap-drop ALL --security-opt no-new-privileges:true \
+  docker.io/gdegoulet/wmail-go:latest
+docker run --rm -it -v wmail-go-data:/data \
+  -v "$PWD/config/config.json:/config/config.json:ro" \
+  docker.io/gdegoulet/wmail-go:latest user add vous
+```
+
+En service, préférez l'étiquette datée (`20261025-af4debf`) à `latest` : elle ne bouge pas. Et placez un proxy TLS
+devant, comme ci-dessus.
 
 ## Tests
 

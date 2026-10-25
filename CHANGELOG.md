@@ -17,6 +17,8 @@ Format inspiré de « Keep a Changelog » ; les dates sont celles du dépôt.
 - Thèmes (dont « DarkShine » reprenant RainLoop), français et anglais, fuseau horaire par utilisateur,
   dispositions 3 volets / aperçu en bas / liste seule, réglages enregistrés à la volée.
 - Déploiement derrière nginx avec terminaison TLS, sauvegarde et restauration du volume de données.
+- Publication de l'image sur un registre (`make image-publish`) : étiquettes « AAAAMMJJ-commit » et « latest »,
+  version injectée dans le binaire et dans les étiquettes OCI, contrôles avant publication.
 - Documentation : `README.md`, `SECURITY.md`, `CONTRIBUTING.md`, cahier des charges, matrice de test (165 points),
   analyse fonction par fonction de RainLoop 1.17 dans `docs/audit-rainloop/`.
 
