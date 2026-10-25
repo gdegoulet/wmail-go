@@ -11,3 +11,6 @@ users.idx
 # fichiers d'échange des éditeurs
 *.swp
 *~
+# journal et verrou de la mise à jour automatique des dépendances
+/.maj-dependances.log
+/.maj-dependances.lock
