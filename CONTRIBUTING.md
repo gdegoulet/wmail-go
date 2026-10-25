@@ -26,6 +26,8 @@ tests est le même pour tout le monde.
 | `make test-e2e` | parcours dans Chromium (composition, filtres, dossiers, contacts) |
 | `make sieve-up` puis `make test` | ajoute les tests d'intégration contre un vrai Dovecot (IMAP + ManageSieve) |
 | `make vet`, `make fmt` | analyse statique et mise en forme |
+| `make vuln` | failles connues (govulncheck) des dépendances et de Go |
+| `make deps-outdated`, `make deps-update` | dépendances en retard, mise à jour groupée |
 | `make logs`, `make shell` | journaux, shell dans le conteneur de développement |
 
 L'intégration continue rejoue `gofmt`, `go vet`, `go test -race`, les contrôles JavaScript et la construction de

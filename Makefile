@@ -13,6 +13,8 @@ help:
 	@echo "make test-race go test -race ./... dans le conteneur dev"
 	@echo "make test-js    contrôles JavaScript (jsdom) sur les pages réelles"
 	@echo "make vet       go vet ./... dans le conteneur dev"
+	@echo "make vuln      vulnérabilités connues (govulncheck) des dépendances et de Go"
+	@echo "make deps-outdated|deps-update   dépendances en retard, mise à jour"
 	@echo "make fmt       gofmt -l -w dans le conteneur dev"
 	@echo "make shell     shell dans le conteneur dev"
 	@echo "make mail-up   démarre GreenMail (IMAP 3143, SMTP 3025)"
@@ -123,6 +125,20 @@ module-path:
 	@OLD=$$(awk '/^module /{print $$2}' go.mod); 	echo "$$OLD -> $(NEW)"; 	grep -rl "$$OLD/internal" --include='*.go' . | xargs sed -i "s|$$OLD/internal|$(NEW)/internal|g"; 	sed -i "s|^module .*|module $(NEW)|" go.mod
 	$(DEV) sh -c "go mod tidy && go build ./... && go test ./internal/config/ -count=1"
 	@echo "chemin de module changé : relisez le diff avant de commiter"
+
+# Vulnérabilités connues dans les dépendances ET dans la version de Go utilisée.
+# govulncheck ne signale que ce qui est réellement atteignable depuis notre code : peu de bruit.
+vuln:
+	$(DEV) sh -c "go run golang.org/x/vuln/cmd/govulncheck@latest ./..."
+
+# Dépendances en retard (sans rien modifier) : à regarder avant de lancer « make deps-update ».
+deps-outdated:
+	$(DEV) sh -c "go list -m -u -f '{{if and .Update (not .Indirect)}}{{.Path}} {{.Version}} -> {{.Update.Version}}{{end}}' all"
+
+# Met à jour les dépendances directes, range go.mod/go.sum, puis vérifie que tout compile et passe les tests.
+deps-update:
+	$(DEV) sh -c "go get -u ./... && go mod tidy && go build ./... && go test ./... -count=1"
+	@echo "relisez le diff de go.mod et go.sum, puis relancez make test-race et make test-js"
 
 # --- sauvegarde et restauration du volume de données ---
 BACKUP_DIR ?= .

@@ -331,6 +331,42 @@ Points de vigilance propres à ce déploiement :
 
 ---
 
+## 11 bis. Tenir les dépendances à jour
+
+Le projet dépend d'une quinzaine de modules Go, de la bibliothèque standard de Go et de deux images de conteneur.
+Une faille peut apparaître dans n'importe lequel **après** la dernière modification du code : la surveillance ne
+peut donc pas se limiter aux contributions.
+
+**Trois filets, automatiques :**
+
+| Quoi | Quand | Où |
+|---|---|---|
+| `govulncheck` (failles connues de Go et des modules, **limitées à ce que notre code appelle réellement**) | à chaque poussée et chaque proposition | tâche `vuln` de l'intégration continue |
+| `govulncheck` de veille | chaque lundi matin, et à la demande | `.github/workflows/vuln-hebdo.yml` ; ouvre un ticket étiqueté « sécurité » si une faille est atteignable |
+| Dependabot (modules Go, actions, image de base) | hebdomadaire / mensuel | `.github/dependabot.yml` ; propose une contribution par mise à jour |
+
+**À la main, quand vous le souhaitez :**
+
+```bash
+make vuln             # failles connues, atteignables depuis notre code
+make deps-outdated    # dépendances directes en retard, sans rien modifier
+make deps-update      # go get -u ./... + go mod tidy + construction + tests
+make test-race test-js  # avant de commiter une mise à jour
+```
+
+**Doctrine retenue**
+
+- Une faille **atteignable** (govulncheck la signale comme appelée) est traitée tout de suite, avant toute autre
+  chose.
+- Une faille **présente mais non atteignable** est notée, pas corrigée en urgence. Exemple actuel :
+  `GO-2026-5932`, le paquet `golang.org/x/crypto/openpgp` est déclaré non maintenu ; il arrive par une dépendance
+  transitive, notre code ne l'appelle jamais, et l'avis ne propose aucune version corrigée.
+- Les mises à jour de confort sont groupées, jamais au fil de l'eau, et toujours suivies de la série complète de
+  tests : une mise à jour non testée est un risque, pas une protection.
+- La version de Go vient de `go.mod` (`go-version-file` dans l'intégration continue) et l'image de base est
+  épinglée dans le `Dockerfile` : une seule ligne à changer pour monter de version, et `govulncheck` vérifie
+  aussi les failles de la bibliothèque standard.
+
 ## 12. Signaler une faille
 
 Écrivez à l'auteur du dépôt, de préférence avec une preuve de concept minimale. Merci de laisser un délai

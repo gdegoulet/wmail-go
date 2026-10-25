@@ -27,6 +27,18 @@ jobs:
       - name: Tests avec détecteur de concurrence
         run: go test -race -count=1 ./...
 
+  vuln:
+    name: Vulnérabilités connues (govulncheck)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: govulncheck
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+
   js:
     name: Contrôles JavaScript (jsdom)
     runs-on: ubuntu-latest
