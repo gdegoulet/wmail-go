@@ -470,6 +470,30 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
   tester  : ouvrir un long message et faire défiler
   attendu : bouton rond en bas à droite, retour en haut au clic
   réponse :
+
+[D-29] Bandeau d'anomalies structurelles
+  tester  : ouvrir un message de phishing authentifié (SPF/DKIM/DMARC valides) qui
+            traque ses lecteurs sans offrir de désabonnement — par exemple un des
+            fichiers du dossier eml/ déposé par glisser-déposer sur la liste
+  attendu : bandeau orangé au-dessus du message, titre « Ce message présente des
+            anomalies techniques », liste des motifs relevés, phrase rappelant que
+            ces indices ne prouvent rien
+  réponse :
+
+[D-30] Bouton « Déplacer vers les indésirables » du bandeau
+  tester  : depuis le bandeau du point D-29, cliquer sur le bouton
+  attendu : le message part dans le dossier des indésirables du compte et
+            disparaît de la liste ; le bouton n'apparaît pas si le message est
+            déjà dans les indésirables
+  réponse :
+
+[D-31] Pas de bandeau sur un message légitime
+  tester  : ouvrir plusieurs messages ordinaires : lettre d'information avec lien
+            de désabonnement, facture, message personnel, notification d'un service
+  attendu : aucun bandeau. C'est le point le plus important du lot : un bandeau qui
+            se trompe serait vite ignoré, donc inutile. Signalez chaque faux positif
+            avec l'expéditeur et le motif affiché
+  réponse :
 ```
 
 ## E. Composition

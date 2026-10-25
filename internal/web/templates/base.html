@@ -331,6 +331,18 @@
 </dl>
 </div>
 
+{{if .Suspect}}<div class="bar suspbar" role="alert">
+<span class="suspicon">{{template "icon" "spam"}}</span>
+<div class="susptext">
+<p class="suspttl"><strong>{{$.T "mail.susp.title"}}</strong></p>
+<ul class="suspwhy">{{range .Suspect}}<li>{{$.T (printf "mail.susp.%s" .)}}</li>{{end}}</ul>
+<p class="suspnote">{{$.T "mail.susp.note"}}</p>
+</div>
+{{if not .InJunk}}<form class="suspact" method="post" action="/mail/action">
+<input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="folder" value="{{.Folder}}"><input type="hidden" name="uid" value="{{.UID}}"><input type="hidden" name="back" value="{{.Back}}">
+<button type="submit" name="action" value="spam">{{$.T "mail.susp.junk"}}</button>
+</form>{{end}}
+</div>{{end}}
 {{if .UnsubscribeURL}}<p class="bar unsubbar"><a href="{{.UnsubscribeURL}}"{{if .UnsubscribeExternal}} target="_blank" rel="noopener noreferrer"{{end}}>{{$.T "mail.unsubscribe"}}</a></p>{{end}}
 {{if .ReadReceipt}}<form class="bar mdnbar" method="post" action="/mail/mdn">
 <input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="folder" value="{{.Folder}}"><input type="hidden" name="uid" value="{{.UID}}"><input type="hidden" name="stay" value="{{.Self}}">

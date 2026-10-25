@@ -617,6 +617,21 @@ dialog.viewer .v-wait[hidden] { display: none; }
 .evlinks { margin-top: .4rem !important; display: flex; gap: .5rem; }
 .evbtn { display: inline-block; padding: .2rem .8rem; border-radius: .4rem; color: #fff !important; text-decoration: none !important; font-size: .75rem; font-weight: 600; }
 .evgoogle { background: #4285f4; } .evoutlook { background: #0078d4; } .evbtn:hover { filter: brightness(1.1); }
+/* Bandeau d'anomalies structurelles : informatif, jamais un verdict. Teinte d'avertissement du thème,
+   pas de rouge d'erreur — le message n'est pas prouvé malveillant, il est seulement mal fabriqué. */
+.suspbar { display: flex; gap: .8rem; align-items: flex-start; background: var(--warn-bg); color: var(--warn-fg); border: 1px solid var(--warn-fg); border-radius: .6rem; margin: .5rem; padding: .6rem .9rem; }
+.suspicon { flex: none; width: 2.2rem; height: 2.2rem; display: flex; align-items: center; justify-content: center; }
+.suspicon svg { width: 1.4rem; height: 1.4rem; }
+.susptext { flex: 1 1 14rem; min-width: 0; }
+.susptext p { margin: .1rem 0; line-height: 1.35; }
+.suspttl strong { font-size: .95rem; }
+.suspwhy { margin: .35rem 0 0; padding-left: 1.1rem; font-size: .8rem; line-height: 1.45; }
+.suspwhy li { margin: .1rem 0; }
+.suspnote { margin-top: .45rem !important; font-size: .75rem; opacity: .85; }
+.suspact { flex: none; align-self: center; }
+.suspact button { margin: 0; height: 1.9rem; padding: 0 .8rem; white-space: nowrap; }
+@media (max-width: 40rem) { .suspact { align-self: flex-start; } }
+
 @keyframes wm-spin { to { transform: rotate(360deg); } }
 a.spinning svg { animation: wm-spin .8s linear infinite; }
 .menu button.depth-1 { padding-left: 1.6rem; } .menu button.depth-2 { padding-left: 2.4rem; } .menu button.depth-3 { padding-left: 3.2rem; } .menu button.depth-4, .menu button.depth-5 { padding-left: 4rem; }

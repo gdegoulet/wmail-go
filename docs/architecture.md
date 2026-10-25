@@ -45,7 +45,7 @@ service annexe, pas d'état partagé entre instances. Le serveur ne fait pas de 
 | `internal/userdata` | **structures de données du compte**, sérialisées en JSON dans le `.cfg` | — |
 | `internal/session` | sessions en mémoire, expiration, nettoyage | store |
 | `internal/mailconn` | IMAP et SMTP : pool, recherche, tri, conversations, garde anti-SSRF | — |
-| `internal/mailview` | analyse MIME, assainissement HTML, conversion texte, vignettes | — |
+| `internal/mailview` | analyse MIME, assainissement HTML, conversion texte, vignettes, **anomalies structurelles** | — |
 | `internal/compose` | construction des messages sortants, adresses, MDN | mailview |
 | `internal/contacts` | carnet : vCard, CSV, CardDAV | — |
 | `internal/sieve` | ManageSieve, règles de filtrage, génération du script | — |
@@ -165,7 +165,17 @@ Le HTML d'un message passe par `mailview.Sanitize` **et** est servi avec une CSP
 Le type d'une pièce jointe est décidé **d'après ses octets**, jamais d'après l'étiquette du message :
 `previewKind` reconnaît les types sûrs ; tout le reste devient `application/octet-stream` en téléchargement.
 
-### 3.6 `fr.json` et `en.json` portent les mêmes clés
+### 3.6 L'analyse d'anomalies ne lit jamais le contenu
+
+`Message.Suspicions()` (`internal/mailview/suspect.go`) ne relève que des faits de structure : en-têtes
+présents ou absents, forme des adresses, parties MIME. **Aucun mot-clé, aucune marque, aucune langue.** Une
+règle lexicale ajoutée là marcherait en français et nulle part ailleurs, et produirait des faux positifs que
+le bandeau ne peut pas se permettre : un avertissement qui se trompe est vite ignoré, donc inutile.
+
+Même règle pour le réseau : l'analyse ne fait **aucune requête**. Résoudre un lien de traçage pour connaître
+sa destination enregistrerait un clic chez l'attaquant et rouvrirait la porte SSRF que le garde ferme.
+
+### 3.7 `fr.json` et `en.json` portent les mêmes clés
 
 `TestLocalesHaveSameKeys` le vérifie. Deux conventions **non testées** s'y ajoutent :
 
@@ -173,13 +183,13 @@ Le type d'une pièce jointe est décidé **d'après ses octets**, jamais d'aprè
 - **insérez une clé en place**, à côté de ses voisines. Retrier le fichier produit un diff de plus de mille
   lignes qui noie le vrai changement.
 
-### 3.7 Une connexion IMAP appartient à une session **et** à une boîte
+### 3.8 Une connexion IMAP appartient à une session **et** à une boîte
 
 La clé du pool est `sess.ID + "/" + acc.ID` (`poolKey`). À la fermeture d'une session, `OnClose` ferme toutes
 les connexions dont la clé commence par `sess.ID + "/"` et vide les pièces jointes en cours. Une connexion
 n'est donc jamais partagée entre deux utilisateurs.
 
-### 3.8 Le journal d'activité ne doit jamais faire échouer une connexion
+### 3.9 Le journal d'activité ne doit jamais faire échouer une connexion
 
 `ensureEventKeys` et `noteLogin` sont appelés pendant l'ouverture de session. Leurs erreurs sont **ignorées** :
 au pire le journal est incomplet, jamais au prix de la connexion. Gardez cette propriété si vous y touchez.

@@ -333,6 +333,57 @@ une fois par session.
 
 ---
 
+## 9 ter. Bandeau d'anomalies structurelles (aide au repérage du hameçonnage)
+
+Le lecteur affiche un bandeau au-dessus d'un message dont la **fabrication** présente des incohérences. Les
+contrôles portent sur la structure, **jamais sur le contenu** : ni marque, ni langue, ni mot-clé. Un message
+en allemand, en espagnol ou en breton est jugé exactement comme un message en français.
+
+**Ce que cela n'est pas.** Ce n'est pas un antispam. Il n'y a ni réputation, ni base bayésienne, ni empreinte
+de campagne, ni la moindre requête réseau — résoudre un lien de traçage enregistrerait un clic chez
+l'attaquant et ouvrirait une porte SSRF. Un filtre de serveur (rspamd, SpamAssassin) fait tout cela
+infiniment mieux et reste la première ligne. L'intérêt de ces contrôles est d'être faits **côté client**, sur
+ce que l'utilisateur a réellement sous les yeux.
+
+**Les motifs relevés** (`internal/mailview/suspect.go`) :
+
+| Motif | Ce qu'il relève | Poids |
+|---|---|---|
+| `bulk_no_unsub` | traçage des ouvertures ou des clics, sans aucun `List-Unsubscribe` | 2 |
+| `html_only` | corps en HTML seul, sans partie `text/plain` | 1 |
+| `bare_host_image` | image chargée depuis un domaine nu, sans chemin | 2 |
+| `link_mismatch` | le texte du lien annonce un domaine, l'adresse mène ailleurs | 3 |
+| `punycode` | un lien vise un domaine `xn--` | 2 |
+| `name_email` | le nom affiché contient une adresse d'un autre domaine que l'expéditeur | 3 |
+| `dkim` | le serveur de réception n'a pas validé la signature du domaine expéditeur | 1 |
+
+Le bandeau s'affiche à partir de **3 points** : soit un motif fort seul, soit deux motifs faibles
+concordants. Un motif faible isolé — un corps sans partie texte, par exemple — ne déclenche rien : c'est trop
+courant pour alerter.
+
+Le traçage est reconnu sans liste de prestataires, qui serait toujours en retard d'un nom : une adresse sur
+un hôte autre que celui de l'expéditeur, avec une chaîne de requête d'au moins 40 caractères. Et
+`bulk_no_unsub` n'est relevé que si le traçage **et** l'absence de désabonnement sont réunis : une lettre
+d'information ordinaire trace ses lecteurs, mais offre un désabonnement, donc ne déclenche rien.
+
+**Ce que le bandeau fait, et ne fait pas.** Il informe et propose un bouton « déplacer vers les
+indésirables ». Il ne classe pas, ne déplace rien de lui-même, ne bloque rien, ne modifie pas le message. Le
+rendu du corps est inchangé : l'assainissement HTML (§ 6) ne dépend pas de cette analyse.
+
+**Limites, à lire avant de s'y fier :**
+
+- **Un attaquant soigneux contourne ces contrôles en quelques minutes.** Ajouter un en-tête
+  `List-Unsubscribe` et une partie `text/plain` coûte deux lignes dans un gabarit. Ces contrôles relèvent la
+  barre contre le hameçonnage authentifié mais bâclé — l'essentiel du volume — pas contre une campagne
+  soignée.
+- **L'absence de bandeau ne vaut pas quitus.** Le cas le plus dangereux reste le message parfaitement formé.
+- `dkim` dépend de l'en-tête `Authentication-Results` **ajouté par le serveur de réception**. La signature
+  n'est pas revérifiée ici. Sur une instance dont le MTA n'ajoute pas cet en-tête, ce motif ne sert à rien.
+- La comparaison de domaines ignore la liste des suffixes publics : `exemple.co.uk` et `autre.co.uk` sont
+  tenus pour parents. Choix délibéré — il rend l'analyse permissive, donc silencieuse plutôt que bavarde.
+
+---
+
 ## 10. Ce qui manque (honnêtement)
 
 Comparé à ce qu'on attend d'un webmail en 2026 :

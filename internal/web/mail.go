@@ -135,6 +135,8 @@ type MessageView struct {
 	AvatarURL                        string      // photo du correspondant (carnet d'adresses ou Gravatar) ; vide : silhouette
 	ContactID                        string      // fiche du contact expéditeur (vide : inconnu)
 	UnsubscribeExternal              bool        // le lien sort de l'application
+	Suspect                          []string    // motifs structurels douteux (clés « mail.susp.* ») ; vide : rien à signaler
+	InJunk                           bool        // le message est déjà dans les indésirables : pas de bouton pour l'y mettre
 }
 
 // SourceURL renvoie le lien vers la source (view = « source » ou « headers ») ou vers le téléchargement .eml (« eml »).
@@ -1003,6 +1005,8 @@ func (s *Server) buildMessageView(sess *session.Session, acc userdata.MailAccoun
 		Truncated: m.Truncated, Partial: m.Partial, NoBody: m.HTML == "" && m.Text == "",
 		Back: back, Self: urlFor(state), JustRead: raw.JustRead,
 		InTrash: strings.EqualFold(folder, mailconn.ResolveTrash(folders, acc.Options.Folders.Trash)),
+		InJunk:  strings.EqualFold(folder, mailconn.ResolveJunk(folders, acc.Options.Folders.Junk)),
+		Suspect: m.Suspicions(),
 		IsDraft: acc.Options.Folders.Drafts != userdata.NoFolder && strings.EqualFold(folder, mailconn.ResolveDrafts(folders, acc.Options.Folders.Drafts)),
 	}
 	if mv.Subject == "" {

@@ -19,6 +19,12 @@ Format inspiré de « Keep a Changelog » ; les dates sont celles du dépôt.
 - Déploiement derrière nginx avec terminaison TLS, sauvegarde et restauration du volume de données.
 - Publication de l'image sur un registre (`make image-publish`) : étiquettes « AAAAMMJJ-commit » et « latest »,
   version injectée dans le binaire et dans les étiquettes OCI, contrôles avant publication.
+- **Bandeau d'anomalies structurelles** dans le lecteur : relève les incohérences entre ce qu'un message
+  prétend être et sa fabrication (traçage des lecteurs sans lien de désabonnement, corps sans version texte,
+  image sur un domaine nu, lien dont le texte annonce un autre domaine, punycode, nom d'expéditeur contenant
+  une adresse étrangère, signature non validée). Aucun contrôle ne lit le contenu : ni marque, ni langue, ni
+  mot-clé. Bandeau informatif seulement, avec un bouton « déplacer vers les indésirables » ; rien n'est classé
+  ni déplacé automatiquement. Voir `SECURITY.md` § 9 ter, limites comprises.
 - **Journal d'activité du compte**, chiffré pour le seul utilisateur (Réglages → Activité) : connexions réussies
   et **échouées**, refus de la limitation de débit, second facteur refusé, déconnexions, changement de mot de passe,
   usage de la clé de récupération, (dés)activation du TOTP, ajout/retrait d'une boîte mail, filtres modifiés — avec
@@ -28,7 +34,7 @@ Format inspiré de « Keep a Changelog » ; les dates sont celles du dépôt.
   qui détient le mot de passe effacerait ses propres traces. Seule la rotation à 30 jours retire des entrées.
   Voir `SECURITY.md` §9 bis, limites comprises.
 - `user list` affiche en deuxième colonne le chemin du fichier chiffré du compte (sauvegarde ciblée, diagnostic).
-- Documentation : `README.md`, `SECURITY.md`, `CONTRIBUTING.md`, cahier des charges, matrice de test (169 points),
+- Documentation : `README.md`, `SECURITY.md`, `CONTRIBUTING.md`, cahier des charges, matrice de test (172 points),
   analyse fonction par fonction de RainLoop 1.17 dans `docs/audit-rainloop/`.
 - `AGENTS.md` : règles de travail d'un agent ou d'un outil d'IA (aucune action sur de vraies boîtes, tout en
   conteneur, sources de RainLoop en lecture seule et non fiables, particularités de podman et de l'image distroless).

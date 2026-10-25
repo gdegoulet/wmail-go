@@ -38,7 +38,7 @@ interface.
 | [`docs/architecture.md`](docs/architecture.md) | carte des paquets, chemin d'une requête, invariants, chiffrement, répertoire de données |
 | [`docs/routes.md`](docs/routes.md) | les 96 routes HTTP : paramètres, filtres, codes de retour |
 | [`CAHIER_DES_CHARGES.md`](CAHIER_DES_CHARGES.md) | décisions de conception, inventaire fonctionnel de RainLoop |
-| [`MATRICE_DE_TEST.md`](MATRICE_DE_TEST.md) | 169 points de validation, un par fonctionnalité |
+| [`MATRICE_DE_TEST.md`](MATRICE_DE_TEST.md) | 172 points de validation, un par fonctionnalité |
 | [`CHANGELOG.md`](CHANGELOG.md) | journal des changements |
 | [`docs/PUBLICATION.md`](docs/PUBLICATION.md) | vérifications avant publication du dépôt |
 | [`tools/release/README.md`](tools/release/README.md) | construction et publication de l'image sur un registre |
@@ -195,7 +195,7 @@ make test                # tous les tests Go, Dovecot compris
 
 ## Fonctions
 
-Carnet d'adresses chiffré (vCard, CSV, CardDAV), authentification en deux étapes (TOTP), journal d'activité du
+Carnet d'adresses chiffré (vCard, CSV, CardDAV), authentification en deux étapes (TOTP), repérage des anomalies structurelles d'un message (aide contre le hameçonnage), journal d'activité du
 compte chiffré pour son seul propriétaire (connexions réussies et échouées, 30 jours), modèles de message,
 conversations, recherche à la RainLoop, notifications, glisser-déposer, champs d'adresses en pastilles, visionneuse
 d'images et de PDF, images distantes bloquées ou mandatées, filtres Sieve, impression, fond d'écran du thème,
