@@ -148,6 +148,27 @@ const key = (w, k, o) => { const e = new w.KeyboardEvent("keydown", Object.assig
   btn.click(); d.dispatchEvent(new w.Event("wmail:pane"));
   ok(!d.body.classList.contains("msg-fullscreen"), "un autre message n'hérite pas du plein écran");
 }
+// Le volet de lecture se charge sans recharger la page : les champs de l'action groupée doivent suivre,
+// sinon Suppr vise le message du dernier rendu complet et rouvre le voisin de celui-là.
+{
+  const html3 = fs.readFileSync("open.html", "utf8").replace(/<script src="[^"]*"[^>]*><\/script>/g, "");
+  const dom = new JSDOM(html3, { url: "http://127.0.0.1:8080/", runScripts: "outside-only", pretendToBeVisual: true });
+  const w = dom.window, d = w.document;
+  w.Element.prototype.scrollIntoView = function () {};
+  w.eval(fs.readFileSync("listnav.js", "utf8"));
+  const uids = Array.from(d.querySelectorAll(".msgrow")).map((r) => r.id.slice(1));
+  const view = d.querySelector(".msgview");
+  const i = uids.indexOf(view.getAttribute("data-uid"));
+  ok(i >= 0 && i + 2 < uids.length, "message ouvert repéré dans la liste (" + i + ")");
+  view.setAttribute("data-uid", uids[i + 1]); // le volet vient d'afficher le message suivant
+  d.dispatchEvent(new w.Event("wmail:pane"));
+  ok(d.getElementById("current-uid").value === uids[i + 1], "current_uid suit le message affiché");
+  const attendu = d.getElementById("m" + uids[i + 2]).querySelector("a.rowlink").getAttribute("href");
+  ok(d.getElementById("open-next").value === attendu, "open_next désigne le voisin du message affiché");
+  view.remove(); // message fermé : plus rien à supprimer ni à rouvrir
+  d.dispatchEvent(new w.Event("wmail:pane"));
+  ok(d.getElementById("current-uid").value === "" && d.getElementById("open-next").value === "", "volet fermé : champs vidés");
+}
 console.log(fails ? "ÉCHECS : " + fails : "TOUS LES CONTRÔLES PASSENT");
 process.exit(fails ? 1 : 0);
 });

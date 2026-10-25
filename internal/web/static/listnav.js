@@ -50,8 +50,15 @@
     return n || null;
   }
 
-  // Un clic dans la liste repart d'une nouvelle ancre pour Maj+flèches.
-  list.addEventListener("click", function () { anchor = -1; before = null; });
+  // Un clic dans la liste repart d'une nouvelle ancre pour Maj+flèches, et amène le curseur sur la ligne
+  // cliquée : sans cela le curseur restait là où le clavier l'avait laissé, et les actions suivantes
+  // (Suppr, archiver) visaient une autre ligne que celle que l'on venait d'ouvrir.
+  list.addEventListener("click", function (e) {
+    anchor = -1;
+    before = null;
+    var row = e.target && e.target.closest && e.target.closest(".msgrow");
+    if (row && !e.target.closest("label.chk")) setFocus(row); // cocher ne déplace pas le curseur
+  });
 
   // --- curseur conservé au travers des actions de la barre d'outils ---
   // Supprimer, archiver ou déplacer recharge la page : la classe « focused » disparaît et le curseur
@@ -95,9 +102,10 @@
     if (!etat || etat.sig !== signature()) return; // autre dossier, autre recherche : on ne force rien
     var all = rows();
     if (!all.length) return;
-    // La ligne d'origine existe encore (marquer lu, suivre…) : le curseur ne bouge pas. Sinon on prend
-    // la ligne qui la suivait, et en dernier recours la place qu'elle occupait.
-    var cible = ligneDe(etat.uid) || ligneDe(etat.suivant);
+    // Le serveur a rouvert un message dans le volet de lecture (open_next) : c'est lui qui fait foi, pour
+    // que le curseur et le message affiché ne divergent jamais. Sinon : la ligne d'origine si elle existe
+    // encore (marquer lu, suivre…), puis celle qui la suivait, et en dernier recours sa place.
+    var cible = list.querySelector(".msgrow.selected") || ligneDe(etat.uid) || ligneDe(etat.suivant);
     if (!cible || all.indexOf(cible) < 0) cible = all[Math.min(Math.max(etat.idx | 0, 0), all.length - 1)];
     setFocus(cible);
   }
@@ -169,6 +177,19 @@
     var view = readpane.querySelector(".msgview");
     var uid = view ? view.getAttribute("data-uid") : "";
     var row = uid ? document.getElementById("m" + uid) : null;
+
+    // Le volet se charge sans recharger la page : sans cette mise à jour, « current_uid » et « open_next »
+    // gardaient le message du dernier rendu complet. Supprimer visait alors un autre message que celui
+    // affiché, et rouvrait le voisin de celui-là.
+    var champUID = document.getElementById("current-uid");
+    if (champUID) champUID.value = uid;
+    var champNext = document.getElementById("open-next");
+    if (champNext && (row || !uid)) { // message hors de la liste affichée : on garde la valeur du serveur
+      var apres = row && (neighbour(row, "next") || neighbour(row, "prev"));
+      var lien = apres ? apres.querySelector("a.rowlink") : null;
+      champNext.value = lien ? lien.getAttribute("href") : "";
+    }
+
     if (!row) return; // message absent de la liste affichée (autre page, liste filtrée) : on garde l'état du serveur
     readpane.querySelectorAll("a.mh-nav[data-msgnav]").forEach(function (a) {
       var n = neighbour(row, a.getAttribute("data-msgnav"));

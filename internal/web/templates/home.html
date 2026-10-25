@@ -79,7 +79,7 @@
 <input type="hidden" name="back" value="{{.Back}}">
 <input type="hidden" name="stay" value="{{.Stay}}">
 <input type="hidden" name="current_uid" id="current-uid" value="{{if $.Msg}}{{$.Msg.UID}}{{end}}">
-{{with $.Msg}}<input type="hidden" name="open_next" id="open-next" value="{{if .NextMsgURL}}{{.NextMsgURL}}{{else}}{{.PrevMsgURL}}{{end}}">{{end}}
+<input type="hidden" name="open_next" id="open-next" value="{{with $.Msg}}{{if .NextMsgURL}}{{.NextMsgURL}}{{else}}{{.PrevMsgURL}}{{end}}{{end}}">
 {{if .Rows}}
 <ul class="msgrows">
 {{range .Rows}}<li id="m{{.UID}}" draggable="true" class="msgrow{{if not .Seen}} unread{{end}}{{if .SubUnread}} subunread{{end}}{{if .Selected}} selected{{end}}{{if .Answered}} answered{{end}}">
