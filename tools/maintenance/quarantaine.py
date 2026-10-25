@@ -21,17 +21,26 @@ import sys
 
 
 def objets(flux):
-    """Découpe la suite d'objets JSON que « go list -json » écrit sans séparateur."""
+    """Découpe la suite d'objets JSON que « go list -json » écrit sans séparateur.
+
+    La sortie peut contenir du bruit : podman-compose écrit un avertissement avant, et le code de
+    retour du conteneur après. On repart donc de la prochaine accolade ouvrante à chaque problème,
+    et on ignore tout ce qui n'est pas un objet.
+    """
     decodeur = json.JSONDecoder()
     texte = flux.read()
     i = 0
     while True:
-        while i < len(texte) and texte[i].isspace():
-            i += 1
-        if i >= len(texte):
+        debut = texte.find("{", i)
+        if debut < 0:
             return
-        obj, i = decodeur.raw_decode(texte, i)
-        yield obj
+        try:
+            obj, i = decodeur.raw_decode(texte, debut)
+        except ValueError:
+            i = debut + 1   # accolade isolée (texte libre) : on avance d'un caractère
+            continue
+        if isinstance(obj, dict):
+            yield obj
 
 
 def date(valeur):
