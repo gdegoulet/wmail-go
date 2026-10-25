@@ -36,6 +36,9 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+          # Dernier correctif de la série : sans cela, le runner installe exactement la version de go.mod,
+          # dont la bibliothèque standard peut être visée par un avis déjà corrigé en amont.
+          check-latest: true
       - name: govulncheck
         run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 
@@ -50,6 +53,9 @@ jobs:
           go-version-file: go.mod
       - name: Contrôles jsdom sur les pages réelles (conteneurs)
         run: make test-js
+      - name: Journaux des conteneurs en cas d'échec
+        if: failure()
+        run: docker compose --profile test --profile dev logs --tail=100 || true
 
   image:
     name: Image de conteneur

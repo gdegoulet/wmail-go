@@ -11,7 +11,25 @@ trap 'rm -rf "$W"' EXIT
 $COMPOSE up -d --build webmail >/dev/null
 $COMPOSE --profile test up -d greenmail >/dev/null
 $COMPOSE --profile test restart greenmail >/dev/null
-sleep 6
+
+# Attendre que les deux services répondent : sur une machine froide (intégration continue), l'image de
+# GreenMail se télécharge et la JVM démarre bien au-delà des quelques secondes d'une machine de travail.
+attendre() {
+	quoi=$1; hote=$2; port=$3; essais=${4:-60}
+	i=0
+	while [ "$i" -lt "$essais" ]; do
+		if python3 -I -c "import socket,sys; s=socket.create_connection(('$hote',$port),2); s.close()" 2>/dev/null; then
+			return 0
+		fi
+		i=$((i + 1))
+		sleep 2
+	done
+	echo "$quoi ne répond pas sur $hote:$port après $((essais * 2)) s" >&2
+	$COMPOSE logs --tail=40 >&2 || true
+	return 1
+}
+attendre "le webmail" 127.0.0.1 8080
+attendre "GreenMail" 127.0.0.1 3025
 $COMPOSE --profile dev run --rm dev go run ./tools/seedmail -addr greenmail:3025 -to test@localhost -n 40 >/dev/null
 $COMPOSE --profile dev run --rm dev go run ./tools/seedmail -addr greenmail:3025 -to second@localhost -n 6 >/dev/null
 
