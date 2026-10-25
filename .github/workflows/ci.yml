@@ -52,7 +52,7 @@ jobs:
       - name: Contrôles jsdom sur les pages réelles (conteneurs)
         run: |
           set -o pipefail
-          sh -x ./tools/jstest/run.sh 2>&1 | tee /tmp/js.log
+          ./tools/jstest/run.sh 2>&1 | tee /tmp/js.log
       # Les journaux d'exécution ne sont lisibles qu'avec les droits d'administration du dépôt ; les
       # annotations, elles, sont publiques. On y recopie la fin de la trace pour pouvoir diagnostiquer.
       - name: Détail de l'échec (annotation publique)

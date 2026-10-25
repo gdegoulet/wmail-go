@@ -6,7 +6,18 @@ cd "$(dirname "$0")/../.."
 COMPOSE="${COMPOSE:-docker compose}"
 RUN="${CONTAINER_ENGINE:-docker}"
 W="$(mktemp -d)"
-trap 'rm -rf "$W"' EXIT
+# « npm install » tourne en root dans le conteneur : avec un moteur non rootless (intégration continue),
+# node_modules appartient à root et l'hôte ne peut pas l'effacer. On le supprime donc depuis un conteneur,
+# puis on rend la main avec le code de sortie du script, jamais celui du ménage.
+nettoyer() {
+	code=$?
+	if [ -d "$W/node_modules" ]; then
+		$RUN run --rm -v "$W":/w:Z -w /w docker.io/library/node:22-alpine rm -rf /w/node_modules >/dev/null 2>&1 || true
+	fi
+	rm -rf "$W" 2>/dev/null || true
+	exit "$code"
+}
+trap nettoyer EXIT
 
 $COMPOSE up -d --build webmail >/dev/null
 $COMPOSE --profile test up -d greenmail >/dev/null
