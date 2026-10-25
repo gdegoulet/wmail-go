@@ -839,6 +839,9 @@ Je remplis ce tableau à partir de vos réponses : un retour `KO` y reste jusqu'
 | J-01 à J-04 | 24/10 | « à toi de tester » | quatre tests automatiques ajoutés (message piégé, CSRF, SSRF, en-têtes) | validé |
 | — | 25/10 | menu « plus d'actions » trop étroit | largeur suivant le contenu, bornée à l'écran | **à revalider** |
 | — | 25/10 | panneau « détails » translucide illisible | sorti de la surcouche, placé dans le flux comme la bande des pièces jointes | **à revalider** |
+| — | 25/10 | Suppr : le curseur ne passe pas au message suivant | la liste est rechargée, donc le curseur (classe `focused`, côté client) était perdu ; il est noté avant l'envoi et reposé au chargement suivant | validé |
+| — | 25/10 | Suppr : ouvre le message d'après le suivant | `open_next` n'était pas mis à jour quand le volet se charge sans recharger la page ; le voisin rouvert était celui du dernier rendu complet | validé |
+| — | 25/10 | correctifs invisibles sans rechargement forcé | `/static` était servi avec `max-age=600` ; les adresses portent désormais l'empreinte du contenu (`?v=…`), gardées un an, revalidées sans marque | validé |
 
 ## Points livrés depuis la dernière session de test
 
