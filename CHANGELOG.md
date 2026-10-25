@@ -19,6 +19,7 @@ Format inspiré de « Keep a Changelog » ; les dates sont celles du dépôt.
 - Déploiement derrière nginx avec terminaison TLS, sauvegarde et restauration du volume de données.
 - Publication de l'image sur un registre (`make image-publish`) : étiquettes « AAAAMMJJ-commit » et « latest »,
   version injectée dans le binaire et dans les étiquettes OCI, contrôles avant publication.
+- `user list` affiche en deuxième colonne le chemin du fichier chiffré du compte (sauvegarde ciblée, diagnostic).
 - Documentation : `README.md`, `SECURITY.md`, `CONTRIBUTING.md`, cahier des charges, matrice de test (165 points),
   analyse fonction par fonction de RainLoop 1.17 dans `docs/audit-rainloop/`.
 

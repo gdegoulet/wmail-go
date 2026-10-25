@@ -126,8 +126,10 @@ func cmdUser(args []string, in io.Reader, out, errw io.Writer) error {
 		if err != nil {
 			return err
 		}
+		// Deux colonnes séparées par une tabulation : le login, puis le fichier chiffré du compte. Le chemin
+		// est celui vu depuis le conteneur, et il dépend de server.key (nom = HMAC du login sous cette clé).
 		for _, l := range logins {
-			fmt.Fprintln(out, l)
+			fmt.Fprintf(out, "%s\t%s\n", l, st.Path(l))
 		}
 		fmt.Fprintf(errw, "%d utilisateur(s)\n", len(logins))
 		return nil

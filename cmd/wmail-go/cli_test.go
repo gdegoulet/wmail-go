@@ -55,8 +55,13 @@ func TestUserLifecycle(t *testing.T) {
 	}
 
 	code, out, _ = runCLI(t, "", "user", "list", "-config", cfg)
-	if code != 0 || strings.TrimSpace(out) != "alice" {
+	champs := strings.Split(strings.TrimSpace(out), "\t")
+	if code != 0 || len(champs) != 2 || champs[0] != "alice" {
 		t.Fatalf("user list : %d %q", code, out)
+	}
+	// La deuxième colonne est le fichier chiffré du compte : il doit exister.
+	if _, err := os.Stat(champs[1]); err != nil {
+		t.Fatalf("chemin annoncé par user list introuvable : %v", err)
 	}
 
 	newPW := "nouveau mot de passe long"

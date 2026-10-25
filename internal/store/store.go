@@ -179,6 +179,13 @@ func (s *Store) path(id string) string {
 	return filepath.Join(s.dir, usersDirName, id[0:2], id[2:4], id+userFileExtension)
 }
 
+// Path donne le chemin du fichier chiffré d'un compte, le login étant déjà normalisé (tel que le rend List).
+// Sert en ligne de commande : sauvegarde d'un seul compte, vérification des droits, diagnostic. Le chemin dépend
+// de server.key : le même login donne un autre fichier sur une autre instance.
+func (s *Store) Path(normalizedLogin string) string {
+	return s.path(s.ID(normalizedLogin))
+}
+
 func (s *Store) checkPassword(pw string) error {
 	if len(pw) > maxPasswordBytes {
 		return ErrPasswordTooLong
