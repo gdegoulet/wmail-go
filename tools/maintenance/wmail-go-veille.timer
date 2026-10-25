@@ -1,0 +1,10 @@
+[Unit]
+Description=wmail-go : déclenche la veille quotidienne de vulnérabilités
+
+[Timer]
+OnCalendar=*-*-* 06:20:00
+RandomizedDelaySec=20m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

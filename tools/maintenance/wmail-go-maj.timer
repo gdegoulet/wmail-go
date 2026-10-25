@@ -2,7 +2,7 @@
 Description=wmail-go : déclenche la mise à jour quotidienne des dépendances
 
 [Timer]
-OnCalendar=*-*-* 04:30:00
+OnCalendar=Mon *-*-* 04:30:00  # hebdomadaire : les dépendances bougent peu
 RandomizedDelaySec=30m
 Persistent=true
 

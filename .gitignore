@@ -14,3 +14,5 @@ users.idx
 # journal et verrou de la mise à jour automatique des dépendances
 /.maj-dependances.log
 /.maj-dependances.lock
+/.deps.json
+/.deps.plan

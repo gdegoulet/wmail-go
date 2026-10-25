@@ -1,0 +1,11 @@
+# Veille quotidienne de vulnérabilités (govulncheck), sans modification du dépôt.
+[Unit]
+Description=wmail-go : veille de vulnérabilités
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/Work/webmail_project
+ExecStart=%h/Work/webmail_project/tools/maintenance/veille-vulnerabilites.sh
+# EnvironmentFile=%h/.config/wmail-go-maj.env
+TimeoutStartSec=1800

@@ -1,4 +1,16 @@
-# Maintenance automatique
+# Maintenance automatique (« CI maison »)
+
+Deux tâches programmées, indépendantes :
+
+| Tâche | Rythme conseillé | Script | Ce qu'elle fait |
+|---|---|---|---|
+| Veille de vulnérabilités | **tous les jours** | `veille-vulnerabilites.sh` | `govulncheck` sur le dépôt tel quel ; ne modifie rien ; courriel seulement si une faille **atteignable** apparaît |
+| Mise à jour des dépendances | **le lundi** | `maj-dependances.sh` | met à jour, teste tout, commite, pousse, récapitulatif par courriel |
+
+Une faille peut être publiée des semaines après la dernière mise à jour : la veille quotidienne est le filet
+qui compte. La mise à jour, elle, n'a pas besoin d'être quotidienne — vos dépendances bougent peu, et chaque
+exécution consomme plusieurs minutes de construction et de tests.
+
 
 `maj-dependances.sh` met à jour les dépendances Go chaque nuit, **sans jamais publier quelque chose qui ne passe
 pas toutes les barrières**.
@@ -33,11 +45,28 @@ Le minuteur est préférable à cron avec Podman sans privilèges : la session u
 
 ## Installation (cron)
 
+`crontab -e` sous l'utilisateur qui possède le dépôt et les conteneurs :
+
 ```cron
-30 4 * * *  cd $HOME/Work/webmail_project && XDG_RUNTIME_DIR=/run/user/$(id -u) \
-            CLE_SSH=$HOME/.ssh/id_wmail_go_maj REMOTES="origin gitea" \
-            ./tools/maintenance/maj-dependances.sh >> $HOME/.wmail-go-maj.cron.log 2>&1
+# Environnement : cron ne charge ni votre profil ni votre session.
+SHELL=/bin/sh
+PATH=/usr/local/bin:/usr/bin:/bin
+MAILTO=""
+WMAIL=/srv/wmail-go
+WMAIL_MAJ_CONF=/srv/wmail-go/.maj.env
+
+# Veille de vulnérabilités, tous les jours à 6 h 20 (courriel seulement en cas de faille atteignable).
+20 6 * * *   cd $WMAIL && XDG_RUNTIME_DIR=/run/user/$(id -u) ./tools/maintenance/veille-vulnerabilites.sh >> $WMAIL/.cron-veille.log 2>&1
+
+# Mise à jour des dépendances, le lundi à 4 h 30.
+30 4 * * 1   cd $WMAIL && XDG_RUNTIME_DIR=/run/user/$(id -u) ./tools/maintenance/maj-dependances.sh >> $WMAIL/.cron-maj.log 2>&1
 ```
+
+`$(id -u)` n'est pas interprété par cron dans la ligne : remplacez-le par votre identifiant numérique
+(`id -u` vous le donne), ou passez par le minuteur systemd ci-dessus qui s'en charge.
+
+Variante minuteur systemd (recommandée avec Podman sans privilèges) : copiez aussi
+`wmail-go-veille.{service,timer}` et activez-les de la même manière.
 
 ## Clé SSH dédiée
 

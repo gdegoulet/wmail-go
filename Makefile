@@ -14,7 +14,7 @@ help:
 	@echo "make test-js    contrôles JavaScript (jsdom) sur les pages réelles"
 	@echo "make vet       go vet ./... dans le conteneur dev"
 	@echo "make vuln      vulnérabilités connues (govulncheck) des dépendances et de Go"
-	@echo "make deps-outdated|deps-update   dépendances en retard, mise à jour"
+	@echo "make deps-outdated|deps-plan|deps-update   dépendances en retard, plan de mise à jour, mise à jour"
 	@echo "make fmt       gofmt -l -w dans le conteneur dev"
 	@echo "make shell     shell dans le conteneur dev"
 	@echo "make mail-up   démarre GreenMail (IMAP 3143, SMTP 3025)"
@@ -135,10 +135,25 @@ vuln:
 deps-outdated:
 	$(DEV) sh -c "go list -m -u -f '{{if and .Update (not .Indirect)}}{{.Path}} {{.Version}} -> {{.Update.Version}}{{end}}' all"
 
-# Met à jour les dépendances directes, range go.mod/go.sum, puis vérifie que tout compile et passe les tests.
+# Met à jour les dépendances, range go.mod/go.sum, puis vérifie que tout compile et passe les tests.
+# QUARANTAINE (en jours, 5 par défaut) écarte les versions publiées trop récemment : une version compromise
+# est le plus souvent repérée et retirée dans les premiers jours. QUARANTAINE=0 prend tout.
+QUARANTAINE ?= 5
+# Par défaut, seules les dépendances directes sont mises à jour : les indirectes suivent leurs propres
+# modules, et govulncheck surveille leurs failles. PORTEE= (vide) prend aussi les indirectes.
+PORTEE ?= --directes-seulement
+
 deps-update:
-	$(DEV) sh -c "go get -u ./... && go mod tidy && go build ./... && go test ./... -count=1"
+	@$(DEV) sh -c "go list -m -u -json all" > .deps.json
+	@python3 -I tools/maintenance/quarantaine.py $(QUARANTAINE) $(PORTEE) > .deps.plan
+	@rm -f .deps.json
+	@if [ -s .deps.plan ]; then 		echo "mises à jour retenues :"; sed 's/^/  /' .deps.plan; 		$(DEV) sh -c "go get $$(tr '\n' ' ' < .deps.plan) && go mod tidy && go build ./... && go test ./... -count=1"; 	else 		echo "aucune mise à jour éligible (voir la quarantaine ci-dessus)"; 	fi
+	@rm -f .deps.plan
 	@echo "relisez le diff de go.mod et go.sum, puis relancez make test-race et make test-js"
+
+# Affiche ce qui serait mis à jour et ce qui reste en quarantaine, sans rien modifier.
+deps-plan:
+	@$(DEV) sh -c "go list -m -u -json all" | python3 -I tools/maintenance/quarantaine.py $(QUARANTAINE) $(PORTEE)
 
 # Mise à jour automatique des dépendances (voir tools/maintenance/README.md).
 deps-cron:
