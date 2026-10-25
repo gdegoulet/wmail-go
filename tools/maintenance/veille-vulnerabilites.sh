@@ -24,6 +24,7 @@ NOTIFIER=${NOTIFIER:-failures}
 JOURNAL=${JOURNAL:-"$DEPOT/.maj-dependances.log"}
 
 cd "$DEPOT"
+mkdir -p "$(dirname "$JOURNAL")" 2>/dev/null || true   # le dossier des journaux peut ne pas exister encore
 RAPPORT=$(mktemp)
 trap 'rm -f "$RAPPORT"' EXIT
 

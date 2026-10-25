@@ -56,6 +56,7 @@ NOTIFIER=${NOTIFIER:-changes}
 JOURNAL=${JOURNAL:-"$DEPOT/.maj-dependances.log"}
 
 cd "$DEPOT"
+mkdir -p "$(dirname "$JOURNAL")" 2>/dev/null || true   # le dossier des journaux peut ne pas exister encore
 
 # Clé dédiée pour git : un cron n'a ni agent ssh ni terminal pour une phrase de passe.
 if [ -n "${CLE_SSH:-}" ]; then
