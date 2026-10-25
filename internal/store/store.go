@@ -25,8 +25,8 @@ import (
 	"golang.org/x/crypto/hkdf"
 	"golang.org/x/text/unicode/norm"
 
-	"wmail-go/internal/userdata"
-	"wmail-go/internal/vault"
+	"github.com/gdegoulet/wmail-go/internal/userdata"
+	"github.com/gdegoulet/wmail-go/internal/vault"
 )
 
 // Erreurs du stockage. ErrInvalidCredentials est volontairement indistincte : à l'ouverture d'un compte, un login

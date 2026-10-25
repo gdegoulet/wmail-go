@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"wmail-go/internal/sieve"
+	"github.com/gdegoulet/wmail-go/internal/sieve"
 )
 
 // DefaultSievePort est le port ManageSieve (RFC 5804).

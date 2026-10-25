@@ -8,7 +8,7 @@ import (
 
 	"github.com/emersion/go-vcard"
 
-	"wmail-go/internal/contacts/davtest"
+	"github.com/gdegoulet/wmail-go/internal/contacts/davtest"
 )
 
 // touch simule « une modification faite après le dernier passage » : le temps recule d'une minute pour tout le monde

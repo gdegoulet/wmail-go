@@ -13,7 +13,7 @@ import (
 	xhtml "golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 
-	"wmail-go/internal/mailview"
+	"github.com/gdegoulet/wmail-go/internal/mailview"
 )
 
 // InlineImage est une image incorporée au corps HTML (référencée par cid:).

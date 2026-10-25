@@ -6,8 +6,8 @@ import (
 
 	"github.com/emersion/go-imap/v2"
 
-	"wmail-go/internal/mailconn"
-	"wmail-go/internal/userdata"
+	"github.com/gdegoulet/wmail-go/internal/mailconn"
+	"github.com/gdegoulet/wmail-go/internal/userdata"
 )
 
 func mkFolders(delim rune, names ...string) []mailconn.Folder {

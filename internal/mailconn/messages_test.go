@@ -10,7 +10,7 @@ import (
 
 	"github.com/emersion/go-imap/v2"
 
-	"wmail-go/internal/mailconn/mailtest"
+	"github.com/gdegoulet/wmail-go/internal/mailconn/mailtest"
 )
 
 func newPool(t *testing.T) (*Pool, Endpoint) {

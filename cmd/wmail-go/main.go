@@ -15,10 +15,10 @@ import (
 	"syscall"
 	"time"
 
-	"wmail-go/internal/config"
-	"wmail-go/internal/store"
-	"wmail-go/internal/vault"
-	"wmail-go/internal/web"
+	"github.com/gdegoulet/wmail-go/internal/config"
+	"github.com/gdegoulet/wmail-go/internal/store"
+	"github.com/gdegoulet/wmail-go/internal/vault"
+	"github.com/gdegoulet/wmail-go/internal/web"
 )
 
 const version = "0.0.2-dev"

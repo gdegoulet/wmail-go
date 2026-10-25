@@ -3,6 +3,7 @@ package web
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/gdegoulet/wmail-go/internal/contacts/davtest"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -11,7 +12,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"wmail-go/internal/contacts/davtest"
 )
 
 func (e *env) upload(c *http.Client, path, tok, field, name string, data []byte) (*http.Response, string) {

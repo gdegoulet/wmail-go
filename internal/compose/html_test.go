@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"wmail-go/internal/mailview"
+	"github.com/gdegoulet/wmail-go/internal/mailview"
 )
 
 const pngB64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="

@@ -14,8 +14,8 @@ import (
 
 	"github.com/emersion/go-imap/v2"
 
-	"wmail-go/internal/config"
-	"wmail-go/internal/mailconn"
+	"github.com/gdegoulet/wmail-go/internal/config"
+	"github.com/gdegoulet/wmail-go/internal/mailconn"
 )
 
 // Conversations contre un vrai Dovecot (THREAD) : lignes regroupées, ouverture d'une conversation, actions sur toute la

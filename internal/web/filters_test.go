@@ -9,11 +9,11 @@ import (
 	"strings"
 	"testing"
 
-	"wmail-go/internal/config"
-	"wmail-go/internal/mailconn/mailtest"
-	"wmail-go/internal/sieve"
-	"wmail-go/internal/sieve/sievetest"
-	"wmail-go/internal/userdata"
+	"github.com/gdegoulet/wmail-go/internal/config"
+	"github.com/gdegoulet/wmail-go/internal/mailconn/mailtest"
+	"github.com/gdegoulet/wmail-go/internal/sieve"
+	"github.com/gdegoulet/wmail-go/internal/sieve/sievetest"
+	"github.com/gdegoulet/wmail-go/internal/userdata"
 )
 
 // filtersEnv ouvre une session dont la boîte a la gestion des filtres reliée à un serveur ManageSieve de test.

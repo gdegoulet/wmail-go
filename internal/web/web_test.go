@@ -14,9 +14,9 @@ import (
 	"testing"
 	"time"
 
-	"wmail-go/internal/config"
-	"wmail-go/internal/store"
-	"wmail-go/internal/vault"
+	"github.com/gdegoulet/wmail-go/internal/config"
+	"github.com/gdegoulet/wmail-go/internal/store"
+	"github.com/gdegoulet/wmail-go/internal/vault"
 )
 
 const pw = "un mot de passe assez long"

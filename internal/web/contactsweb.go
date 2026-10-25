@@ -11,8 +11,8 @@ import (
 	"strconv"
 	"strings"
 
-	"wmail-go/internal/contacts"
-	"wmail-go/internal/session"
+	"github.com/gdegoulet/wmail-go/internal/contacts"
+	"github.com/gdegoulet/wmail-go/internal/session"
 )
 
 const maxContactsImport = 8 << 20

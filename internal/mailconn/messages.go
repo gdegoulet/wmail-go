@@ -14,7 +14,7 @@ import (
 	"github.com/emersion/go-imap/v2"
 	"github.com/emersion/go-imap/v2/imapclient"
 	"github.com/emersion/go-message"
-	"wmail-go/internal/mailview" // décodeur de charsets de repli (message.CharsetReader) et affichage des domaines
+	"github.com/gdegoulet/wmail-go/internal/mailview" // décodeur de charsets de repli (message.CharsetReader) et affichage des domaines
 )
 
 var (

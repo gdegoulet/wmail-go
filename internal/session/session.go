@@ -5,12 +5,12 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"github.com/gdegoulet/wmail-go/internal/contacts"
 	"io"
 	"sync"
 	"time"
-	"wmail-go/internal/contacts"
 
-	"wmail-go/internal/store"
+	"github.com/gdegoulet/wmail-go/internal/store"
 )
 
 // Session contient le compte déchiffré et l'état de navigation de l'utilisateur.

@@ -9,7 +9,7 @@ import (
 
 	"github.com/emersion/go-imap/v2"
 
-	"wmail-go/internal/mailview"
+	"github.com/gdegoulet/wmail-go/internal/mailview"
 )
 
 // Structure lit la structure MIME d'un message (BODYSTRUCTURE) sans télécharger son contenu : de quoi lister les pièces

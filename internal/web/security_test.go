@@ -12,8 +12,8 @@ import (
 
 	"github.com/emersion/go-imap/v2"
 
-	"wmail-go/internal/config"
-	"wmail-go/internal/mailconn/mailtest"
+	"github.com/gdegoulet/wmail-go/internal/config"
+	"github.com/gdegoulet/wmail-go/internal/mailconn/mailtest"
 )
 
 // piegeMessage fabrique un message HTML contenant les pièges classiques : script, gestionnaire en ligne,

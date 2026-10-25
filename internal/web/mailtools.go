@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"wmail-go/internal/mailview"
-	"wmail-go/internal/session"
+	"github.com/gdegoulet/wmail-go/internal/mailview"
+	"github.com/gdegoulet/wmail-go/internal/session"
 )
 
 // mailSource sert la source d'un message : tout (view=source), seulement les en-têtes (view=headers) ou le fichier

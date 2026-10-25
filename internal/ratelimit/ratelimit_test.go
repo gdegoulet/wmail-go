@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"wmail-go/internal/config"
+	"github.com/gdegoulet/wmail-go/internal/config"
 )
 
 func TestSlidingWindow(t *testing.T) {

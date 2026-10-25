@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"wmail-go/internal/contacts"
-	"wmail-go/internal/session"
-	"wmail-go/internal/userdata"
+	"github.com/gdegoulet/wmail-go/internal/contacts"
+	"github.com/gdegoulet/wmail-go/internal/session"
+	"github.com/gdegoulet/wmail-go/internal/userdata"
 )
 
 const (

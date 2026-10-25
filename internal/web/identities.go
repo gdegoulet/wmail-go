@@ -6,9 +6,9 @@ import (
 	"slices"
 	"strings"
 
-	"wmail-go/internal/compose"
-	"wmail-go/internal/session"
-	"wmail-go/internal/userdata"
+	"github.com/gdegoulet/wmail-go/internal/compose"
+	"github.com/gdegoulet/wmail-go/internal/session"
+	"github.com/gdegoulet/wmail-go/internal/userdata"
 )
 
 const maxIdentities = 20

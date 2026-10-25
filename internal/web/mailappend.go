@@ -8,9 +8,9 @@ import (
 
 	"github.com/emersion/go-imap/v2"
 
-	"wmail-go/internal/mailconn"
-	"wmail-go/internal/mailview"
-	"wmail-go/internal/session"
+	"github.com/gdegoulet/wmail-go/internal/mailconn"
+	"github.com/gdegoulet/wmail-go/internal/mailview"
+	"github.com/gdegoulet/wmail-go/internal/session"
 )
 
 // mailAppend ajoute au dossier affiché un message déposé en fichier .eml (glisser-déposer sur la liste). Le fichier doit

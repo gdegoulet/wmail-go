@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"wmail-go/internal/config"
-	"wmail-go/internal/mailconn/mailtest"
+	"github.com/gdegoulet/wmail-go/internal/config"
+	"github.com/gdegoulet/wmail-go/internal/mailconn/mailtest"
 )
 
 type mailPorts struct{ imap, smtp int }

@@ -8,11 +8,11 @@ import (
 	"slices"
 	"strings"
 
-	"wmail-go/internal/mailconn"
-	"wmail-go/internal/session"
-	"wmail-go/internal/sieve"
-	"wmail-go/internal/store"
-	"wmail-go/internal/userdata"
+	"github.com/gdegoulet/wmail-go/internal/mailconn"
+	"github.com/gdegoulet/wmail-go/internal/session"
+	"github.com/gdegoulet/wmail-go/internal/sieve"
+	"github.com/gdegoulet/wmail-go/internal/store"
+	"github.com/gdegoulet/wmail-go/internal/userdata"
 )
 
 const maxFilters = 100

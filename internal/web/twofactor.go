@@ -15,10 +15,10 @@ import (
 
 	"github.com/skip2/go-qrcode"
 
-	"wmail-go/internal/session"
-	"wmail-go/internal/store"
-	"wmail-go/internal/totp"
-	"wmail-go/internal/userdata"
+	"github.com/gdegoulet/wmail-go/internal/session"
+	"github.com/gdegoulet/wmail-go/internal/store"
+	"github.com/gdegoulet/wmail-go/internal/totp"
+	"github.com/gdegoulet/wmail-go/internal/userdata"
 )
 
 const (

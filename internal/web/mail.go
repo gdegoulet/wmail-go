@@ -19,12 +19,12 @@ import (
 
 	"github.com/emersion/go-imap/v2"
 
-	"wmail-go/internal/ical"
-	"wmail-go/internal/mailconn"
-	"wmail-go/internal/mailview"
-	"wmail-go/internal/session"
-	"wmail-go/internal/store"
-	"wmail-go/internal/userdata"
+	"github.com/gdegoulet/wmail-go/internal/ical"
+	"github.com/gdegoulet/wmail-go/internal/mailconn"
+	"github.com/gdegoulet/wmail-go/internal/mailview"
+	"github.com/gdegoulet/wmail-go/internal/session"
+	"github.com/gdegoulet/wmail-go/internal/store"
+	"github.com/gdegoulet/wmail-go/internal/userdata"
 )
 
 const (

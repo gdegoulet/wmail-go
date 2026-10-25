@@ -11,8 +11,8 @@ import (
 
 	"golang.org/x/term"
 
-	"wmail-go/internal/config"
-	"wmail-go/internal/store"
+	"github.com/gdegoulet/wmail-go/internal/config"
+	"github.com/gdegoulet/wmail-go/internal/store"
 )
 
 // prompter lit les mots de passe : sans écho quand l'entrée est un vrai terminal, ligne par ligne sinon

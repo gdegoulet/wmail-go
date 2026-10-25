@@ -10,10 +10,10 @@ import (
 
 	"github.com/emersion/go-imap/v2"
 
-	"wmail-go/internal/mailconn"
-	"wmail-go/internal/session"
-	"wmail-go/internal/store"
-	"wmail-go/internal/userdata"
+	"github.com/gdegoulet/wmail-go/internal/mailconn"
+	"github.com/gdegoulet/wmail-go/internal/session"
+	"github.com/gdegoulet/wmail-go/internal/store"
+	"github.com/gdegoulet/wmail-go/internal/userdata"
 )
 
 // FolderSetting est une ligne de la liste des dossiers (réglages).

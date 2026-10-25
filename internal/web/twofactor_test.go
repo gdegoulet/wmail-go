@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"wmail-go/internal/totp"
+	"github.com/gdegoulet/wmail-go/internal/totp"
 )
 
 var (

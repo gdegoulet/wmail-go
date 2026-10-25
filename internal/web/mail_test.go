@@ -19,7 +19,7 @@ import (
 	"testing"
 	"time"
 
-	"wmail-go/internal/mailconn/mailtest"
+	"github.com/gdegoulet/wmail-go/internal/mailconn/mailtest"
 )
 
 // mailEnv ouvre une session avec un compte mail relié au serveur IMAP de test (30 messages dans INBOX).

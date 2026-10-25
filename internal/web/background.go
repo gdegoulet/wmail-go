@@ -8,7 +8,7 @@ import (
 	"io"
 	"net/http"
 
-	"wmail-go/internal/session"
+	"github.com/gdegoulet/wmail-go/internal/session"
 )
 
 const (

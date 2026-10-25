@@ -24,12 +24,12 @@ import (
 	"sync"
 	"time"
 
-	"wmail-go/internal/config"
-	"wmail-go/internal/i18n"
-	"wmail-go/internal/mailconn"
-	"wmail-go/internal/ratelimit"
-	"wmail-go/internal/session"
-	"wmail-go/internal/store"
+	"github.com/gdegoulet/wmail-go/internal/config"
+	"github.com/gdegoulet/wmail-go/internal/i18n"
+	"github.com/gdegoulet/wmail-go/internal/mailconn"
+	"github.com/gdegoulet/wmail-go/internal/ratelimit"
+	"github.com/gdegoulet/wmail-go/internal/session"
+	"github.com/gdegoulet/wmail-go/internal/store"
 )
 
 //go:embed templates/*.html

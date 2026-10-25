@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"wmail-go/internal/config"
+	"github.com/gdegoulet/wmail-go/internal/config"
 )
 
 type entry struct {

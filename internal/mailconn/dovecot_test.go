@@ -12,7 +12,7 @@ import (
 
 	"github.com/emersion/go-imap/v2"
 
-	"wmail-go/internal/mailview"
+	"github.com/gdegoulet/wmail-go/internal/mailview"
 )
 
 // Tests d'intégration contre un vrai Dovecot (make sieve-up). Ignorés si DOVECOT_IMAP n'est pas défini ou injoignable.

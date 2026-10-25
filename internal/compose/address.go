@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"golang.org/x/net/idna"
 
+	"github.com/gdegoulet/wmail-go/internal/mailview"
 	"net/mail"
 	"regexp"
 	"strings"
 	"unicode"
-	"wmail-go/internal/mailview"
 )
 
 // ErrInvalidAddress signale une adresse inutilisable (syntaxe, caractère de contrôle).

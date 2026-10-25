@@ -5,14 +5,14 @@ import (
 
 	"crypto/rand"
 	"encoding/hex"
+	"github.com/gdegoulet/wmail-go/internal/mailview"
 	"net/http"
 	"slices"
 	"strings"
 	"time"
-	"wmail-go/internal/mailview"
 
-	"wmail-go/internal/session"
-	"wmail-go/internal/userdata"
+	"github.com/gdegoulet/wmail-go/internal/session"
+	"github.com/gdegoulet/wmail-go/internal/userdata"
 )
 
 const (

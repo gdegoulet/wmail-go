@@ -12,11 +12,11 @@ import (
 	"sync"
 	"time"
 
-	"wmail-go/internal/compose"
-	"wmail-go/internal/mailconn"
-	"wmail-go/internal/session"
-	"wmail-go/internal/store"
-	"wmail-go/internal/userdata"
+	"github.com/gdegoulet/wmail-go/internal/compose"
+	"github.com/gdegoulet/wmail-go/internal/mailconn"
+	"github.com/gdegoulet/wmail-go/internal/session"
+	"github.com/gdegoulet/wmail-go/internal/store"
+	"github.com/gdegoulet/wmail-go/internal/userdata"
 )
 
 const (

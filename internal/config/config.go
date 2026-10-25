@@ -133,9 +133,9 @@ type Config struct {
 	// SourceURL : adresse où les utilisateurs obtiennent le code source, affichée dans les réglages.
 	// L'article 13 de l'AGPL l'exige pour un service accessible par le réseau. À changer si vous publiez
 	// une version modifiée : c'est *votre* version que vos utilisateurs doivent pouvoir récupérer.
-	SourceURL            string     `json:"source_url"`
-	LogLevel             string     `json:"log_level"`
-	LogFormat            string     `json:"log_format"`
+	SourceURL string `json:"source_url"`
+	LogLevel  string `json:"log_level"`
+	LogFormat string `json:"log_format"`
 }
 
 func mustLimit(s string) Limit {

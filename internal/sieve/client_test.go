@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"wmail-go/internal/sieve/sievetest"
+	"github.com/gdegoulet/wmail-go/internal/sieve/sievetest"
 )
 
 func dial(t *testing.T, port int) *Client {

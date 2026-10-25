@@ -11,7 +11,7 @@ import (
 	"sync"
 	"testing"
 
-	"wmail-go/internal/vault"
+	"github.com/gdegoulet/wmail-go/internal/vault"
 )
 
 const goodPW = "un mot de passe assez long"

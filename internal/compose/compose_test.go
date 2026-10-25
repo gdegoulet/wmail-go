@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"wmail-go/internal/mailview"
+	"github.com/gdegoulet/wmail-go/internal/mailview"
 )
 
 func addrs(t *testing.T, s string) []*mail.Address {

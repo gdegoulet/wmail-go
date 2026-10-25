@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"wmail-go/internal/config"
-	"wmail-go/internal/session"
+	"github.com/gdegoulet/wmail-go/internal/config"
+	"github.com/gdegoulet/wmail-go/internal/session"
 )
 
 const (

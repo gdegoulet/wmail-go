@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"wmail-go/internal/config"
-	"wmail-go/internal/mailconn/mailtest"
-	"wmail-go/internal/mailview"
+	"github.com/gdegoulet/wmail-go/internal/config"
+	"github.com/gdegoulet/wmail-go/internal/mailconn/mailtest"
+	"github.com/gdegoulet/wmail-go/internal/mailview"
 )
 
 // composeEnv ouvre une session reliée à un IMAP de test et à un SMTP de test qui garde les messages envoyés.

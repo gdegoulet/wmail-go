@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"strings"
 
-	"wmail-go/internal/mailconn"
-	"wmail-go/internal/session"
-	"wmail-go/internal/userdata"
+	"github.com/gdegoulet/wmail-go/internal/mailconn"
+	"github.com/gdegoulet/wmail-go/internal/session"
+	"github.com/gdegoulet/wmail-go/internal/userdata"
 )
 
 // PollInfo configure le script de sondage d'une page du courrier.

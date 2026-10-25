@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"wmail-go/internal/store"
-	"wmail-go/internal/userdata"
+	"github.com/gdegoulet/wmail-go/internal/store"
+	"github.com/gdegoulet/wmail-go/internal/userdata"
 )
 
 func acct(login string) *store.Account {

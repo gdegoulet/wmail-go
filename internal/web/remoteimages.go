@@ -12,10 +12,10 @@ import (
 	"strings"
 	"time"
 
-	"wmail-go/internal/config"
-	"wmail-go/internal/mailview"
-	"wmail-go/internal/session"
-	"wmail-go/internal/userdata"
+	"github.com/gdegoulet/wmail-go/internal/config"
+	"github.com/gdegoulet/wmail-go/internal/mailview"
+	"github.com/gdegoulet/wmail-go/internal/session"
+	"github.com/gdegoulet/wmail-go/internal/userdata"
 )
 
 const (

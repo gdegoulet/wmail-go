@@ -8,8 +8,8 @@ import (
 
 	"github.com/emersion/go-imap/v2"
 
-	"wmail-go/internal/mailconn/mailtest"
-	"wmail-go/internal/mailview"
+	"github.com/gdegoulet/wmail-go/internal/mailconn/mailtest"
+	"github.com/gdegoulet/wmail-go/internal/mailview"
 )
 
 // mdnEnv ouvre une session dont INBOX contient, en plus du jeu habituel, un message qui demande un accusé de lecture

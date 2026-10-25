@@ -1,14 +1,14 @@
 package web
 
 import (
+	"github.com/gdegoulet/wmail-go/internal/config"
 	"net/url"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
-	"wmail-go/internal/config"
 
-	"wmail-go/internal/mailconn/mailtest"
+	"github.com/gdegoulet/wmail-go/internal/mailconn/mailtest"
 )
 
 func folderNames(page string) []string {

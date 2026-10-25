@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"wmail-go/internal/sieve"
+	"github.com/gdegoulet/wmail-go/internal/sieve"
 )
 
 type msg struct {
