@@ -28,7 +28,55 @@ pas toutes les barrières**.
 À la moindre erreur : `go.mod` et `go.sum` sont remis en état, **rien n'est commité ni poussé**, et le courriel
 contient la raison et les dernières lignes du journal.
 
-## Installation (minuteur systemd, recommandé)
+## Installation avec crond, en root (le plus simple pour les conteneurs)
+
+En root, le démon Docker (ou Podman en mode privilégié) est directement accessible : pas de
+`XDG_RUNTIME_DIR` à poser, pas de session utilisateur à maintenir ouverte.
+
+```bash
+# 1. dépôt, appartenant à root, en SSH
+git clone git@github.com:gdegoulet/wmail-go.git /srv/wmail-go
+cd /srv/wmail-go
+git remote add gitea ssh://git@git.degoulet.net:2223/gdegoulet/wmail-go.git
+
+# 2. clé de déploiement dédiée, sans phrase de passe
+ssh-keygen -t ed25519 -N '' -C 'wmail-go maj auto' -f /root/.ssh/id_wmail_go_maj
+#    GitHub : Settings → Deploy keys → « Allow write access »
+#    Gitea  : Paramètres → Clés de déploiement, droit d'écriture
+
+# 3. réglages
+cat > /srv/wmail-go/.maj.env <<'FIN'
+CLE_SSH=/root/.ssh/id_wmail_go_maj
+REMOTES=origin gitea
+DESTINATAIRE=wmail-go@degoulet.net
+MAILER=sendmail -t
+NOTIFIER=changes
+QUARANTAINE=5
+FIN
+chmod 600 /srv/wmail-go/.maj.env
+
+# 4. essais, avant d'activer quoi que ce soit
+cd /srv/wmail-go
+WMAIL_MAJ_CONF=/srv/wmail-go/.maj.env NOTIFIER=always ./tools/maintenance/veille-vulnerabilites.sh
+WMAIL_MAJ_CONF=/srv/wmail-go/.maj.env SANS_PUSH=1 ./tools/maintenance/maj-dependances.sh
+
+# 5. tâches programmées
+install -m 0644 tools/maintenance/cron.d-wmail-go /etc/cron.d/wmail-go
+systemctl reload crond 2>/dev/null || systemctl reload cron
+```
+
+Trois pièges propres à root :
+
+- **Propriété du dépôt.** Si le dépôt appartient à un autre utilisateur, git refuse de l'ouvrir en root
+  (« dubious ownership »). Soit le dépôt appartient à root (recommandé : il est fait pour lui seul), soit vous
+  déclarez `git config --global --add safe.directory /srv/wmail-go`. Sans cela, le script s'arrête dès le
+  `git pull`, et le courriel vous le dira.
+- **Images de conteneur séparées.** Les images et le cache de compilation de root sont distincts de ceux de
+  votre compte : la première exécution reconstruit tout (comptez quelques minutes et ~2 Gio).
+- **Ce dépôt-là n'est pas celui que vous modifiez à la main.** Gardez votre copie de travail dans votre compte
+  et laissez `/srv/wmail-go` à l'automate : il refuse de toute façon de travailler sur un arbre modifié.
+
+## Installation (minuteur systemd, pour une exécution sans privilèges)
 
 ```bash
 mkdir -p ~/.config/systemd/user

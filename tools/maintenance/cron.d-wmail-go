@@ -1,0 +1,24 @@
+# /etc/cron.d/wmail-go — « CI maison » de wmail-go, exécutée par root avec crond.
+# Installation :
+#   install -m 0644 tools/maintenance/cron.d-wmail-go /etc/cron.d/wmail-go
+# Le fichier doit appartenir à root, ne pas contenir de point dans son nom, et se terminer par une
+# ligne vide (crond ignore silencieusement un fichier mal formé).
+#
+# Prérequis côté root :
+#   - dépôt cloné en SSH, par exemple /srv/wmail-go, appartenant à root ;
+#   - clé SSH dédiée sans phrase de passe dans /root/.ssh/ (clé de déploiement, droit d'écriture) ;
+#   - docker (ou podman) utilisable par root ;
+#   - programme d'envoi de courriel (sendmail, msmtp) ;
+#   - réglages dans /srv/wmail-go/.maj.env (mode 0600).
+
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+MAILTO=""
+WMAIL_MAJ_CONF=/srv/wmail-go/.maj.env
+
+# Veille de vulnérabilités : tous les jours à 6 h 20. Ne modifie rien ; courriel seulement si une
+# faille atteignable apparaît.
+20 6 * * *  root  cd /srv/wmail-go && ./tools/maintenance/veille-vulnerabilites.sh >> /var/log/wmail-go-veille.log 2>&1
+
+# Mise à jour des dépendances : le lundi à 4 h 30. Ne pousse que si toutes les barrières passent.
+30 4 * * 1  root  cd /srv/wmail-go && ./tools/maintenance/maj-dependances.sh >> /var/log/wmail-go-maj.log 2>&1
