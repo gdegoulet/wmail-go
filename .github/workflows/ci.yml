@@ -50,10 +50,16 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Contrôles jsdom sur les pages réelles (conteneurs)
-        run: sh -x ./tools/jstest/run.sh
-      - name: Journaux des conteneurs en cas d'échec
+        run: |
+          set -o pipefail
+          sh -x ./tools/jstest/run.sh 2>&1 | tee /tmp/js.log
+      # Les journaux d'exécution ne sont lisibles qu'avec les droits d'administration du dépôt ; les
+      # annotations, elles, sont publiques. On y recopie la fin de la trace pour pouvoir diagnostiquer.
+      - name: Détail de l'échec (annotation publique)
         if: failure()
-        run: docker compose --profile test --profile dev logs --tail=100 || true
+        run: |
+          docker compose --profile test --profile dev logs --tail=60 >>/tmp/js.log 2>&1 || true
+          python3 -c "import sys;t=open('/tmp/js.log',errors='replace').read().splitlines()[-80:];print('::error title=echec-jsdom::'+'%0A'.join(l.replace('%','%25') for l in t))"
 
   image:
     name: Image de conteneur
