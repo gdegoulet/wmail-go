@@ -130,6 +130,10 @@ type Config struct {
 	DefaultLanguage      string     `json:"default_language"`
 	DefaultTheme         string     `json:"default_theme"`
 	Timezone             string     `json:"timezone"` // fuseau d'affichage des dates (ex. Europe/Paris) ; vide : celui du système
+	// SourceURL : adresse où les utilisateurs obtiennent le code source, affichée dans les réglages.
+	// L'article 13 de l'AGPL l'exige pour un service accessible par le réseau. À changer si vous publiez
+	// une version modifiée : c'est *votre* version que vos utilisateurs doivent pouvoir récupérer.
+	SourceURL            string     `json:"source_url"`
 	LogLevel             string     `json:"log_level"`
 	LogFormat            string     `json:"log_format"`
 }
@@ -174,6 +178,7 @@ func Default() Config {
 		DefaultLanguage: "fr",
 		DefaultTheme:    "rainloop",
 		Timezone:        "Europe/Paris",
+		SourceURL:       "https://github.com/gdegoulet/wmail-go",
 		LogLevel:        "info",
 		LogFormat:       "text",
 	}
@@ -266,6 +271,9 @@ func (c *Config) Validate() error {
 		if _, err := time.LoadLocation(c.Timezone); err != nil {
 			add("timezone inconnu : %s", c.Timezone)
 		}
+	}
+	if u := strings.TrimSpace(c.SourceURL); u != "" && !strings.HasPrefix(u, "https://") && !strings.HasPrefix(u, "http://") {
+		add("source_url doit être une adresse http(s)")
 	}
 	switch c.LogLevel {
 	case "debug", "info", "warn", "error":

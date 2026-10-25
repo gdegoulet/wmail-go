@@ -128,6 +128,7 @@ func cmdServe(args []string) error {
 	if err != nil {
 		return err
 	}
+	web.Version = version // affichée dans les réglages, à côté du lien vers le code source
 	srv, err := web.New(cfg, st, logger)
 	if err != nil {
 		return err

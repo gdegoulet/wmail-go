@@ -64,6 +64,10 @@ type Server struct {
 }
 
 // New construit le serveur et charge les modèles.
+// Version est la version affichée dans les réglages (avec le lien vers le code source, article 13 de l'AGPL).
+// cmd/wmail-go la renseigne au démarrage.
+var Version = "dev"
+
 func New(cfg config.Config, st *store.Store, log *slog.Logger) (*Server, error) {
 	bundle, err := i18n.New(cfg.DefaultLanguage)
 	if err != nil {
@@ -586,6 +590,8 @@ type PrefsView struct {
 	FontSize                   int
 	Layout                     string
 	FaviconCount               bool
+	Version                    string // version affichée dans les réglages
+	SourceURL                  string // code source (AGPL, article 13)
 	Language, Theme            string
 	IdleMinutes, AbsoluteHours int
 	TrustedSenders             []string

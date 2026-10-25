@@ -110,5 +110,12 @@
 </form>
 </section>
 {{end}}
+{{if eq .Section "general"}}
+<section class="about">
+<h2>{{.T "about.title"}}</h2>
+<p class="muted">{{.T "about.text" .Prefs.Version}}
+{{if .Prefs.SourceURL}}<br><a href="{{.Prefs.SourceURL}}" target="_blank" rel="noopener noreferrer">{{.T "about.source"}}</a>{{end}}</p>
+</section>
+{{end}}
 {{template "setclose" .}}{{end}}
 {{define "scripts"}}<link rel="stylesheet" href="/static/settings-auto.css"><script src="/static/mailto.js" defer></script><script src="/static/notify-setting.js" defer></script><script src="/static/settings-auto.js" defer></script>{{end}}

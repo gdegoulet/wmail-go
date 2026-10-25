@@ -1,5 +1,8 @@
 {
   "app.name": "wmail-go",
+  "about.title": "About",
+  "about.text": "wmail-go %s — free software under the AGPL-3.0 licence, without warranty.",
+  "about.source": "Get the source code of this version",
   "nav.settings": "Settings",
   "nav.logout": "Log out",
   "lang.fr": "Français",

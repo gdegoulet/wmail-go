@@ -63,5 +63,6 @@
     "mail_seconds": 30,
     "send_seconds": 90,
     "dial_seconds": 20
-  }
+  },
+  "source_url": "https://github.com/gdegoulet/wmail-go"
 }
