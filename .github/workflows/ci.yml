@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
+          go-version: '1.26.x'   # dernier correctif de la série : go.mod fixerait 1.26.0, déjà corrigé en amont
           check-latest: true
       - name: Format
         run: test -z "$(gofmt -l ./cmd ./internal)" || { gofmt -l ./cmd ./internal; exit 1; }
@@ -35,9 +35,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
-          # Dernier correctif de la série : sans cela, le runner installe exactement la version de go.mod,
-          # dont la bibliothèque standard peut être visée par un avis déjà corrigé en amont.
+          go-version: '1.26.x'   # idem : avec go.mod, govulncheck signalerait les avis déjà corrigés en 1.26.1
           check-latest: true
       - name: govulncheck
         run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
@@ -52,7 +50,7 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Contrôles jsdom sur les pages réelles (conteneurs)
-        run: make test-js
+        run: sh -x ./tools/jstest/run.sh
       - name: Journaux des conteneurs en cas d'échec
         if: failure()
         run: docker compose --profile test --profile dev logs --tail=100 || true
