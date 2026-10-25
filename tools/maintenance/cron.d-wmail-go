@@ -1,6 +1,7 @@
 # /etc/cron.d/wmail-go — « CI maison » de wmail-go, exécutée par root avec crond.
 # Installation :
 #   install -m 0644 tools/maintenance/cron.d-wmail-go /etc/cron.d/wmail-go
+# Rien à recharger : cron relit ce dossier chaque minute.
 # Le fichier doit appartenir à root, ne pas contenir de point dans son nom, et se terminer par une
 # ligne vide (crond ignore silencieusement un fichier mal formé).
 #

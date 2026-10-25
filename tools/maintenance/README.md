@@ -62,7 +62,8 @@ WMAIL_MAJ_CONF=/data/Work/wmail-go/.maj.env SANS_PUSH=1 ./tools/maintenance/maj-
 
 # 5. tâches programmées
 install -m 0644 tools/maintenance/cron.d-wmail-go /etc/cron.d/wmail-go
-systemctl reload crond 2>/dev/null || systemctl reload cron
+# Aucun rechargement nécessaire : cron relit /etc/cron.d à chaque minute (il surveille la date de
+# modification). « systemctl reload cron » échoue d'ailleurs sur Debian et Ubuntu, c'est sans conséquence.
 ```
 
 Trois pièges propres à root :
