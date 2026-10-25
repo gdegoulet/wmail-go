@@ -180,7 +180,6 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /settings", s.auth(s.settingsGet))
 	mux.HandleFunc("GET /settings/security", s.auth(s.settingsSecurity))
 	mux.HandleFunc("GET /settings/activity", s.auth(s.activityGet))
-	mux.HandleFunc("POST /settings/activity/clear", s.auth(s.activityClear))
 	mux.HandleFunc("GET /settings/folders", s.auth(s.foldersGet))
 	mux.HandleFunc("POST /settings/folders/action", s.auth(s.foldersAction))
 	mux.HandleFunc("POST /settings/folders/system", s.auth(s.foldersSystem))

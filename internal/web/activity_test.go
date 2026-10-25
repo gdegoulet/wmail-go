@@ -94,22 +94,28 @@ func TestActivityChiffreSurDisque(t *testing.T) {
 	}
 }
 
-func TestActivityClear(t *testing.T) {
+// Le journal ne doit pas pouvoir être effacé : sinon un intrus qui détient le mot de passe
+// supprime ses propres traces, et le journal ne sert plus à rien.
+func TestActivityNonEffacable(t *testing.T) {
 	e := newEnv(t, nil)
 	c := e.client()
 	e.register(c, "alice")
 	_, page := e.do(c, "GET", "/settings/activity", nil, nil)
 	if !strings.Contains(page, "Connexion") {
-		t.Fatalf("journal vide avant effacement :\n%s", page)
+		t.Fatalf("journal vide :\n%s", page)
 	}
+	if strings.Contains(page, "activity/clear") {
+		t.Error("la page propose encore d'effacer le journal")
+	}
+
+	// La route n'existe plus : aucune requête ne doit vider l'historique.
 	resp, _ := e.do(c, "POST", "/settings/activity/clear", url.Values{"csrf": {csrf(t, page)}}, nil)
-	e.expect(resp, 303, "/settings/activity")
-	_, page = e.do(c, "GET", "/settings/activity", nil, nil)
-	if !strings.Contains(page, "Journal effacé.") {
-		t.Errorf("message d'effacement absent :\n%s", page)
+	if resp.StatusCode < 400 {
+		t.Errorf("POST /settings/activity/clear répond %d, attendu une erreur", resp.StatusCode)
 	}
-	if strings.Count(page, "activity.kind") != 0 && strings.Contains(page, "Déconnexion") {
-		t.Error("le journal n'est pas vide après effacement")
+	_, page = e.do(c, "GET", "/settings/activity", nil, nil)
+	if !strings.Contains(page, "Connexion") {
+		t.Errorf("journal vidé malgré tout :\n%s", page)
 	}
 }
 

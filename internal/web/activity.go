@@ -223,23 +223,6 @@ func (s *Server) activityGet(w http.ResponseWriter, r *http.Request, sess *sessi
 	s.render(w, r, sess, http.StatusOK, "activity", p)
 }
 
-// activityClear efface l'historique à la demande de l'utilisateur.
-func (s *Server) activityClear(w http.ResponseWriter, r *http.Request, sess *session.Session) {
-	sess.Mu.Lock()
-	acc := sess.Account
-	sess.Mu.Unlock()
-	if _, _, err := s.store.DrainEvents(acc); err != nil {
-		s.serverError(w, r, sess, err)
-		return
-	}
-	if err := s.store.SaveActivity(acc, nil); err != nil {
-		s.serverError(w, r, sess, err)
-		return
-	}
-	s.setFlash(sess, "activity.cleared")
-	http.Redirect(w, r, "/settings/activity", http.StatusSeeOther)
-}
-
 // activityRows met en forme l'historique, du plus récent au plus ancien.
 func (s *Server) activityRows(sess *session.Session, hist []userdata.Event) []ActivityRow {
 	loc := s.userLoc(sess)

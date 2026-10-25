@@ -105,9 +105,10 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
   attendu : « Dernière connexion le … » et le nombre d'échecs depuis ; affiché une seule fois
   réponse :
 
-[A-16] Effacement du journal
-  tester  : Réglages > Activité, « Effacer le journal », confirmer
-  attendu : « Journal effacé. », liste vide ; la connexion suivante repart de zéro
+[A-16] Journal non effaçable
+  tester  : Réglages > Activité, chercher un moyen d'effacer le journal
+  attendu : aucun bouton d'effacement ; la page explique que les entrées
+            disparaissent d'elles-mêmes au bout de 30 jours
   réponse :
 ```
 

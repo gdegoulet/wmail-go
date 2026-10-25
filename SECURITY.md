@@ -323,8 +323,13 @@ une fois par session.
 - La file `.evt` est alimentée par des tentatives de connexion, donc par n'importe qui. Elle est **plafonnée**
   (400 entrées, 256 Kio) : au-delà, les entrées du milieu sont jetées et comptées, et le journal l'affiche. Sans ce
   plafond, un attaquant remplirait le disque.
-- L'adresse IP est une donnée personnelle. Elle est ici chiffrée pour le seul utilisateur concerné, conservée
-  30 jours, et l'utilisateur peut effacer tout son journal depuis la page.
+- **Le journal ne peut pas être effacé depuis l'interface, volontairement.** Un intrus qui détient le mot de
+  passe est un utilisateur comme un autre : lui donner un bouton « effacer » revient à lui offrir le moyen de
+  supprimer ses propres traces, et le journal ne détecterait plus rien. Seule la rotation automatique retire des
+  entrées, au bout de 30 jours.
+- L'adresse IP est une donnée personnelle. Elle est ici chiffrée pour le seul utilisateur concerné et conservée
+  30 jours au plus. Pour l'effacer plus tôt, il faut supprimer le compte (`user delete`), qui emporte `.act`,
+  `.evt` et `.pub` avec lui.
 
 ---
 

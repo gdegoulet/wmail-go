@@ -24,7 +24,9 @@ Format inspiré de « Keep a Changelog » ; les dates sont celles du dépôt.
   usage de la clé de récupération, (dés)activation du TOTP, ajout/retrait d'une boîte mail, filtres modifiés — avec
   date, adresse IP et navigateur, conservés 30 jours. Un rappel à la connexion annonce la précédente et les échecs
   survenus depuis. Les échecs sont écrits compte fermé grâce à une paire de clés X25519 par compte (clé publique en
-  clair, privée dans le fichier chiffré). Voir `SECURITY.md` §9 bis, limites comprises.
+  clair, privée dans le fichier chiffré). Le journal **ne peut pas être effacé depuis l'interface** : un intrus
+  qui détient le mot de passe effacerait ses propres traces. Seule la rotation à 30 jours retire des entrées.
+  Voir `SECURITY.md` §9 bis, limites comprises.
 - `user list` affiche en deuxième colonne le chemin du fichier chiffré du compte (sauvegarde ciblée, diagnostic).
 - Documentation : `README.md`, `SECURITY.md`, `CONTRIBUTING.md`, cahier des charges, matrice de test (165 points),
   analyse fonction par fonction de RainLoop 1.17 dans `docs/audit-rainloop/`.

@@ -14,13 +14,6 @@
 </tr>{{end}}
 </tbody>
 </table>
-<details class="danger">
-<summary>{{$.T "activity.clear"}}</summary>
-<form method="post" action="/settings/activity/clear">
-<input type="hidden" name="csrf" value="{{$.CSRF}}">
-<p>{{$.T "activity.clear_confirm"}}</p>
-<button type="submit" class="danger">{{$.T "activity.clear_yes"}}</button>
-</form>
-</details>
+<p class="muted">{{$.T "activity.keep" .Days}}</p>
 {{else}}<p>{{$.T "activity.empty"}}</p>{{end}}
 {{template "setclose" $}}{{end}}{{end}}
