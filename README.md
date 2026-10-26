@@ -104,6 +104,22 @@ make tls-up-dev                    # variante poste de travail : mêmes données
 | `timeouts.mail_seconds` (30), `send_seconds` (90), `dial_seconds` (20) | délais des opérations IMAP, de l'envoi SMTP et de la connexion |
 | `timezone`, `default_language`, `default_theme` | valeurs par défaut, modifiables par utilisateur |
 
+## Thèmes
+
+Cinq thèmes sont livrés : **Ciel crépusculaire** (`ciel-crepuscule`, celui par défaut, donc le fond de la page de
+connexion), **Mer de nuages au crépuscule** (`mer-de-nuages-crepuscule`), **DarkShine** (`rainloop`, les couleurs de
+RainLoop 1.17), clair et sombre. Les trois premiers partagent exactement les mêmes couleurs : seul le fond d'écran
+change. Chaque utilisateur choisit le sien dans Réglages.
+
+Pour mettre votre propre fond sous un thème, déposez une image dans le volume de données :
+
+```
+<data_dir>/themes/<nom-du-thème>/background.jpg     # .jpeg, .png ou .webp acceptés
+```
+
+Elle passe devant l'image livrée, sans recompiler. Un dossier `<data_dir>/themes/<nom>/theme.css` ajoute de la même
+façon un thème entier, qui apparaît alors dans la liste.
+
 ## Sauvegarde
 
 Toutes les données tiennent dans le volume `wmail-go-data` (`/data` dans le conteneur) : comptes chiffrés, carnets

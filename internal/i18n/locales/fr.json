@@ -756,6 +756,8 @@
   "theme.rainloop": "DarkShine (comme RainLoop)",
   "theme.light": "Clair",
   "theme.dark": "Sombre",
+  "theme.ciel-crepuscule": "Ciel crépusculaire",
+  "theme.mer-de-nuages-crepuscule": "Mer de nuages au crépuscule",
   "mail.search.results": "Résultats de recherche pour « %s »",
   "settings.prefs.timezone": "Fuseau horaire d'affichage des dates",
   "settings.prefs.timezone_hint": "Nom IANA (ex. Europe/Paris, America/Montreal). Vide : %s, le réglage du serveur.",

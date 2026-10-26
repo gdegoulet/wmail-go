@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -454,7 +455,7 @@ func TestThemeCSS(t *testing.T) {
 	if !strings.Contains(body, "#abcdef") {
 		t.Error("thème externe non servi")
 	}
-	if names := e.srv.themeNames(); strings.Join(names, ",") != "custom,dark,light,rainloop" {
+	if names := e.srv.themeNames(); strings.Join(names, ",") != "ciel-crepuscule,custom,dark,light,mer-de-nuages-crepuscule,rainloop" {
 		t.Errorf("thèmes %v", names)
 	}
 }
@@ -585,19 +586,79 @@ func TestSafeNext(t *testing.T) {
 }
 
 // Les URL d'images d'un thème doivent être absolues : dans une variable CSS, une URL relative est résolue
-// d'après la feuille qui l'utilise (/static/app.css), pas d'après le fichier du thème.
+// d'après la feuille qui l'utilise (/static/app.css), pas d'après le fichier du thème. Un thème qui copie
+// un autre thème doit aussi avoir corrigé les chemins, sans quoi il afficherait le fond de l'original.
 func TestThemeImageURLsAreAbsolute(t *testing.T) {
-	css, err := staticFS.ReadFile("static/themes/rainloop/theme.css")
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, want := range []string{`url("/themes/rainloop/background.jpg")`, `url("/themes/rainloop/background.svg")`} {
-		if !strings.Contains(string(css), want) {
-			t.Errorf("%s absent du thème", want)
+	for _, theme := range []string{"rainloop", "ciel-crepuscule", "mer-de-nuages-crepuscule"} {
+		css, err := staticFS.ReadFile("static/themes/" + theme + "/theme.css")
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, want := range []string{`url("/themes/` + theme + `/background.jpg")`, `url("/themes/` + theme + `/background.svg")`} {
+			if !strings.Contains(string(css), want) {
+				t.Errorf("%s absent du thème %s", want, theme)
+			}
+		}
+		if strings.Contains(string(css), `url("background.`) {
+			t.Errorf("URL relative dans le thème %s : elle serait résolue depuis /static/", theme)
 		}
 	}
-	if strings.Contains(string(css), `url("background.`) {
-		t.Error("URL relative dans le thème : elle serait résolue depuis /static/")
+}
+
+// Les thèmes « ciel-crepuscule » et « mer-de-nuages-crepuscule » sont des copies de DarkShine : seul le fond
+// change. Toute variable ajoutée à l'un des trois doit l'être aux trois, sinon le thème copié perd une couleur
+// sans que rien ne le signale.
+func TestThemesCopiesDeDarkShine(t *testing.T) {
+	variables := func(theme string) []string {
+		css, err := staticFS.ReadFile("static/themes/" + theme + "/theme.css")
+		if err != nil {
+			t.Fatal(err)
+		}
+		var noms []string
+		for _, ligne := range strings.Split(string(css), "\n") {
+			ligne = strings.TrimSpace(ligne)
+			if nom, _, ok := strings.Cut(ligne, ":"); ok && strings.HasPrefix(nom, "--") {
+				noms = append(noms, nom)
+			}
+		}
+		return noms
+	}
+	ref := variables("rainloop")
+	for _, theme := range []string{"ciel-crepuscule", "mer-de-nuages-crepuscule"} {
+		if got := variables(theme); !slices.Equal(got, ref) {
+			t.Errorf("thème %s : variables différentes de DarkShine\n%v\n%v", theme, got, ref)
+		}
+	}
+}
+
+// Le fond livré doit être un SVG autonome : pas de script, pas de requête vers l'extérieur. Il est servi par
+// /themes/<nom>/background.svg et chargé comme image de fond, mais la règle vaut aussi pour ce qu'il embarque.
+func TestFondsLivresSansScriptNiAppelExterne(t *testing.T) {
+	for _, theme := range []string{"rainloop", "ciel-crepuscule", "mer-de-nuages-crepuscule"} {
+		svg, err := staticFS.ReadFile("static/themes/" + theme + "/background.svg")
+		if err != nil {
+			t.Fatal(err)
+		}
+		corps := string(svg)
+		for _, interdit := range []string{"<script", "javascript:", "<foreignObject", "<image", "xlink:href", "<use"} {
+			if strings.Contains(strings.ToLower(corps), strings.ToLower(interdit)) {
+				t.Errorf("thème %s : %q dans le fond livré", theme, interdit)
+			}
+		}
+		// Seules les déclarations d'espace de noms ont le droit de citer une adresse http : elles ne
+		// déclenchent aucune requête. Toute autre adresse ferait sortir le navigateur du site.
+		reste := corps
+		for {
+			i := strings.Index(reste, "http")
+			if i < 0 {
+				break
+			}
+			reste = reste[i+len("http"):]
+			if strings.HasPrefix(reste, "://www.w3.org/2000/svg") || strings.HasPrefix(reste, "://c2pa.org/manifest") {
+				continue
+			}
+			t.Errorf("thème %s : adresse externe dans le fond livré", theme)
+		}
 	}
 }
 

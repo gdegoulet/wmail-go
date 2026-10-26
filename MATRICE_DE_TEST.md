@@ -22,7 +22,7 @@ Chaque point a un **identifiant stable** (`C-12`, `D-09`…). Répondez sur la l
 ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 
 - Version testée : `git rev-parse --short HEAD` = ............ — date : ............
-- Navigateur : ............ — taille de fenêtre : ............ — thème : `DarkShine (comme RainLoop)`
+- Navigateur : ............ — taille de fenêtre : ............ — thème : `Ciel crépusculaire` (défaut) / `DarkShine (comme RainLoop)`
 - Avant de tester une nouvelle version : `make up` (le conteneur redémarre, la session est perdue).
 
 ---
@@ -469,7 +469,7 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 [D-21] Bouton « haut de page »
   tester  : ouvrir un long message et faire défiler
   attendu : bouton rond en bas à droite, retour en haut au clic
-  réponse :
+  réponse : ERROR : je ne trouve pas le "bouton rond en bas à droite" ??
 
 [D-29] Bandeau d'anomalies structurelles
   tester  : ouvrir un message de phishing authentifié (SPF/DKIM/DMARC valides) qui
@@ -478,14 +478,14 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
   attendu : bandeau orangé au-dessus du message, titre « Ce message présente des
             anomalies techniques », liste des motifs relevés, phrase rappelant que
             ces indices ne prouvent rien
-  réponse :
+  réponse : OK
 
 [D-30] Bouton « Déplacer vers les indésirables » du bandeau
   tester  : depuis le bandeau du point D-29, cliquer sur le bouton
   attendu : le message part dans le dossier des indésirables du compte et
             disparaît de la liste ; le bouton n'apparaît pas si le message est
             déjà dans les indésirables
-  réponse :
+  réponse : OK
 
 [D-31] Pas de bandeau sur un message légitime
   tester  : ouvrir plusieurs messages ordinaires : lettre d'information avec lien
@@ -493,7 +493,7 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
   attendu : aucun bandeau. C'est le point le plus important du lot : un bandeau qui
             se trompe serait vite ignoré, donc inutile. Signalez chaque faux positif
             avec l'expéditeur et le motif affiché
-  réponse :
+  réponse : OK
 ```
 
 ## E. Composition
@@ -544,12 +544,12 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 
 [E-11] Brouillon automatique
   attendu : enregistré environ chaque minute, repris à l'ouverture, pas de doublon
-  réponse :
+  réponse : OK
 
 [E-12] Brouillon écrit dans RainLoop
   tester  : créer un brouillon de réponse dans RainLoop, l'ouvrir dans wmail-go
   attendu : reconnu comme réponse (en-tête X-Draft-Info)
-  réponse :
+  réponse : OK
 
 [E-13] Modèles de message
   attendu : création, insertion, mise en forme conservée
@@ -583,19 +583,19 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 ```
 [F-01] Vue en deux volets
   attendu : liste étroite à gauche, fiche à droite, contact courant mis en évidence
-  réponse :
+  réponse : OK
 
 [F-02] Créer, modifier, supprimer ⚠
   attendu : conforme, confirmation avant suppression
-  réponse :
+  réponse : OK
 
 [F-03] Photo de contact
   attendu : envoi, affichage dans la fiche et dans les messages, suppression
-  réponse :
+  réponse : ERROR : pas de photo de contact dans https://webmail2.degoulet.net/contacts?edit=cddece7f5f3eace202c8e679#edit
 
 [F-04] Recherche par nom et par étiquette
   attendu : conforme
-  réponse :
+  réponse : OK
 
 [F-05] Recherche par numéro
   tester  : chercher « 0612 » pour un contact enregistré « +33 6 12 34 56 78 »
@@ -617,11 +617,11 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 
 [F-09] Écrire à la sélection
   attendu : nouveau message avec toutes les adresses cochées
-  réponse :
+  réponse : OK
 
 [F-10] Ajouter l'expéditeur aux contacts
   attendu : fiche créée avec nom et adresse, ouverte pour complément
-  réponse :
+  réponse : OK mais dans le menu "Ajouter aux contacts" est légerement décalé vers la droite par rapport aux autres elements du menu
 ```
 
 ## G. Dossiers
@@ -643,11 +643,11 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 [G-04] Créer un dossier
   tester  : bouton en bas à gauche
   attendu : nom et dossier parent, création immédiate, dossier visible
-  réponse :
+  réponse : OK
 
 [G-05] Renommer ⚠
   attendu : sous-dossiers suivis, compteurs corrects
-  réponse :
+  réponse : OK 
 
 [G-06] Garde-fous de suppression ⚠
   tester  : supprimer un dossier système, un dossier non vide, un dossier avec sous-dossiers
@@ -683,24 +683,24 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 ```
 [H-01] Page des filtres
   attendu : règles listées, script actif indiqué
-  réponse :
+  réponse : OK
 
 [H-02] Créer une règle
   tester  : « si De contient X, déplacer vers Y »
   attendu : script valide, règle appliquée par le serveur
-  réponse :
+  réponse : OK
 
 [H-03] Ordre des règles
   attendu : modifiable, ordre respecté
-  réponse :
+  réponse : OK
 
 [H-04] Édition du script brut
   attendu : vérification de syntaxe avant enregistrement
-  réponse :
+  réponse : OK
 
 [H-05] Serveur sans ManageSieve
   attendu : message clair, pas de plantage
-  réponse :
+  réponse : OK
 ```
 
 ## I. Réglages et apparence
@@ -736,7 +736,7 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 
 [I-08] Notifications bureau et son
   attendu : autorisation demandée, notification à l'arrivée d'un message, clic qui ouvre le message
-  réponse :
+  réponse : ERROR : je n'ai pas souvenir d'avoir entendu de son
 
 [I-09] Barre « Retour » des réglages
   attendu : au-dessus de la carte blanche, sur le fond d'écran
@@ -770,6 +770,26 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 [I-11] Boutons des réglages
   attendu : relief léger, bord foncé, comme RainLoop
   réponse : OK
+
+[I-19] Thème « Ciel crépusculaire » par défaut
+  tester  : se déconnecter, regarder la page de connexion ; ouvrir une session neuve sans avoir choisi de thème
+  attendu : fond du ciel crépusculaire sur les deux, couleurs identiques à DarkShine (barres, dossiers, liste)
+  réponse :
+
+[I-20] Thème « Mer de nuages au crépuscule »
+  tester  : Réglages > Général, choisir ce thème
+  attendu : fond changé aussitôt, le reste de l'interface identique à DarkShine, aucun texte illisible
+  réponse :
+
+[I-21] Vignettes des deux nouveaux thèmes
+  tester  : Réglages > Général, zone « Thème »
+  attendu : une vignette par thème, dont les teintes rappellent le fond correspondant
+  réponse :
+
+[I-22] Fond personnel sur un nouveau thème
+  tester  : déposer une image dans <data_dir>/themes/ciel-crepuscule/background.jpg, recharger
+  attendu : votre image passe devant le SVG livré ; la retirer rend le SVG, sans erreur 404 dans la console
+  réponse :
 ```
 
 ## I bis. Téléphone et mode sans JavaScript
@@ -830,7 +850,7 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 
 [J-09] Redémarrage du conteneur
   attendu : comptes et données chiffrées conservés
-  réponse :
+  réponse : OK
 ```
 
 ## K. Comparaison écran par écran avec RainLoop

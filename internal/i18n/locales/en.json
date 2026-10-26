@@ -756,6 +756,8 @@
   "theme.rainloop": "DarkShine (like RainLoop)",
   "theme.light": "Light",
   "theme.dark": "Dark",
+  "theme.ciel-crepuscule": "Twilight sky",
+  "theme.mer-de-nuages-crepuscule": "Sea of clouds at twilight",
   "mail.search.results": "Search results for “%s”",
   "settings.prefs.timezone": "Time zone for displayed dates",
   "settings.prefs.timezone_hint": "IANA name (e.g. Europe/Paris, America/Montreal). Empty: %s, the server setting.",

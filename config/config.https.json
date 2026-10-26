@@ -52,7 +52,7 @@
     "parallelism": 4
   },
   "default_language": "fr",
-  "default_theme": "rainloop",
+  "default_theme": "ciel-crepuscule",
   "timezone": "Europe/Paris",
   "log_level": "info",
   "log_format": "json",

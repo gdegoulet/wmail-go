@@ -176,7 +176,7 @@ func Default() Config {
 		KDF:             KDF{MemoryMiB: 64, Iterations: 3, Parallelism: 4},
 		Timeouts:        Timeouts{Mail: 30, Send: 90, Dial: 20},
 		DefaultLanguage: "fr",
-		DefaultTheme:    "rainloop",
+		DefaultTheme:    "ciel-crepuscule",
 		Timezone:        "Europe/Paris",
 		SourceURL:       "https://github.com/gdegoulet/wmail-go",
 		LogLevel:        "info",

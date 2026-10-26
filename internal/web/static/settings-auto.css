@@ -95,6 +95,20 @@
     linear-gradient(140deg, #f6b24a 0%, #dd5f1f 26%, #c2458f 54%, #4a1c54 78%, #121a30 100%);
 }
 
+.theme-prev[data-theme-prev="ciel-crepuscule"] {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, .45) 0 14px, rgba(0, 0, 0, 0) 14px),
+    radial-gradient(ellipse 60% 55% at 20% 70%, rgba(255, 224, 176, .8) 0%, rgba(255, 159, 110, 0) 100%),
+    linear-gradient(180deg, #140b2e 0%, #3a1d5e 30%, #8a3f7d 55%, #f0936a 78%, #b2557a 100%);
+}
+
+.theme-prev[data-theme-prev="mer-de-nuages-crepuscule"] {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, .45) 0 14px, rgba(0, 0, 0, 0) 14px),
+    radial-gradient(ellipse 55% 50% at 76% 60%, rgba(255, 244, 220, .85) 0%, rgba(255, 154, 128, 0) 100%),
+    linear-gradient(180deg, #0a1638 0%, #22386f 32%, #5a5c9c 52%, #c98aa0 64%, #ffc49a 76%, #ffd9b0 100%);
+}
+
 .theme-prev[data-theme-prev="light"] {
   background:
     linear-gradient(180deg, #dfe3e8 0 14px, rgba(0, 0, 0, 0) 14px),

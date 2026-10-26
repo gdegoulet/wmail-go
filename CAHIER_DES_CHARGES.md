@@ -1014,6 +1014,13 @@ jointe et l'envoi SMTP, alors que les délais métier ci-dessus sont la vraie bo
 bouton « Test » d'une boîte, 3 s par commande ManageSieve, 5 min d'inactivité avant fermeture d'une connexion IMAP
 du pool, 2 min entre deux sondages.
 
+**Décision 165 — thèmes crépusculaires.** Deux thèmes s'ajoutent à « rainloop » : « ciel-crepuscule » (nouveau
+défaut de `default_theme`, donc fond de la page de connexion) et « mer-de-nuages-crepuscule ». Ce sont des copies
+de DarkShine : le jeu de variables CSS est identique au caractère près, seul le fond d'écran change. Les fonds sont
+des SVG vectoriels livrés avec l'application, sans script ni appel extérieur, et chacun reste remplaçable par une
+image personnelle déposée dans `<data_dir>/themes/<nom>/background.jpg`. Un test compare la liste des variables des
+trois thèmes : une couleur ajoutée à l'un doit l'être aux trois.
+
 **Décision 164 — vérification visuelle obligatoire.** Toute correction d'interface est contrôlée par une capture
 d'écran (Chromium sans tête) avant d'être annoncée : c'est ainsi qu'ont été trouvés la barre de quota grise
 (collision de la classe `.bar`), le nom de dossier tronqué (`flex: 1` sur l'étoile) et la bannière d'images

@@ -1,0 +1,73 @@
+/* Thème « ciel-crepuscule » : copie du thème DarkShine (voir themes/rainloop/theme.css), avec un autre fond.
+   Fond d'écran : posez votre propre image dans <data_dir>/themes/ciel-crepuscule/background.jpg ; sinon l'image
+   livrée (background.svg) s'affiche, et à défaut un dégradé qui en reprend les teintes. Les chemins doivent être
+   absolus : une URL relative dans une variable CSS est résolue d'après la feuille qui l'utilise (/static/app.css),
+   pas d'après ce fichier. */
+:root {
+  color-scheme: light;
+  --wall:
+    url("/themes/ciel-crepuscule/background.jpg") left top / cover no-repeat,  /* votre image, si vous en posez une dans data/themes/ciel-crepuscule/ */
+    url("/themes/ciel-crepuscule/background.svg") left top / cover no-repeat,  /* image livrée */
+    radial-gradient(ellipse 36% 58% at 20% 67%, rgba(255,224,176,.85) 0%, rgba(255,159,110,.45) 35%, rgba(255,159,110,0) 100%),
+    linear-gradient(180deg, #140b2e 0%, #3a1d5e 30%, #8a3f7d 55%, #f0936a 75%, #b2557a 100%);
+  --login-bg: rgba(0, 0, 0, .5);
+  --login-fg: #eeeeee;
+  --login-border: none;
+  --login-radius: .5rem;
+  --login-shadow: 0 2px 10px rgba(0, 0, 0, .5);
+  --login-title: #dddddd;
+  --login-link: #dddddd;
+  --bg: #e3e3e3;
+  --fg: #333333;
+  --muted: #777777;
+  --card-bg: #ffffff;
+  --border: #d5d5d5;
+  --input-bg: #ffffff;
+  --accent: #336699;
+  --accent-fg: #ffffff;
+  --link: #336699;
+  --bar-bg: rgba(0, 0, 0, .5);
+  --bar-fg: #ffffff;
+  --btn-bg: linear-gradient(#ffffff, #e6e6e6);
+  --btn-hover: #e6e6e6;
+  --btn-fg: #333333;
+  --btn-bd: rgba(0, 0, 0, .25);
+  --new-bg: #84ab04;
+  --new-fg: #ffffff;
+  --new-bd: rgba(0, 0, 0, .25);
+  --menu-bg: #ffffff;
+  --menu-fg: #333333;
+  --menu-hover-bg: #48525c;
+  --menu-hover-fg: #eeeeee;
+  --menu-hover: #48525c;
+  --folders-fg: #ffffff;
+  --folders-disabled: #aaaaaa;
+  --folders-sel: rgba(255, 255, 255, .3);
+  --folders-sep: #999999;
+  --badge-bg: #999999;
+  --badge-fg: #ffffff;
+  --toolbar-bg: linear-gradient(#f4f4f4, #dfdfdf);
+  --list-bg: #ffffff;
+  --row-bg: #f9f9f9;
+  --row-hover: #f5f5f5;
+  --row-bd: #e5e5e5;
+  --row-fg: #000000;
+  --sender: #000000;
+  --date: #999999;
+  --unread-bg: #ffffd9;
+  --unread-bar: #ffa500;
+  --sel-bg: #dfefff;
+  --sel-bar: #398cf2;
+  --star: #666666;
+  --star-on: #ffa500;
+  --read-bg: #ffffff;
+  --read-fg: #333333;
+  --bar-gray: #eeeeee;
+  --bar-line: #dddddd;
+  --danger-bg: #fff5f5;
+  --danger-fg: #b02a37;
+  --info-bg: #ebf8ff;
+  --info-fg: #1a5276;
+  --warn-bg: #fffaf0;
+  --warn-fg: #8a5a00;
+}
