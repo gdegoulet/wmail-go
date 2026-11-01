@@ -175,6 +175,24 @@ le bandeau ne peut pas se permettre : un avertissement qui se trompe est vite ig
 Même règle pour le réseau : l'analyse ne fait **aucune requête**. Résoudre un lien de traçage pour connaître
 sa destination enregistrerait un clic chez l'attaquant et rouvrirait la porte SSRF que le garde ferme.
 
+### 3.6 bis La page parente ne peut rien savoir du corps d'un message
+
+Le corps est servi par `/mail/body` dans un iframe dont le bac à sable n'accorde ni `allow-scripts` ni
+`allow-same-origin`. Trois conséquences qui ont déjà coûté une fonction :
+
+- **Le défilement a lieu dans ce document.** `iframe.mailbody` est `flex: 1 1 auto` dans `.readpane`, donc
+  il occupe exactement la hauteur restante : `.readpane.scrollHeight` égale toujours `.readpane.clientHeight`,
+  et son `scrollTop` reste à zéro quoi que fasse l'utilisateur. Tout script de la page parente qui écoute le
+  défilement du volet de lecture ne se déclenchera jamais. C'est ainsi qu'un bouton « haut de page » est resté
+  invisible pendant des semaines sans que rien ne le signale.
+- **La page parente ne peut ni lire ni déplacer ce défilement** : `contentDocument` est inaccessible, l'origine
+  du corps étant opaque. Le seul levier est de recharger l'iframe, ce qui coûte un aller-retour IMAP.
+- **Le corps ne peut pas se déplacer lui-même**, même sans script : le bac à sable bloque jusqu'à la
+  navigation vers un fragment (`href="#"`). Seul `allow-same-origin` la débloquerait, et l'ajouter affaiblirait
+  l'isolement — décision prise de ne pas le faire.
+
+Avant d'ajouter quoi que ce soit qui dépende de la position de lecture dans un message, relire ces trois points.
+
 ### 3.7 `fr.json` et `en.json` portent les mêmes clés
 
 `TestLocalesHaveSameKeys` le vérifie. Deux conventions **non testées** s'y ajoutent :

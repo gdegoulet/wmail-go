@@ -44,6 +44,13 @@ Format inspiré de « Keep a Changelog » ; les dates sont celles du dépôt.
   bout en bout, inventaire du répertoire de données.
 - `docs/routes.md` : les 96 routes HTTP, avec paramètres, filtres de validation et codes de retour.
 
+### Retiré
+- Bouton « haut de page » du volet de lecture. Il ne pouvait pas fonctionner : le corps d'un message est
+  servi dans un iframe dont le bac à sable n'accorde ni `allow-scripts` ni `allow-same-origin`, donc le
+  défilement a lieu dans ce document et la page parente ne peut ni le lire ni le déplacer. Un bouton placé
+  dans le corps échoue aussi, le bac à sable bloquant la navigation vers un fragment. `Home` ramène en
+  haut. Conserver l'isolement l'a emporté sur l'agrément.
+
 ### Corrigé
 - Photo d'un contact : la fiche affichait `<img src="#ZgotmplZ">` au lieu de l'image. `html/template` ne
   reconnaît pas le schéma `data:` dans un attribut `src` et remplace l'URL. Et sur une fiche sans photo,

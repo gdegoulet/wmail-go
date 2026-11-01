@@ -466,10 +466,12 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
   attendu : le PDF s'affiche dans la visionneuse (pas de téléchargement, pas de nouvel onglet)
   réponse : ERROR : Refused to display '￼http://localhost:8080/' in a frame because it set 'X-Frame-Options' to 'deny'.
 
-[D-21] Bouton « haut de page »
-  tester  : ouvrir un long message et faire défiler
-  attendu : bouton rond en bas à droite, retour en haut au clic
-  réponse : ERROR : je ne trouve pas le "bouton rond en bas à droite" ??
+[D-21] Retour en haut d'un long message — RETIRÉ
+  Le bouton n'existe plus : il ne pouvait pas fonctionner. Le corps est servi dans un iframe dont le bac
+  à sable n'accorde ni allow-scripts ni allow-same-origin, donc le défilement a lieu dans ce document,
+  hors d'atteinte de la page parente (.readpane ne défile jamais : scrollHeight égale clientHeight). Un
+  bouton posé dans le corps ne marche pas non plus, le bac à sable bloquant la navigation vers un
+  fragment. Home / Ctrl+Début du navigateur ramène en haut quand le focus est dans le corps.
 
 [D-29] Bandeau d'anomalies structurelles
   tester  : ouvrir un message de phishing authentifié (SPF/DKIM/DMARC valides) qui
