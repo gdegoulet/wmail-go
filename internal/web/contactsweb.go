@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"html/template"
 	"io"
 	"net/http"
 	"net/mail"
@@ -83,18 +84,21 @@ type ContactRow struct {
 
 // ContactsView alimente la page des contacts.
 type ContactsView struct {
-	Rows                  []ContactRow
-	Total, Page, Pages    int
-	Q, Tag                string
-	AllTags               []string
-	Sync                  SyncView
-	Edit                  *contacts.Contact // fiche affichée dans le formulaire (ID vide : création)
-	Editing               bool
-	EmailRows, PhoneRows  []contacts.Typed
-	URLRows               []contacts.Typed
-	PostalRows            []contacts.Postal
-	TagsText              string
-	PhotoURL              string // photo actuelle du contact (URI data:)
+	Rows                 []ContactRow
+	Total, Page, Pages   int
+	Q, Tag               string
+	AllTags              []string
+	Sync                 SyncView
+	Edit                 *contacts.Contact // fiche affichée dans le formulaire (ID vide : création)
+	Editing              bool
+	EmailRows, PhoneRows []contacts.Typed
+	URLRows              []contacts.Typed
+	PostalRows           []contacts.Postal
+	TagsText             string
+	// PhotoURL est l'URI data: de la photo. Son type dit à html/template qu'elle peut figurer dans un
+	// attribut src : sans cela il n'y reconnaît pas le schéma data: et écrit « #ZgotmplZ » à la place,
+	// si bien que la fiche n'affichait aucune image. safePhotoURL refait le contrôle avant la conversion.
+	PhotoURL              template.URL
 	Info                  string // clé de message d'information
 	Added, Skipped        int
 	PrevURL, NextURL      string
@@ -162,7 +166,7 @@ func (s *Server) contactsPage(w http.ResponseWriter, r *http.Request, sess *sess
 		v.EmailRows, v.PhoneRows, v.URLRows = padTyped(edit.Emails, 2), padTyped(edit.Phones, 2), padTyped(edit.URLs, 1)
 		v.PostalRows = append(append([]contacts.Postal(nil), edit.Postals...), contacts.Postal{})
 		v.TagsText = strings.Join(edit.Tags, ", ")
-		v.PhotoURL = edit.Photo
+		v.PhotoURL = safePhotoURL(edit.Photo)
 	}
 	nav := url.Values{}
 	if v.Q != "" {
@@ -432,6 +436,16 @@ func (s *Server) contactIDFor(sess *session.Session, email string) string {
 		}
 	})
 	return id
+}
+
+// safePhotoURL n'accepte dans un attribut src que ce que le carnet accepte d'enregistrer : une URI data:
+// d'image connue, en base64. Le contrôle est refait ici, et non supposé acquis au moment de
+// l'enregistrement, parce que c'est le seul endroit où une chaîne du carnet redevient une URL.
+func safePhotoURL(photo string) template.URL {
+	if !contacts.ValidPhoto(photo) {
+		return ""
+	}
+	return template.URL(photo)
 }
 
 // contactPhoto renvoie la photo enregistrée dans le carnet pour cette adresse.

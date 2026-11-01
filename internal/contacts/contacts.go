@@ -146,7 +146,7 @@ func (c *Contact) Normalize() error {
 	c.Prefix, c.First, c.Middle, c.Last, c.Suffix = line(c.Prefix), line(c.First), line(c.Middle), line(c.Last), line(c.Suffix)
 	c.Nick, c.Org, c.Title = line(c.Nick), line(c.Org), line(c.Title)
 	c.Notes = cut(c.Notes, MaxNotes)
-	if !photoRe.MatchString(c.Photo) || len(c.Photo) > MaxPhoto {
+	if !ValidPhoto(c.Photo) {
 		c.Photo = ""
 	}
 	total := 0
@@ -511,6 +511,11 @@ func FormatAddress(name, addr string) string {
 }
 
 var photoRe = regexp.MustCompile(`^data:image/(png|jpeg|gif|webp);base64,[A-Za-z0-9+/=\s]+$`)
+
+// ValidPhoto dit si la chaîne est bien une photo de contact : une URI data: d'un format d'image connu,
+// encodée en base64, de taille raisonnable. Clean s'en sert pour vider le champ ; l'interface s'en sert
+// avant de replacer la chaîne dans un attribut src.
+func ValidPhoto(s string) bool { return photoRe.MatchString(s) && len(s) <= MaxPhoto }
 
 // PhotoBytes décode l'image du contact ; ok est faux s'il n'y en a pas.
 func (c *Contact) PhotoBytes() (data []byte, mime string, ok bool) {

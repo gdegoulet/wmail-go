@@ -592,6 +592,10 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 [F-03] Photo de contact
   attendu : envoi, affichage dans la fiche et dans les messages, suppression
   réponse : ERROR : pas de photo de contact dans https://webmail2.degoulet.net/contacts?edit=cddece7f5f3eace202c8e679#edit
+            CORRIGÉ (à revalider) : deux défauts. L'image était bien enregistrée mais html/template
+            écrivait <img src="#ZgotmplZ"> — il refuse le schéma data: dans un src. Et sur une fiche sans
+            photo, choisir un fichier n'affichait aucun aperçu : le gabarit ne rend la zone que s'il y en
+            a déjà une.
 
 [F-04] Recherche par nom et par étiquette
   attendu : conforme
@@ -622,6 +626,8 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
 [F-10] Ajouter l'expéditeur aux contacts
   attendu : fiche créée avec nom et adresse, ouverte pour complément
   réponse : OK mais dans le menu "Ajouter aux contacts" est légerement décalé vers la droite par rapport aux autres elements du menu
+            CORRIGÉ (à revalider) : 7 px d'écart. « .replygroup .menu a » fixe le retrait des liens, et
+            cette entrée est un <button> dans un <form> parce qu'elle POSTe. La règle couvre les deux.
 ```
 
 ## G. Dossiers

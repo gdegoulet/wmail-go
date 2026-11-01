@@ -45,6 +45,11 @@ Format inspiré de « Keep a Changelog » ; les dates sont celles du dépôt.
 - `docs/routes.md` : les 96 routes HTTP, avec paramètres, filtres de validation et codes de retour.
 
 ### Corrigé
+- Photo d'un contact : la fiche affichait `<img src="#ZgotmplZ">` au lieu de l'image. `html/template` ne
+  reconnaît pas le schéma `data:` dans un attribut `src` et remplace l'URL. Et sur une fiche sans photo,
+  choisir un fichier ne montrait aucun aperçu, la zone n'étant rendue que s'il y avait déjà une image.
+- Menu d'un message : « Ajouter aux contacts » était décalé de 7 px vers la droite. C'est la seule entrée
+  qui soit un `<button>` dans un `<form>` — elle POSTe — et la règle de retrait ne visait que les liens.
 - `make deps-update` ne mettait jamais rien à jour : le plan était calculé sur une entrée standard vide
   (`.deps.json` écrit, jamais lu), ce qui se lisait « aucune mise à jour éligible ». Le cron hebdomadaire
   annonçait donc un succès sans rien examiner. `quarantaine.py` refuse désormais une entrée vide.
