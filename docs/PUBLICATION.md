@@ -50,7 +50,10 @@ make build          # l'image doit se construire depuis un dépôt propre
 - Branche par défaut `main`, descriptions et sujets renseignés.
 - Intégration continue active (`.github/workflows/ci.yml`) ; sur Gitea, Actions compatibles ou pipeline équivalent.
 - Signalement des failles : la page de sécurité pointe sur `SECURITY.md`.
-- Dependabot activé (`.github/dependabot.yml`) pour les modules Go, les actions et l'image de base.
+- Dependabot activé (`.github/dependabot.yml`) pour les actions et l'image de base. **Pas pour les modules
+  Go** : ils relèvent de `make deps-cron`, qui applique une quarantaine et pousse vers les deux dépôts, là où
+  Dependabot ne pousse que vers GitHub (voir les commentaires du fichier). Les *security updates*, elles,
+  restent actives : c'est un réglage du dépôt, pas une entrée de ce fichier.
 
 ## 7. Publier l'image sur Docker Hub
 

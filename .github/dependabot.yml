@@ -1,13 +1,18 @@
-# Mises à jour automatiques des dépendances : modules Go et actions de l'intégration continue.
+# Mises à jour automatiques des dépendances.
+#
+# Les modules Go ne sont PAS ici : ils sont mis à jour par tools/maintenance/maj-dependances.sh
+# (« make deps-cron »), qui applique une quarantaine de 5 jours sur les versions trop fraîches, groupe
+# toutes les mises à jour en un seul commit, lance make test-race / test-js / build / vuln avant ET après,
+# tient le CHANGELOG, et pousse vers GitHub *et* Gitea. Dependabot ne pousse que vers GitHub : ses commits
+# manqueraient à Gitea et au clone local, où le cron s'arrêterait ensuite sur « git pull impossible ».
+#
+# Les alertes de sécurité ne dépendent pas de ce fichier : « Dependabot security updates » est un réglage
+# du dépôt, et continue d'ouvrir une demande de tirage pour une faille connue, quarantaine ou pas.
+#
+# Restent ici les deux écosystèmes que le cron ne couvre pas : les actions de l'intégration continue et
+# l'image de base du Dockerfile.
 version: 2
 updates:
-  - package-ecosystem: gomod
-    directory: /
-    schedule:
-      interval: weekly
-    open-pull-requests-limit: 5
-    commit-message:
-      prefix: "dépendances"
   - package-ecosystem: github-actions
     directory: /
     schedule:

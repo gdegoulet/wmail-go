@@ -441,7 +441,9 @@ peut donc pas se limiter aux contributions.
 |---|---|---|
 | `govulncheck` (failles connues de Go et des modules, **limitées à ce que notre code appelle réellement**) | à chaque poussée et chaque proposition | tâche `vuln` de l'intégration continue |
 | `govulncheck` de veille | chaque lundi matin, et à la demande | `.github/workflows/vuln-hebdo.yml` ; ouvre un ticket étiqueté « sécurité » si une faille est atteignable |
-| Dependabot (modules Go, actions, image de base) | hebdomadaire / mensuel | `.github/dependabot.yml` ; propose une contribution par mise à jour |
+| Mise à jour des modules Go | hebdomadaire | `tools/maintenance/maj-dependances.sh` (`make deps-cron`) : quarantaine de 5 jours, un seul commit, `test-race` / `test-js` / `build` / `vuln` avant et après, poussé vers GitHub et Gitea |
+| Dependabot (actions de l'intégration continue, image de base) | mensuel | `.github/dependabot.yml` ; propose une contribution par mise à jour |
+| Dependabot security updates (tous écosystèmes, modules Go compris) | à la publication d'une alerte | réglage du dépôt, indépendant de `dependabot.yml` : une faille connue passe devant la quarantaine |
 
 **À la main, quand vous le souhaitez :**
 
