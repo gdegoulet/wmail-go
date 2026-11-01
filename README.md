@@ -49,6 +49,7 @@ interface.
 
 ```
 make up                  # http://127.0.0.1:8080
+                         # make up PORT=8090 si 8080 sert déjà à autre chose
 make mail-up mail-seed   # GreenMail (IMAP/SMTP de test) et messages de démonstration
 make user-add LOGIN=alice   # crée un compte webmail (mot de passe demandé)
 make logs                # journaux du serveur

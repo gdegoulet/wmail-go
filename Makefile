@@ -2,12 +2,16 @@
 .DEFAULT_GOAL := help
 COMPOSE ?= docker compose
 DEV     := $(COMPOSE) --profile dev run --rm dev
+# Port d'écoute côté poste de travail : « make up PORT=8090 » quand 8080 est déjà pris. La variable est
+# exportée parce que docker-compose.yaml et tools/jstest/run.sh la lisent dans l'environnement.
+PORT ?= 8080
+export WMAIL_PORT := $(PORT)
 
 .PHONY: image-publish image-publish-essai sieve-up sieve-down test-sieve test-e2e theme-background help build up down logs ps test test-race vet fmt shell mail-up mail-down mail-seed user-add user-list user-passwd user-recover user-delete clean
 
 help:
 	@echo "make build     construit l'image wmail-go"
-	@echo "make up        démarre wmail-go (http://127.0.0.1:8080)"
+	@echo "make up        démarre wmail-go (http://127.0.0.1:$(PORT)) ; PORT=8090 pour en changer"
 	@echo "make down      arrête les conteneurs"
 	@echo "make logs      suit les journaux de wmail-go"
 	@echo "make test      go test ./... dans le conteneur dev"
@@ -79,11 +83,11 @@ test-sieve:
 
 # Scénario de composition dans Chromium (voir tools/e2e/compose.js) : exige make up, make mail-up, make mail-seed et make sieve-up (filtres).
 test-e2e:
-	docker run --rm --user 0 --network host -e NODE_PATH=/usr/src/app/node_modules -v $(CURDIR)/tools/e2e:/e2e:Z zenika/alpine-chrome:with-puppeteer node /e2e/compose.js /tmp
-	docker run --rm --user 0 --network host -e NODE_PATH=/usr/src/app/node_modules -v $(CURDIR)/tools/e2e:/e2e:Z zenika/alpine-chrome:with-puppeteer node /e2e/filters.js /tmp
-	docker run --rm --user 0 --network host -e NODE_PATH=/usr/src/app/node_modules -v $(CURDIR)/tools/e2e:/e2e:Z zenika/alpine-chrome:with-puppeteer node /e2e/folders.js /tmp
-	docker run --rm --user 0 --network host -e NODE_PATH=/usr/src/app/node_modules -v $(CURDIR)/tools/e2e:/e2e:Z zenika/alpine-chrome:with-puppeteer node /e2e/contacts.js /tmp
-	docker run --rm --user 0 --network host -e NODE_PATH=/usr/src/app/node_modules -v $(CURDIR)/tools/e2e:/e2e:Z zenika/alpine-chrome:with-puppeteer node /e2e/liste.js /tmp
+	docker run --rm --user 0 --network host -e WMAIL_PORT=$(PORT) -e NODE_PATH=/usr/src/app/node_modules -v $(CURDIR)/tools/e2e:/e2e:Z zenika/alpine-chrome:with-puppeteer node /e2e/compose.js /tmp
+	docker run --rm --user 0 --network host -e WMAIL_PORT=$(PORT) -e NODE_PATH=/usr/src/app/node_modules -v $(CURDIR)/tools/e2e:/e2e:Z zenika/alpine-chrome:with-puppeteer node /e2e/filters.js /tmp
+	docker run --rm --user 0 --network host -e WMAIL_PORT=$(PORT) -e NODE_PATH=/usr/src/app/node_modules -v $(CURDIR)/tools/e2e:/e2e:Z zenika/alpine-chrome:with-puppeteer node /e2e/folders.js /tmp
+	docker run --rm --user 0 --network host -e WMAIL_PORT=$(PORT) -e NODE_PATH=/usr/src/app/node_modules -v $(CURDIR)/tools/e2e:/e2e:Z zenika/alpine-chrome:with-puppeteer node /e2e/contacts.js /tmp
+	docker run --rm --user 0 --network host -e WMAIL_PORT=$(PORT) -e NODE_PATH=/usr/src/app/node_modules -v $(CURDIR)/tools/e2e:/e2e:Z zenika/alpine-chrome:with-puppeteer node /e2e/liste.js /tmp
 
 mail-seed:
 	$(DEV) go run ./tools/seedmail -addr greenmail:3025 -to test@localhost -n 40

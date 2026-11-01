@@ -7,6 +7,7 @@ Merci de l'intérêt porté au projet. Ce document dit comment construire, teste
 ```bash
 git clone https://github.com/gdegoulet/wmail-go.git && cd wmail-go
 make up                    # construit l'image et démarre  →  http://127.0.0.1:8080
+make up PORT=8090          # même chose sur un autre port, quand 8080 est pris
 make mail-up mail-seed     # serveur IMAP/SMTP de test (GreenMail) et messages de démonstration
 make user-add LOGIN=alice  # crée un compte webmail
 ```

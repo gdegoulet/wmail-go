@@ -2,7 +2,7 @@
 // création, modification, désactivation, réordonnancement et suppression de filtres, script brut, filtre « similaire ».
 const puppeteer = require("puppeteer");
 const assert = require("assert");
-const BASE = process.env.BASE || "http://127.0.0.1:8080", PW = "un mot de passe assez long";
+const BASE = process.env.BASE || "http://127.0.0.1:" + (process.env.WMAIL_PORT || "8080"), PW = "un mot de passe assez long";
 
 (async () => {
   const browser = await puppeteer.launch({ executablePath: process.env.CHROMIUM_PATH || "/usr/bin/chromium-browser", headless: "new", args: ["--no-sandbox", "--disable-gpu"] });

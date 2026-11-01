@@ -51,6 +51,11 @@ Format inspiré de « Keep a Changelog » ; les dates sont celles du dépôt.
   dans le corps échoue aussi, le bac à sable bloquant la navigation vers un fragment. `Home` ramène en
   haut. Conserver l'isolement l'a emporté sur l'agrément.
 
+### Modifié
+- Le port d'écoute sur le poste de travail est réglable : `make up PORT=8090`, et de même pour `test-js`
+  et `test-e2e`. Il était en dur dans quatre fichiers, ce qui rendait les contrôles JavaScript impossibles
+  dès qu'un autre service occupait 8080.
+
 ### Corrigé
 - Photo d'un contact : la fiche affichait `<img src="#ZgotmplZ">` au lieu de l'image. `html/template` ne
   reconnaît pas le schéma `data:` dans un attribut `src` et remplace l'URL. Et sur une fiche sans photo,

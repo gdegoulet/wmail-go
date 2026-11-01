@@ -1,9 +1,10 @@
 """Génère les pages réelles du serveur en marche (liste 3 volets, fragment du volet de lecture)
 pour les contrôles JavaScript. Usage : python3 -I gen_fixtures.py <dossier de sortie>"""
-import html, http.cookiejar, random, re, sys, urllib.error, urllib.parse, urllib.request
+import html, http.cookiejar, os, random, re, sys, urllib.error, urllib.parse, urllib.request
 
 out = sys.argv[1]
-B, PW = "http://127.0.0.1:8080", "un mot de passe assez long"
+B = "http://127.0.0.1:" + os.environ.get("WMAIL_PORT", "8080")
+PW = "un mot de passe assez long"
 jar = http.cookiejar.CookieJar()
 
 

@@ -78,6 +78,7 @@ compte, écraser un fichier dont vous n'avez pas lu le contenu, envoyer un courr
 
 ```
 make up                       # webmail sur http://127.0.0.1:8080 (+ GreenMail)
+make up PORT=8090             # autre port si 8080 est déjà pris ; make test-js PORT=8090 aussi
 make down                     # arrêt
 make logs                     # journaux
 make shell                    # shell dans le conteneur de développement
@@ -150,7 +151,8 @@ Ces points ont tous coûté du temps au moins une fois. Ils ne sont pas des bogu
 
 1. `make fmt vet test-race` — tout doit passer.
 2. `make test-js` si vous avez touché au JavaScript ou aux gabarits.
-3. Vérifier dans le navigateur sur `http://127.0.0.1:8080` si le changement est visible.
+3. Vérifier dans le navigateur sur `http://127.0.0.1:8080` si le changement est visible (`PORT=` si
+   le port est pris).
 4. Mettre à jour, s'il y a lieu : `CHANGELOG.md`, `SECURITY.md`, `docs/routes.md` (nouvelle route),
    `MATRICE_DE_TEST.md` (nouveau cas à valider), `docs/architecture.md` (nouvel invariant).
 5. Les traductions `fr.json` et `en.json` doivent garder **exactement les mêmes clés** — un test le vérifie —

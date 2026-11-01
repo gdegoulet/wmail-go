@@ -39,7 +39,7 @@ attendre() {
 	$COMPOSE logs --tail=40 >&2 || true
 	return 1
 }
-attendre "le webmail" 127.0.0.1 8080
+attendre "le webmail" 127.0.0.1 "${WMAIL_PORT:-8080}"
 attendre "GreenMail" 127.0.0.1 3025
 $COMPOSE --profile dev run --rm dev go run ./tools/seedmail -addr greenmail:3025 -to test@localhost -n 40 >/dev/null
 $COMPOSE --profile dev run --rm dev go run ./tools/seedmail -addr greenmail:3025 -to second@localhost -n 6 >/dev/null

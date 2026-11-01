@@ -1,6 +1,7 @@
 # wmail-go – démarrage et tests sur le poste de travail (Docker ou Podman).
 #
 #   make up        démarre wmail-go            http://127.0.0.1:8080
+#                  make up PORT=8090 si 8080 est déjà pris sur le poste
 #   make test      lance go test dans le conteneur dev
 #   make mail-up   démarre GreenMail (IMAP/SMTP de test)
 
@@ -13,7 +14,8 @@ services:
       target: runtime
     image: localhost/wmail-go:dev
     ports:
-      - "127.0.0.1:8080:8080"
+      # Port côté poste de travail : « make up PORT=8090 » quand 8080 sert déjà à autre chose.
+      - "127.0.0.1:${WMAIL_PORT:-8080}:8080"
     volumes:
       - ./config/config.json:/config/config.json:ro
       - wmail-go-data:/data
