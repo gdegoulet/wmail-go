@@ -63,7 +63,9 @@ def main():
     limite = dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=jours)
 
     retenues, quarantaine, sans_date = [], [], []
+    lus = 0
     for m in objets(sys.stdin):
+        lus += 1
         maj = m.get("Update")
         if not maj or m.get("Main"):
             continue
@@ -89,9 +91,15 @@ def main():
         print(f"écartées faute de date ({len(sans_date)}) :", file=sys.stderr)
         for ligne in sans_date:
             print("  " + ligne, file=sys.stderr)
+    if not lus:
+        # Entrée vide : « go list » n'a rien produit, ou le plan a été calculé sans brancher son
+        # entrée. Ce n'est pas « rien à mettre à jour » ; le dire serait un succès en trompe-l'œil.
+        print("entrée vide : aucun module lu sur l'entrée standard", file=sys.stderr)
+        return 2
     if not retenues:
         print("aucune mise à jour éligible", file=sys.stderr)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

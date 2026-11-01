@@ -45,6 +45,9 @@ Format inspiré de « Keep a Changelog » ; les dates sont celles du dépôt.
 - `docs/routes.md` : les 96 routes HTTP, avec paramètres, filtres de validation et codes de retour.
 
 ### Corrigé
+- `make deps-update` ne mettait jamais rien à jour : le plan était calculé sur une entrée standard vide
+  (`.deps.json` écrit, jamais lu), ce qui se lisait « aucune mise à jour éligible ». Le cron hebdomadaire
+  annonçait donc un succès sans rien examiner. `quarantaine.py` refuse désormais une entrée vide.
 - **Mot de passe ManageSieve perdu par le bouton « Test ».** Le champ du formulaire ne reportait pas la valeur
   saisie, contrairement à ceux d'IMAP et de SMTP : après un test, il revenait vide, et l'enregistrement suivant
   écrivait un mot de passe vide. Les filtres cessaient alors de fonctionner sans aucun message. Le champ reporte
@@ -64,3 +67,7 @@ Format inspiré de « Keep a Changelog » ; les dates sont celles du dépôt.
 - Jeton CSRF, cookie `__Host-` `SameSite=Strict`, en-têtes CSP/HSTS/Permissions-Policy, garde anti-SSRF,
   limitation de débit par IP et par identifiant.
 - Tests de sécurité automatiques (message piégé, CSRF, SSRF, gestionnaires en ligne).
+- `golang.org/x/net` porté en v0.62.0 : GO-2026-6860 (complexité quadratique en fusionnant les nœuds de
+  texte, `html.ParseFragment`) et GO-2026-6866 (transitions d'espace de noms au rendu du texte brut,
+  `html.Render`). Les deux sont atteignables depuis `mailview.CollapseQuotes`, qui traite le HTML de
+  chaque message reçu : la quarantaine de 5 jours a été levée pour ce cas (`make deps-update QUARANTAINE=0`).

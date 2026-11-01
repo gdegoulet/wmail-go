@@ -148,7 +148,7 @@ PORTEE ?= --directes-seulement
 
 deps-update:
 	@$(DEV) sh -c "go list -m -u -json all" > .deps.json
-	@python3 -I tools/maintenance/quarantaine.py $(QUARANTAINE) $(PORTEE) > .deps.plan
+	@python3 -I tools/maintenance/quarantaine.py $(QUARANTAINE) $(PORTEE) < .deps.json > .deps.plan
 	@rm -f .deps.json
 	@if [ -s .deps.plan ]; then 		echo "mises à jour retenues :"; sed 's/^/  /' .deps.plan; 		$(DEV) sh -c "go get $$(tr '\n' ' ' < .deps.plan) && go mod tidy && go build ./... && go test ./... -count=1"; 	else 		echo "aucune mise à jour éligible (voir la quarantaine ci-dessus)"; 	fi
 	@rm -f .deps.plan
