@@ -1,7 +1,21 @@
 /* Thème sombre. Même variables que les autres thèmes. */
 :root {
   color-scheme: dark;
+
+  /* Fond d'écran */
   --wall: #101316;
+
+  /* Page de connexion */
+  --login-bg: #1f242a;
+  --login-fg: #e4e7ea;
+  --login-border: 1px solid #3a434b;
+  --login-radius: .5rem;
+  --login-shadow: 0 2px 10px rgba(0, 0, 0, .6);
+  --login-title: #e4e7ea;
+  --login-title-shadow: none;
+  --login-link: #7fb6e8;
+
+  /* Couleurs de base */
   --bg: #101316;
   --fg: #e4e7ea;
   --muted: #9aa5b1;
@@ -11,36 +25,57 @@
   --accent: #63a4e8;
   --accent-fg: #0b1620;
   --link: #7db4ee;
+
+  /* Barres et boutons */
   --bar-bg: #0a0c0e;
   --bar-fg: #e4e7ea;
+  --toolbar-bg: #262d33;
   --btn-bg: #2a3036;
+  --btn-hover: #384047;
   --btn-fg: #e4e7ea;
   --btn-bd: #4a545c;
   --new-bg: #3f8f3f;
   --new-fg: #ffffff;
   --new-bd: #2f6f2f;
+
+  /* Menus déroulants */
   --menu-bg: #232a30;
   --menu-fg: #e4e7ea;
-  --menu-hover: #33404c;
+  --menu-hover-bg: #33404c;
+  --menu-hover-fg: #e4e7ea;
+
+  /* Panneau des dossiers */
   --folders-fg: #e4e7ea;
+  --folders-disabled: #7d8791;
   --folders-sel: rgba(99, 164, 232, .22);
   --folders-sep: #3a434b;
   --badge-bg: #5b6670;
   --badge-fg: #ffffff;
+
+  /* Liste des messages */
   --list-bg: #171b1f;
   --row-bg: #1e2327;
+  --row-hover: #262d33;
   --row-bd: #2e363c;
   --row-fg: #e4e7ea;
   --sender: #9bbbe0;
   --date: #7d8791;
   --unread-bg: #2d2a14;
   --unread-bar: #d8a800;
+  --subunread-bg: #2b2a1f;
+  --subunread-bar: #8a7430;
   --sel-bg: #1f3550;
   --sel-bar: #4a98e8;
+  --focus-ring: #e4564c;
+  --focus-tint: rgba(228, 86, 76, .12);
   --star: #5b6670;
   --star-on: #e5b100;
+
+  /* Volet de lecture */
   --read-bg: #1e2327;
   --read-fg: #e4e7ea;
+
+  /* Bandeaux d'information */
   --bar-gray: #262d33;
   --bar-line: #3a434b;
   --danger-bg: #2c1618;
@@ -49,10 +84,4 @@
   --info-fg: #8fc7f0;
   --warn-bg: #2b2210;
   --warn-fg: #f0c36b;
-  --btn-hover: #384047;
-  --folders-disabled: #7d8791;
-  --menu-hover-bg: #33404c;
-  --menu-hover-fg: #e4e7ea;
-  --toolbar-bg: #262d33;
-  --row-hover: #262d33;
 }

@@ -7,7 +7,7 @@ DEV     := $(COMPOSE) --profile dev run --rm dev
 PORT ?= 8080
 export WMAIL_PORT := $(PORT)
 
-.PHONY: image-publish image-publish-essai sieve-up sieve-down test-sieve test-e2e theme-background help build up down logs ps test test-race vet fmt shell mail-up mail-down mail-seed user-add user-list user-passwd user-recover user-delete clean
+.PHONY: image-publish image-publish-essai sieve-up sieve-down test-sieve test-e2e theme-new theme-background help build up down logs ps test test-race vet fmt shell mail-up mail-down mail-seed user-add user-list user-passwd user-recover user-delete clean
 
 help:
 	@echo "make build     construit l'image wmail-go"
@@ -29,6 +29,7 @@ help:
 	@echo "make sieve-up   démarre un Dovecot de test (ManageSieve) pour les tests d'intégration des filtres ; make sieve-down l'arrête"
 	@echo "make mail-down arrête GreenMail"
 	@echo "make user-add|user-list|user-passwd|user-recover|user-delete LOGIN=nom   gestion des comptes"
+	@echo "make theme-new IMAGE=img.jpg NAME=nom  déduit un thème d'une image (palette, contrastes, aperçu)"
 	@echo "make theme-background FILE=image.jpg   pose votre fond d'écran pour le thème rainloop"
 	@echo "make clean     supprime conteneurs et volumes (efface les données !)"
 	@echo ""
@@ -230,6 +231,18 @@ deploy/certs/wmail-go.crt:
 	$(MAKE) tls-cert
 
 # Pose une image de fond pour le thème « rainloop » dans le volume de données (dossier externe des thèmes).
+# Déduit un thème d'une image : palette, 65 variables, contrastes garantis, page d'aperçu modifiable.
+#   make theme-new IMAGE=~/Images/foret.jpg NAME=foret
+# DEST=data écrit dans data/themes/ (effet immédiat, sans recompiler) ; PANNEAUX=clair|sombre force le parti.
+# L'image doit être accessible depuis le conteneur : elle est copiée dans .themegen-in avant l'appel.
+DEST     ?= static
+PANNEAUX ?= auto
+theme-new:
+	@test -n "$(NAME)" || { echo "usage : make theme-new IMAGE=chemin/image.jpg NAME=nom-du-theme"; exit 1; }
+	@test -f "$(IMAGE)" || { echo "image introuvable : $(IMAGE)"; exit 1; }
+	@mkdir -p .themegen-in && cp "$(IMAGE)" ".themegen-in/$(notdir $(IMAGE))"
+	@$(DEV) go run ./tools/themegen -image ".themegen-in/$(notdir $(IMAGE))" -nom "$(NAME)" -dest "$(DEST)" -panneaux "$(PANNEAUX)" $(if $(FORCE),-force,); 		code=$$?; rm -rf .themegen-in; exit $$code
+
 theme-background:
 	@test -f "$(FILE)" || { echo "usage : make theme-background FILE=chemin/image.jpg"; exit 1; }
 	podman run --rm -v wmail-go_wmail-go-data:/data -v "$(abspath $(FILE))":/in:ro,Z --user 0 docker.io/library/alpine:3 sh -c 'mkdir -p /data/themes/rainloop && cp /in /data/themes/rainloop/background.jpg && chown -R 65532:65532 /data/themes && chmod -R u=rwX,go=rX /data/themes'

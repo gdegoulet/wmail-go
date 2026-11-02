@@ -4,8 +4,9 @@
    variable CSS est résolue d'après la feuille qui l'utilise (/static/app.css), pas d'après ce fichier. */
 :root {
   color-scheme: light;
-  --wall:
-    url("/themes/rainloop/background.jpg") left top / cover no-repeat,  /* votre image, si vous en posez une dans data/themes/rainloop/ */
+
+  /* Fond d'écran */
+  --wall: url("/themes/rainloop/background.jpg") left top / cover no-repeat,  /* votre image, si vous en posez une dans data/themes/rainloop/ */
     url("/themes/rainloop/background.svg") left top / cover no-repeat,  /* image livrée : bokeh vectoriel (tools/theme/gen_background.py) */
     radial-gradient(ellipse 13% 26% at 21% 47%, #fff8ee 0%, #f4be62 42%, rgba(244,190,98,0) 100%),
     radial-gradient(ellipse 34% 52% at 30% 50%, rgba(205,82,28,.95) 0%, rgba(205,82,28,0) 100%),
@@ -13,13 +14,18 @@
     radial-gradient(ellipse 30% 55% at 58% 22%, rgba(140,36,28,.85) 0%, rgba(140,36,28,0) 100%),
     linear-gradient(180deg, rgba(0,0,0,0) 52%, rgba(12,7,5,.9) 82%),
     linear-gradient(90deg, #2e0f08 0%, #40170a 32%, #170c0b 68%, #0d070c 100%);
+
+  /* Page de connexion */
   --login-bg: rgba(0, 0, 0, .5);
   --login-fg: #eeeeee;
   --login-border: none;
   --login-radius: .5rem;
   --login-shadow: 0 2px 10px rgba(0, 0, 0, .5);
   --login-title: #dddddd;
+  --login-title-shadow: none;
   --login-link: #dddddd;
+
+  /* Couleurs de base */
   --bg: #e3e3e3;
   --fg: #333333;
   --muted: #777777;
@@ -29,8 +35,11 @@
   --accent: #336699;
   --accent-fg: #ffffff;
   --link: #336699;
+
+  /* Barres et boutons */
   --bar-bg: rgba(0, 0, 0, .5);
   --bar-fg: #ffffff;
+  --toolbar-bg: linear-gradient(#f4f4f4, #dfdfdf);
   --btn-bg: linear-gradient(#ffffff, #e6e6e6);
   --btn-hover: #e6e6e6;
   --btn-fg: #333333;
@@ -38,18 +47,22 @@
   --new-bg: #84ab04;
   --new-fg: #ffffff;
   --new-bd: rgba(0, 0, 0, .25);
+
+  /* Menus déroulants */
   --menu-bg: #ffffff;
   --menu-fg: #333333;
   --menu-hover-bg: #48525c;
   --menu-hover-fg: #eeeeee;
-  --menu-hover: #48525c;
+
+  /* Panneau des dossiers */
   --folders-fg: #ffffff;
   --folders-disabled: #aaaaaa;
   --folders-sel: rgba(255, 255, 255, .3);
   --folders-sep: #999999;
   --badge-bg: #999999;
   --badge-fg: #ffffff;
-  --toolbar-bg: linear-gradient(#f4f4f4, #dfdfdf);
+
+  /* Liste des messages */
   --list-bg: #ffffff;
   --row-bg: #f9f9f9;
   --row-hover: #f5f5f5;
@@ -59,12 +72,20 @@
   --date: #999999;
   --unread-bg: #ffffd9;
   --unread-bar: #ffa500;
+  --subunread-bg: #ffffd9;
+  --subunread-bar: #ffdb99;
   --sel-bg: #dfefff;
   --sel-bar: #398cf2;
+  --focus-ring: #cc2f26;
+  --focus-tint: rgba(204, 47, 38, .08);
   --star: #666666;
   --star-on: #ffa500;
+
+  /* Volet de lecture */
   --read-bg: #ffffff;
   --read-fg: #333333;
+
+  /* Bandeaux d'information */
   --bar-gray: #eeeeee;
   --bar-line: #dddddd;
   --danger-bg: #fff5f5;

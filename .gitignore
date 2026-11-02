@@ -21,3 +21,5 @@ users.idx
 tools/release/publier.env
 tools/maintenance/maj.env
 /eml/
+/.themegen-in/
+/.themegen-out/

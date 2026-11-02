@@ -92,6 +92,7 @@ Par où commencer la lecture, dans cet ordre :
 | `README.md` | installation, mise en service, sauvegarde, publication |
 | `docs/architecture.md` | carte des paquets, chemin d'une requête, **invariants et pièges** |
 | `docs/routes.md` | les 96 routes HTTP, paramètres et filtres compris |
+| `docs/themes.md` | les 65 variables d'un thème, et le générateur `make theme-new` |
 | `SECURITY.md` | modèle de menace, chiffrement, ce qui manque |
 | `CAHIER_DES_CHARGES.md` | § 6 : journal des décisions, numérotées, avec leur motif |
 | `CONTRIBUTING.md` | outils, règles de code, dépannage de la CI |

@@ -12,7 +12,7 @@ body.mailpage { height: 100vh; overflow: hidden; display: flex; flex-direction: 
 .tbtn:hover:not(:disabled):not(.disabled) { background: var(--btn-hover); }
 .tbtn:disabled { opacity: .55; cursor: not-allowed; }
 .tbtn.disabled { cursor: default; }
-.btn-new { background: var(--new-bg); color: var(--new-fg); border-color: rgba(0,0,0,.25); text-shadow: 0 1px 0 rgba(0,0,0,.3); }
+.btn-new { background: var(--new-bg); color: var(--new-fg); border-color: var(--new-bd); text-shadow: 0 1px 0 rgba(0,0,0,.3); }
 .btn-new:hover { filter: brightness(1.06); }
 .btn-new.disabled { cursor: default; }
 .tgroup { display: inline-flex; }
@@ -94,8 +94,8 @@ body.dragging iframe { pointer-events: none; }
 .f.depth-1 { padding-left: 1.786rem; } .f.depth-2 { padding-left: 2.857rem; } .f.depth-3 { padding-left: 3.929rem; }
 .f.depth-4 { padding-left: 5rem; } .f.depth-5 { padding-left: 6.071rem; }
 .f.nosel { color: var(--folders-disabled); }
-.fsep { margin: .714rem; border: 0; border-bottom: 1px solid #999; }
-.badge { flex: none; margin-left: .4rem; padding: .071rem .643rem .143rem; border-radius: .643rem; background: #999; color: #fff; font-size: .846rem; font-weight: 700; line-height: 1;
+.fsep { margin: .714rem; border: 0; border-bottom: 1px solid var(--folders-sep); }
+.badge { flex: none; margin-left: .4rem; padding: .071rem .643rem .143rem; border-radius: .643rem; background: var(--badge-bg); color: var(--badge-fg); font-size: .846rem; font-weight: 700; line-height: 1;
   text-shadow: 0 -1px 0 rgba(0,0,0,.25); }
 .folders .msg { color: #fff; background: rgba(0,0,0,.35); border-color: rgba(255,255,255,.4); margin: .5rem; }
 .folders a { color: inherit; }
@@ -120,7 +120,7 @@ form.search details.adv { position: absolute; right: 0; top: 0; bottom: 0; }
 .adv-menu button { width: auto; align-self: flex-start; padding: .286rem .929rem; background: var(--btn-bg); border: 1px solid var(--btn-bd); border-radius: .214rem; }
 .filterbar { margin: 0; padding: .357rem .714rem; background: var(--unread-bg); border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; }
 .listpane > .msg { margin: .5rem; }
-.msglist-form { flex: 1; min-height: 0; overflow-x: hidden; overflow-y: auto; margin: 0; background: #fff; }
+.msglist-form { flex: 1; min-height: 0; overflow-x: hidden; overflow-y: auto; margin: 0; background: var(--list-bg); }
 .msgrows { list-style: none; margin: 0; padding: 0; }
 .lp-foot { flex: none; display: flex; justify-content: space-between; align-items: center; min-height: 3.143rem; padding: .5rem; background: var(--toolbar-bg); border-top: 1px solid #ddd;
   border-bottom-left-radius: .357rem; border-bottom-right-radius: .357rem; }
@@ -132,7 +132,7 @@ form.search details.adv { position: absolute; right: 0; top: 0; bottom: 0; }
 
 /* ---------- ligne de message : 52 px, texte de 12 px, interligne de 21 px ---------- */
 .msgrow { position: relative; display: block; height: 3.714rem; max-height: 4.286rem; overflow: hidden; margin: 0; cursor: pointer; font-size: .929rem; line-height: 1.5;
-  background: var(--row-bg); border-bottom: 1px solid #e5e5e5; }
+  background: var(--row-bg); border-bottom: 1px solid var(--row-bd); }
 .msgrow .delimiter { display: block; height: 1px; background: #999; opacity: .2; }
 .msgrow .sidebar { float: left; display: inline-block; width: .429rem; height: 100%; background: #eee; }
 .msgrow .wrapper { padding: .357rem 0; }
@@ -195,7 +195,7 @@ form.search details.adv { position: absolute; right: 0; top: 0; bottom: 0; }
 .checkedParent .chk { margin: 0; }
 .chk input { margin: 0; width: 1rem; height: 1rem; vertical-align: top; }
 .flagParent { display: inline-block; float: right; padding: 0 .714rem 0 .357rem; line-height: 1.5; }
-.dateParent { display: inline-block; float: right; margin: 0 .357rem; color: #999; font-size: .857rem; line-height: 1.8; }
+.dateParent { display: inline-block; float: right; margin: 0 .357rem; color: var(--date); font-size: .857rem; line-height: 1.8; }
 .star { margin: 0; padding: 0; display: inline-flex; background: none; border: 0; color: var(--star); cursor: pointer; font-size: 1.143rem; line-height: 1; vertical-align: middle; opacity: .6; }
 .star:hover { opacity: 1; }
 .star.on { color: var(--star-on); opacity: 1; }
@@ -255,7 +255,7 @@ dl.headers dd { margin: 0; overflow-wrap: anywhere; }
    libellé apparaissait décalé de 7 px vers la droite. */
 .replygroup .menu a, .replygroup .menu button { display: block; padding: .3rem .9rem; color: var(--menu-fg); text-decoration: none; white-space: nowrap; }
 .replygroup .menu a:hover, .replygroup .menu button:hover { background: var(--menu-hover-bg); color: var(--menu-hover-fg); }
-.bar { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; margin: 0; padding: .714rem 1.071rem; background: #eee; border-bottom: 1px solid #ddd; }
+.bar { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; margin: 0; padding: .714rem 1.071rem; background: var(--bar-gray); border-bottom: 1px solid var(--bar-line); }
 .bar.warn { background: var(--warn-bg); color: var(--warn-fg); }
 .imgbar { cursor: pointer; }
 .imgbar a { color: #333; text-decoration: none; }

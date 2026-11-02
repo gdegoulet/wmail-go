@@ -112,6 +112,13 @@ connexion), **Mer de nuages au crépuscule** (`mer-de-nuages-crepuscule`), **Dar
 RainLoop 1.17), clair et sombre. Les trois premiers partagent exactement les mêmes couleurs : seul le fond d'écran
 change. Chaque utilisateur choisit le sien dans Réglages.
 
+Pour fabriquer un thème à partir d'une image — palette déduite, contrastes garantis, page d'aperçu
+modifiable — voir `docs/themes.md` :
+
+```
+make theme-new IMAGE=~/Images/foret.jpg NAME=foret
+```
+
 Pour mettre votre propre fond sous un thème, déposez une image dans le volume de données :
 
 ```

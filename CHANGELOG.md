@@ -51,6 +51,13 @@ Format inspiré de « Keep a Changelog » ; les dates sont celles du dépôt.
   dans le corps échoue aussi, le bac à sable bloquant la navigation vers un fragment. `Home` ramène en
   haut. Conserver l'isolement l'a emporté sur l'agrément.
 
+### Ajouté
+- **Générateur de thème** (`make theme-new IMAGE=… NAME=…`) : déduit les 65 variables d'une image, garantit
+  les contrastes WCAG par ajustement de luminosité, assombrit au besoin les bandes où se posent la colonne
+  des dossiers et la barre du haut, et écrit une **page d'aperçu modifiable** — maquette de l'interface,
+  un réglage par variable, contrastes recalculés en direct, `theme.css` final à copier. `docs/themes.md`
+  documente les 65 variables, ce que chacune peint, et les deux emplacements possibles d'un thème.
+
 ### Modifié
 - Le port d'écoute sur le poste de travail est réglable : `make up PORT=8090`, et de même pour `test-js`
   et `test-e2e`. Il était en dur dans quatre fichiers, ce qui rendait les contrôles JavaScript impossibles
@@ -60,6 +67,13 @@ Format inspiré de « Keep a Changelog » ; les dates sont celles du dépôt.
 - Photo d'un contact : la fiche affichait `<img src="#ZgotmplZ">` au lieu de l'image. `html/template` ne
   reconnaît pas le schéma `data:` dans un attribut `src` et remplace l'URL. Et sur une fiche sans photo,
   choisir un fichier ne montrait aucun aperçu, la zone n'étant rendue que s'il y avait déjà une image.
+- Thèmes : dix variables déclarées par les cinq thèmes n'étaient câblées nulle part — la feuille de style
+  gardait la couleur de `rainloop` en dur. Le thème sombre affichait donc une liste de messages sur fond
+  blanc, des bandeaux gris clair sous du texte clair, et des séparateurs de dossiers vifs. Cinq autres
+  couleurs étaient lues avec une valeur de repli sans qu'aucun thème ne les déclare, et `light` comme
+  `dark` ignoraient les sept variables de la page de connexion. Deux tests ferment les deux sens.
+- `dropMissingWallpaper` effaçait la couche d'image d'un thème **livré avec la sienne** : il ne cherchait
+  l'image que dans `data_dir`, jamais dans le thème embarqué.
 - Menu d'un message : « Ajouter aux contacts » était décalé de 7 px vers la droite. C'est la seule entrée
   qui soit un `<button>` dans un `<form>` — elle POSTe — et la règle de retrait ne visait que les liens.
 - `make deps-update` ne mettait jamais rien à jour : le plan était calculé sur une entrée standard vide

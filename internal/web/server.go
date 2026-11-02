@@ -476,8 +476,12 @@ var themeFileRe = regexp.MustCompile(`^(theme\.css|background\.(jpe?g|png|webp|s
 
 // themeFile sert theme.css (dossier externe d'abord, puis thème embarqué) et l'image de fond background.* du dossier externe
 // <data_dir>/themes/<nom>/ : chacun peut y poser sa propre image sans recompiler.
-// dropMissingWallpaper retire du thème les couches d'image que personne n'a posées dans data/themes/<thème>/ :
-// sans cela le navigateur demanderait un fichier absent et noterait une erreur 404 dans sa console.
+//
+// dropMissingWallpaper retire du thème les couches d'image que personne n'a posées : sans cela le navigateur
+// demanderait un fichier absent et noterait une erreur 404 dans sa console. Une couche est gardée dès que
+// l'image existe **quelque part** — dans data/themes/<thème>/, posée par l'utilisateur, ou dans le thème
+// embarqué. Ne regarder que le volume reviendrait à effacer le fond d'un thème livré avec son image, ce qui
+// est précisément ce que produit tools/themegen à partir d'une photo.
 func dropMissingWallpaper(css []byte, dataDir, theme string) []byte {
 	var keep []string
 	for _, line := range strings.Split(string(css), "\n") {
@@ -487,9 +491,13 @@ func dropMissingWallpaper(css []byte, dataDir, theme string) []byte {
 			if !strings.Contains(line, ref) {
 				continue
 			}
-			if _, err := os.Stat(filepath.Join(dataDir, "themes", theme, "background."+ext)); err != nil {
-				drop = true
+			if _, err := os.Stat(filepath.Join(dataDir, "themes", theme, "background."+ext)); err == nil {
+				continue
 			}
+			if _, err := fs.Stat(staticFS, "static/themes/"+theme+"/background."+ext); err == nil {
+				continue
+			}
+			drop = true
 		}
 		if !drop {
 			keep = append(keep, line)
