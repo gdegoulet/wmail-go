@@ -110,6 +110,28 @@ func executer(chemin, nom, dest, panneaux, voile string, force bool) error {
 	fondURL := fmt.Sprintf("url(\"/themes/%s/background.%s\") left top / cover no-repeat", nom, ext)
 	t := Construire(nom, p, sombres, fondURL+",\n    "+degradeDeRepli(p))
 
+	// Un SVG n'est pas rasterisé ici : son voile de lisibilité se pose en CSS, dans la pile --wall, et non
+	// dans le fichier. La luminance de référence est celle de la palette entière, faute de pouvoir mesurer
+	// la bande gauche — c'est une approximation, que la page d'aperçu permet de corriger.
+	voileSVG := 0.0
+	if ext == "svg" && voile != "non" {
+		switch voile {
+		case "auto":
+			voileSVG = math.Max(
+				ForceDuVoile(p.Luminance, couleurDe(t, "--folders-fg"), ContrasteTexte),
+				ForceDuVoile(p.Luminance, couleurDe(t, "--bar-fg"), ContrasteTexte))
+		default:
+			f, err := strconv.ParseFloat(strings.Replace(voile, ",", ".", 1), 64)
+			if err != nil || f < 0 || f > 0.65 {
+				return fmt.Errorf("-voile %q : attendu auto, non, ou une force de 0 à 0,65", voile)
+			}
+			voileSVG = f
+		}
+		if couches := VoileCSS(voileSVG); couches != "" {
+			t = Construire(nom, p, sombres, couches+fondURL+",\n    "+degradeDeRepli(p))
+		}
+	}
+
 	// Voile de lisibilité : il s'applique à l'image, pas au CSS, parce que la feuille de style n'a aucun
 	// moyen de poser un fond derrière le panneau des dossiers — il est transparent par construction.
 	forceVoile, sortieImage := 0.0, src
@@ -175,8 +197,13 @@ func executer(chemin, nom, dest, panneaux, voile string, force bool) error {
 	}
 	if ext == "svg" {
 		fmt.Println("  (SVG : poids comptés par occurrence d'attribut, pas par surface couverte)")
-		fmt.Println("  aucun voile n'est appliqué à un SVG : vérifiez à l'œil que les noms de dossiers restent")
-		fmt.Println("    lisibles en haut à gauche, là où ils se posent à même le fond")
+		if voileSVG > 0 {
+			fmt.Printf("  voile de lisibilité : %.0f %% en CSS, au bord gauche et en haut — le fichier SVG n'est\n"+
+				"    pas retouché (-voile=non pour l'enlever, -voile=0,30 pour l'ajuster)\n", voileSVG*100)
+		} else {
+			fmt.Println("  voile de lisibilité : inutile d'après la palette ; vérifiez quand même à l'œil que les")
+			fmt.Println("    noms de dossiers restent lisibles en haut à gauche, là où ils se posent à même le fond")
+		}
 	}
 
 	fmt.Println("\n  contrastes :")

@@ -54,13 +54,40 @@ Trois points qui ont coûté du temps au moins une fois :
   feuille qui *l'utilise* (`/static/app.css`), pas d'après le fichier du thème.
 - **La couche `.jpg` est retirée à la volée** quand personne n'a posé l'image (`dropMissingWallpaper`),
   pour éviter une erreur 404 dans la console du navigateur. Cela ne vaut que pour `jpg`, `jpeg`, `png` et
-  `webp` : un `background.svg` cité par le thème doit exister.
+  `webp` : un `background.svg` cité par le thème doit exister. Le retrait se fait **couche par couche**, et
+  non ligne par ligne : la première couche porte aussi le `--wall:`, et l'emporter laissait une déclaration
+  invalide, donc plus aucun fond d'écran nulle part.
 - **Le fond personnel de l'utilisateur**, envoyé depuis les réglages, est écrit par `/user.css` avec
   `!important` et passe donc devant `--wall`.
 
 Un SVG de fond doit être autonome : ni script, ni appel vers l'extérieur. La CSP de l'application est
 `default-src 'self'; img-src 'self' data:`, donc une feuille de style ne peut de toute façon rien charger
 d'un autre domaine — mais un test le vérifie aussi pour les fonds livrés.
+
+### Le voile de lisibilité
+
+Deux zones de l'interface sont posées **à même le fond**, sans couleur de fond propre : le panneau des
+dossiers (`--folders-w`, 248 px) et la barre du haut (`--bar-h`, 50 px, par-dessus `--bar-bg`). Sur un fond
+clair à ces endroits, les noms de dossiers disparaissent, et aucun test de feuille de style ne peut le voir :
+il faut peindre l'image et la relire.
+
+Le remède est une couche de dégradé noir en tête de `--wall`, à pleine force sur la zone de texte puis
+effacée au-delà :
+
+```css
+--wall:
+  linear-gradient(90deg, rgba(0, 0, 0, .55) 0 13%, rgba(0, 0, 0, 0) 30%),   /* dossiers */
+  linear-gradient(180deg, rgba(0, 0, 0, .35) 0 5%, rgba(0, 0, 0, 0) 20%),   /* barre du haut */
+  url("/themes/<nom>/background.svg") left top / cover no-repeat,
+  linear-gradient(...);
+```
+
+Le palier compte : un dégradé qui décroît dès le bord ne donne presque rien aux derniers noms de dossiers,
+ceux qui touchent le bord droit du panneau.
+
+`make theme-check` mesure ces deux zones dans Chromium, fond réellement peint, et donne la ligne à poser
+quand le contraste tombe sous 4,5:1. C'est le seul contrôle de thème qui demande un navigateur ; il exige
+`make up`.
 
 ---
 
@@ -252,18 +279,38 @@ Comment il procède :
    (3:1 pour les contours et le texte secondaire), à teinte et saturation constantes. Le thème produit est
    donc lisible par construction, et un test balaie 180 palettes pour le vérifier.
 4. **Voile de lisibilité.** La colonne des dossiers n'a pas de fond : sur une photo claire, les noms
-   disparaissent. L'outil assombrit donc une bande à gauche et en haut de l'**image elle-même**, par un
-   dégradé en cosinus qui s'efface vers le centre. La décision se prend sur le **90e centile** de luminance
-   de la bande, pas sur sa moyenne : une photo sombre traversée d'une épaule éclairée a une moyenne basse
-   et des dossiers illisibles. Un SVG n'est jamais retouché — vérifiez à l'œil.
+   disparaissent. Sur une photo, l'outil assombrit l'**image elle-même** : plein régime sur la zone de
+   texte, puis décroissance en cosinus. La décision se prend sur le **90e centile** de luminance de la
+   bande, pas sur sa moyenne : une photo sombre traversée d'une épaule éclairée a une moyenne basse et des
+   dossiers illisibles. Un SVG n'est pas retouché — il reçoit le même voile, mais **en CSS**, en tête de
+   `--wall` (§ 2). La force est alors déduite de la palette entière, faute de pouvoir mesurer la bande :
+   c'est une approximation, que `make theme-check` corrige.
+
+### Inscrire un thème produit par le générateur
+
+`make theme-new DEST=...` écrit un dossier de thème ; le copier dans `internal/web/static/themes/` ne suffit
+pas à l'inscrire dans l'application. Trois gestes suivent, qui s'oublient sans que rien ne casse tout de
+suite — `make theme-register ECRIRE=1` les fait, et un test les exige :
+
+| Geste | Sans lui |
+|---|---|
+| vignette dans `settings-auto.css` | la case du thème est le carré gris neutre |
+| `"theme.<nom>"` dans `fr.json` **et** `en.json` | les réglages affichent le nom du dossier |
+| retrait de `apercu.html` | le fichier entre dans le binaire sans que rien ne puisse l'ouvrir |
+
+Le libellé écrit par défaut est le nom du dossier : relisez-le, c'est ce que lit l'utilisateur. La vignette
+est déduite du dégradé de repli de `--wall` ; pour l'écrire à la main, posez la règle `.theme-prev[...]`
+**hors** du bloc produit, et `theme-register` la respectera.
+
+Ensuite : `make test`, puis `make up` et `make theme-check`.
 
 ### À la main
 
 1. Copier un thème proche : `cp -r internal/web/static/themes/light internal/web/static/themes/<nom>`
    — ou dans `<data_dir>/themes/<nom>/` pour un effet immédiat sans recompiler.
 2. Régler les valeurs. Garder les 65 variables et l'ordre : `make test` le vérifie.
-3. Ajouter `"theme.<nom>"` dans `fr.json` **et** `en.json`, **en place**, sans retrier le fichier.
-4. `make test` puis `make up` et un tour dans les réglages.
+3. `make theme-register ECRIRE=1`, puis relire le libellé.
+4. `make test`, puis `make up` et un tour dans les réglages.
 
 ---
 

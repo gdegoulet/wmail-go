@@ -15,7 +15,7 @@ Format inspiré de « Keep a Changelog » ; les dates sont celles du dépôt.
 - Plusieurs boîtes IMAP/SMTP par compte, identités multiples, dossiers système, filtres Sieve (ManageSieve).
 - Carnet d'adresses chiffré : vCard, CSV, photos, autocomplétion, synchronisation CardDAV.
 - Thèmes (« DarkShine » reprenant RainLoop, « Ciel crépusculaire » — le défaut —, « Mer de nuages au
-  crépuscule », clair, sombre), français et anglais, fuseau horaire par utilisateur,
+  crépuscule », « Shamrock », « Coquillage », « Méduse », « Méduse 2 », « Guada », « Automne », « Citron », clair, sombre), français et anglais, fuseau horaire par utilisateur,
   dispositions 3 volets / aperçu en bas / liste seule, réglages enregistrés à la volée.
 - Déploiement derrière nginx avec terminaison TLS, sauvegarde et restauration du volume de données.
 - Publication de l'image sur un registre (`make image-publish`) : étiquettes « AAAAMMJJ-commit » et « latest »,

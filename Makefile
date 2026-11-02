@@ -7,7 +7,7 @@ DEV     := $(COMPOSE) --profile dev run --rm dev
 PORT ?= 8080
 export WMAIL_PORT := $(PORT)
 
-.PHONY: image-publish image-publish-essai sieve-up sieve-down test-sieve test-e2e theme-new theme-background help build up down logs ps test test-race vet fmt shell mail-up mail-down mail-seed user-add user-list user-passwd user-recover user-delete clean
+.PHONY: image-publish image-publish-essai sieve-up sieve-down test-sieve test-e2e theme-new theme-register theme-check theme-background help build up down logs ps test test-race vet fmt shell mail-up mail-down mail-seed user-add user-list user-passwd user-recover user-delete clean
 
 help:
 	@echo "make build     construit l'image wmail-go"
@@ -30,6 +30,8 @@ help:
 	@echo "make mail-down arrête GreenMail"
 	@echo "make user-add|user-list|user-passwd|user-recover|user-delete LOGIN=nom   gestion des comptes"
 	@echo "make theme-new IMAGE=img.jpg NAME=nom  déduit un thème d'une image (palette, contrastes, aperçu)"
+	@echo "make theme-register                    inscrit les thèmes copiés dans static/themes (vignette, libellés)"
+	@echo "make theme-check                       mesure la lisibilité des fonds dans Chromium (exige make up)"
 	@echo "make theme-background FILE=image.jpg   pose votre fond d'écran pour le thème rainloop"
 	@echo "make clean     supprime conteneurs et volumes (efface les données !)"
 	@echo ""
@@ -242,6 +244,23 @@ theme-new:
 	@test -f "$(IMAGE)" || { echo "image introuvable : $(IMAGE)"; exit 1; }
 	@mkdir -p .themegen-in && cp "$(IMAGE)" ".themegen-in/$(notdir $(IMAGE))"
 	@$(DEV) go run ./tools/themegen -image ".themegen-in/$(notdir $(IMAGE))" -nom "$(NAME)" -dest "$(DEST)" -panneaux "$(PANNEAUX)" $(if $(FORCE),-force,); 		code=$$?; rm -rf .themegen-in; exit $$code
+
+# Inscrit dans l'application les thèmes copiés à la main dans internal/web/static/themes/ : vignette des
+# réglages, libellés fr/en, et retrait de l'apercu.html que le serveur ne sert jamais.
+#   make theme-register              dit ce qui manque
+#   make theme-register ECRIRE=1     applique
+theme-register:
+	@$(DEV) go run ./tools/themereg $(if $(ECRIRE),-ecrire,)
+
+# Mesure, dans Chromium, le contraste réel du texte posé à même le fond d'écran : noms de dossiers et barre
+# du haut. Aucune feuille de style ne peut le vérifier — il faut peindre l'image. Exige « make up ».
+#   make theme-check            tous les thèmes embarqués
+#   make theme-check THEMES=a,b  ceux-là seulement
+theme-check:
+	docker run --rm --user 0 --network host -e WMAIL_PORT=$(PORT) \
+	  -e THEMES="$(if $(THEMES),$(THEMES),$(shell ls internal/web/static/themes | tr '\n' ',' | sed 's/,$$//'))" \
+	  -e NODE_PATH=/usr/src/app/node_modules -v $(CURDIR)/tools/themecheck:/tc:Z \
+	  zenika/alpine-chrome:with-puppeteer node /tc/check.js
 
 theme-background:
 	@test -f "$(FILE)" || { echo "usage : make theme-background FILE=chemin/image.jpg"; exit 1; }

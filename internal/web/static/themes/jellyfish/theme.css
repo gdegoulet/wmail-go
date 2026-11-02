@@ -1,0 +1,89 @@
+/* Thème « jellyfish ». Les 65 variables et ce qu'elles peignent : docs/themes.md. */
+:root {
+  color-scheme: dark;
+
+  /* Fond d'écran */
+  --wall: url("/themes/jellyfish/background.svg") left top / cover no-repeat,
+    linear-gradient(160deg, #5a2c5f 0%, #a15fa7 100%);
+
+  /* Page de connexion */
+  --login-bg: rgba(0, 0, 0, .5);
+  --login-fg: #eeeeee;
+  --login-border: none;
+  --login-radius: .5rem;
+  --login-shadow: 0 2px 10px rgba(0, 0, 0, .5);
+  --login-title: #dddddd;
+  --login-title-shadow: none;
+  --login-link: #dddddd;
+
+  /* Couleurs de base */
+  --bg: #e9e8e9;
+  --fg: #1f1b20;
+  --muted: #838083;
+  --card-bg: #fdfcfd;
+  --border: #d5d4d5;
+  --input-bg: #fdfcfd;
+  --accent: #ff5191;
+  --accent-fg: #4b1d2e;
+  --link: #e80054;
+
+  /* Barres et boutons */
+  --bar-bg: rgba(0, 0, 0, .35);
+  --bar-fg: #e9e5e9;
+  --toolbar-bg: linear-gradient(#f4f3f4, #e0dfe0);
+  --btn-bg: linear-gradient(#fdfcfd, #e7e6e7);
+  --btn-hover: #e7e6e7;
+  --btn-fg: #1f1b20;
+  --btn-bd: rgba(0, 0, 0, .25);
+  --new-bg: #ffb2ce;
+  --new-fg: #2c2628;
+  --new-bd: rgba(0, 0, 0, .25);
+
+  /* Menus déroulants */
+  --menu-bg: #fdfcfd;
+  --menu-fg: #1f1b20;
+  --menu-hover-bg: #ff6ba1;
+  --menu-hover-fg: #5b2337;
+
+  /* Panneau des dossiers */
+  --folders-fg: #e9e5e9;
+  --folders-disabled: #b1a5b7;
+  --folders-sel: rgba(233, 229, 233, .3);
+  --folders-sep: #aa9db0;
+  --badge-bg: #aa9db0;
+  --badge-fg: #3f363f;
+
+  /* Liste des messages */
+  --list-bg: #fdfcfd;
+  --row-bg: #f9f8f9;
+  --row-hover: #f3f1f4;
+  --row-bd: #dfdddf;
+  --row-fg: #1f1b20;
+  --sender: #1f1b20;
+  --date: #817e82;
+  --unread-bg: #fcf8de;
+  --unread-bar: #ffa200;
+  --subunread-bg: #fcf8de;
+  --subunread-bar: #fec459;
+  --sel-bg: #e1f0fe;
+  --sel-bar: #3a90f2;
+  --focus-ring: #3a90f2;
+  --focus-tint: rgba(206, 45, 39, .08);
+  --star: #6b686c;
+  --star-on: #ffa200;
+
+  /* Volet de lecture */
+  --read-bg: #fefefe;
+  --read-fg: #1f1b20;
+
+  /* Bandeaux d'information */
+  --bar-gray: #edecee;
+  --bar-line: #deddde;
+  --danger-bg: #fef1f1;
+  --danger-fg: #b22a37;
+  --info-bg: #f1f8fe;
+  --info-fg: #224e6d;
+  --warn-bg: #fef9f1;
+  --warn-fg: #8a5c00;
+}
+

@@ -57,6 +57,7 @@ make test-race           # avec le détecteur de concurrence, avant toute propos
 make test-js             # contrôles jsdom sur les pages réellement produites
 make test-e2e            # parcours dans Chromium
 make vuln                # govulncheck
+make theme-check         # lisibilité des fonds d'écran dans Chromium (exige make up)
 ```
 
 Le moteur de conteneurs est **podman en émulation docker**. Voir §4 pour ses particularités.
@@ -156,7 +157,9 @@ Ces points ont tous coûté du temps au moins une fois. Ils ne sont pas des bogu
    le port est pris).
 4. Mettre à jour, s'il y a lieu : `CHANGELOG.md`, `SECURITY.md`, `docs/routes.md` (nouvelle route),
    `MATRICE_DE_TEST.md` (nouveau cas à valider), `docs/architecture.md` (nouvel invariant).
-5. Les traductions `fr.json` et `en.json` doivent garder **exactement les mêmes clés** — un test le vérifie —
+5. Nouveau thème copié dans `internal/web/static/themes/` : `make theme-register ECRIRE=1` (vignette,
+   libellés, retrait de `apercu.html`), relire le libellé, puis `make up && make theme-check`.
+6. Les traductions `fr.json` et `en.json` doivent garder **exactement les mêmes clés** — un test le vérifie —
    et les mêmes placeholders `fmt.Sprintf`. Insérez une clé **en place**, sans retrier le fichier : un tri
    accidentel produit un diff de plus de mille lignes qui masque le vrai changement.
 

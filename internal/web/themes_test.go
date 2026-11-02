@@ -2,6 +2,7 @@ package web
 
 import (
 	"io/fs"
+	"os"
 	"regexp"
 	"slices"
 	"sort"
@@ -117,6 +118,35 @@ func TestVariablesDeThemeToutesUtiliseesEtToutesDeclarees(t *testing.T) {
 		if !slices.Contains(declarees, v) && !slices.Contains(varsHorsTheme, v) {
 			t.Errorf("%s est lue par une feuille de style mais déclarée par aucun thème "+
 				"(si c'est une dimension et non une couleur, l'ajouter à varsHorsTheme)", v)
+		}
+	}
+}
+
+// Un thème copié dans static/themes/ n'est pas inscrit dans l'application pour autant : sans libellé, les
+// réglages affichent le nom du dossier ; sans vignette, sa case est le carré gris neutre. Les deux gestes
+// s'oublient, et rien ne les signale à l'usage. tools/themereg les fait ; ce test les exige.
+func TestChaqueThemeAUnLibelleEtUneVignette(t *testing.T) {
+	css, err := staticFS.ReadFile("static/settings-auto.css")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var trads [][]byte
+	for _, f := range []string{"../i18n/locales/fr.json", "../i18n/locales/en.json"} {
+		b, err := os.ReadFile(f)
+		if err != nil {
+			t.Fatal(err)
+		}
+		trads = append(trads, b)
+	}
+	for _, theme := range themesEmbarques(t) {
+		if !strings.Contains(string(css), `.theme-prev[data-theme-prev="`+theme+`"]`) {
+			t.Errorf("thème %s : pas de vignette dans settings-auto.css (go run ./tools/themereg -ecrire)", theme)
+		}
+		for i, b := range trads {
+			if !strings.Contains(string(b), `"theme.`+theme+`"`) {
+				t.Errorf("thème %s : clé theme.%s absente de %s", theme, theme,
+					[]string{"fr.json", "en.json"}[i])
+			}
 		}
 	}
 }

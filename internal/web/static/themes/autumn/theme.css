@@ -1,0 +1,92 @@
+/* Thème « autumn ». Les 65 variables et ce qu'elles peignent : docs/themes.md. */
+:root {
+  color-scheme: dark;
+
+  /* Fond d'écran */
+  /* Voile de lisibilité (voir docs/themes.md) : ce fond est clair là où se posent les noms de
+     dossiers. Le voile tient sa force sur toute la largeur du panneau, puis s'efface au-delà. */
+  --wall: linear-gradient(90deg, rgba(0, 0, 0, 0.20) 0 13%, rgba(0, 0, 0, 0) 30%),
+    url("/themes/autumn/background.svg") left top / cover no-repeat,
+    linear-gradient(160deg, #190200 0%, #332220 100%);
+
+  /* Page de connexion */
+  --login-bg: rgba(0, 0, 0, .5);
+  --login-fg: #eeeeee;
+  --login-border: none;
+  --login-radius: .5rem;
+  --login-shadow: 0 2px 10px rgba(0, 0, 0, .5);
+  --login-title: #dddddd;
+  --login-title-shadow: none;
+  --login-link: #dddddd;
+
+  /* Couleurs de base */
+  --bg: #e9e7e7;
+  --fg: #1a1818;
+  --muted: #807f7f;
+  --card-bg: #fdfcfc;
+  --border: #d4d3d3;
+  --input-bg: #fdfcfc;
+  --accent: #965600;
+  --accent-fg: #ede8e1;
+  --link: #965600;
+
+  /* Barres et boutons */
+  --bar-bg: rgba(0, 0, 0, .35);
+  --bar-fg: #e3e2e1;
+  --toolbar-bg: linear-gradient(#f4f3f3, #dfdede);
+  --btn-bg: linear-gradient(#fdfcfc, #e6e5e5);
+  --btn-hover: #e6e5e5;
+  --btn-fg: #1a1818;
+  --btn-bd: rgba(0, 0, 0, .25);
+  --new-bg: #965600;
+  --new-fg: #ede8e1;
+  --new-bd: rgba(0, 0, 0, .25);
+
+  /* Menus déroulants */
+  --menu-bg: #fdfcfc;
+  --menu-fg: #1a1818;
+  --menu-hover-bg: #a56f26;
+  --menu-hover-fg: #100e0a;
+
+  /* Panneau des dossiers */
+  --folders-fg: #e3e2e1;
+  --folders-disabled: #a39890;
+  --folders-sel: rgba(227, 226, 225, .3);
+  --folders-sep: #9b8f86;
+  --badge-bg: #9b8f86;
+  --badge-fg: #2c2a29;
+
+  /* Liste des messages */
+  --list-bg: #fdfcfc;
+  --row-bg: #f9f8f8;
+  --row-hover: #f4f1f1;
+  --row-bd: #dedddd;
+  --row-fg: #1a1818;
+  --sender: #1a1818;
+  --date: #7e7d7d;
+  --unread-bg: #fcf8de;
+  --unread-bar: #ffa200;
+  --subunread-bg: #fcf8de;
+  --subunread-bar: #fec459;
+  --sel-bg: #c19b67;
+  --sel-bar: #a56f26;
+  --focus-ring: #a56f26;
+  --focus-tint: rgba(206, 45, 39, .08);
+  --star: #686666;
+  --star-on: #ffa200;
+
+  /* Volet de lecture */
+  --read-bg: #fefefe;
+  --read-fg: #1a1818;
+
+  /* Bandeaux d'information */
+  --bar-gray: #edecec;
+  --bar-line: #dddcdc;
+  --danger-bg: #fef1f1;
+  --danger-fg: #b22a37;
+  --info-bg: #f1f8fe;
+  --info-fg: #224e6d;
+  --warn-bg: #fef9f1;
+  --warn-fg: #8a5c00;
+}
+

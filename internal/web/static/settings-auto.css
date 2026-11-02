@@ -122,6 +122,58 @@
     linear-gradient(140deg, #35383c 0%, #26282b 55%, #161719 100%);
 }
 
+/* >>> vignettes produites par tools/themereg : ne pas modifier à la main. */
+.theme-prev[data-theme-prev="autumn"] {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, .45) 0 14px, rgba(0, 0, 0, 0) 14px),
+    radial-gradient(ellipse 70% 60% at 35% 40%, #49312ebf 0%, rgba(0, 0, 0, 0) 100%),
+    linear-gradient(160deg, #190200 0%, #261210 55%, #332220 100%);
+}
+
+.theme-prev[data-theme-prev="guada"] {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, .45) 0 14px, rgba(0, 0, 0, 0) 14px),
+    radial-gradient(ellipse 70% 60% at 35% 40%, #22c6d3bf 0%, rgba(0, 0, 0, 0) 100%),
+    linear-gradient(160deg, #188992 0%, #0c7094 55%, #005896 100%);
+}
+
+.theme-prev[data-theme-prev="jellyfish"] {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, .45) 0 14px, rgba(0, 0, 0, 0) 14px),
+    radial-gradient(ellipse 70% 60% at 35% 40%, #e989f2bf 0%, rgba(0, 0, 0, 0) 100%),
+    linear-gradient(160deg, #5a2c5f 0%, #7d4583 55%, #a15fa7 100%);
+}
+
+.theme-prev[data-theme-prev="jellyfish2"] {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, .45) 0 14px, rgba(0, 0, 0, 0) 14px),
+    radial-gradient(ellipse 70% 60% at 35% 40%, #ffd8d3bf 0%, rgba(0, 0, 0, 0) 100%),
+    linear-gradient(160deg, #b69592 0%, #7e4d51 55%, #460511 100%);
+}
+
+.theme-prev[data-theme-prev="lemon"] {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, .45) 0 14px, rgba(0, 0, 0, 0) 14px),
+    radial-gradient(ellipse 70% 60% at 35% 40%, #ffffa6bf 0%, rgba(0, 0, 0, 0) 100%),
+    linear-gradient(160deg, #f0c943 0%, #f1d25b 55%, #f2db73 100%);
+}
+
+.theme-prev[data-theme-prev="shamrock"] {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, .45) 0 14px, rgba(0, 0, 0, 0) 14px),
+    radial-gradient(ellipse 70% 60% at 35% 40%, #76cd2cbf 0%, rgba(0, 0, 0, 0) 100%),
+    linear-gradient(160deg, #528e1f 0%, #2c5d11 55%, #062c03 100%);
+}
+
+.theme-prev[data-theme-prev="shell"] {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, .45) 0 14px, rgba(0, 0, 0, 0) 14px),
+    radial-gradient(ellipse 70% 60% at 35% 40%, #a59983bf 0%, rgba(0, 0, 0, 0) 100%),
+    linear-gradient(160deg, #695840 0%, #6d614d 55%, #726a5b 100%);
+}
+
+/* <<< fin des vignettes produites par tools/themereg. */
+
 .theme-name {
   display: block;
   min-height: 2.4em; /* toutes les vignettes gardent la même hauteur, même si le nom tient sur deux lignes */

@@ -798,6 +798,19 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
   tester  : déposer une image dans <data_dir>/themes/ciel-crepuscule/background.jpg, recharger
   attendu : votre image passe devant le SVG livré ; la retirer rend le SVG, sans erreur 404 dans la console
   réponse :
+
+[I-23] Les sept thèmes produits par tools/themegen
+  tester  : Réglages > Général ; choisir tour à tour Shamrock, Coquillage, Méduse, Méduse 2, Guada,
+            Automne et Citron ; parcourir liste, lecture, composition et réglages
+  attendu : aucun texte illisible, noms de dossiers et barre du haut lisibles sur le fond,
+            une vignette par thème rappelant sa teinte, un libellé en français dans la liste
+  réponse :
+
+[I-24] Fond d'écran de la page de connexion
+  tester  : se déconnecter, regarder la page de connexion, puis choisir « DarkShine » une fois connecté
+  attendu : l'image du thème s'affiche dans les deux cas ; elle disparaissait quand le thème citait une
+            image personnelle facultative (background.jpg) que personne n'avait posée
+  réponse :
 ```
 
 ## I bis. Téléphone et mode sans JavaScript

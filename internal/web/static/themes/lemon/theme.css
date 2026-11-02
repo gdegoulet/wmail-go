@@ -1,0 +1,93 @@
+/* Thème « lemon ». Les 65 variables et ce qu'elles peignent : docs/themes.md. */
+:root {
+  color-scheme: dark;
+
+  /* Fond d'écran */
+  /* Voile de lisibilité (voir docs/themes.md) : ce fond est clair là où se posent les noms de
+     dossiers. Le voile tient sa force sur toute la largeur du panneau, puis s'efface au-delà. */
+  --wall: linear-gradient(90deg, rgba(0, 0, 0, 0.55) 0 13%, rgba(0, 0, 0, 0) 30%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0 5%, rgba(0, 0, 0, 0) 20%),
+    url("/themes/lemon/background.svg") left top / cover no-repeat,
+    linear-gradient(160deg, #f0c943 0%, #f2db73 100%);
+
+  /* Page de connexion */
+  --login-bg: rgba(0, 0, 0, .5);
+  --login-fg: #eeeeee;
+  --login-border: none;
+  --login-radius: .5rem;
+  --login-shadow: 0 2px 10px rgba(0, 0, 0, .5);
+  --login-title: #dddddd;
+  --login-title-shadow: none;
+  --login-link: #dddddd;
+
+  /* Couleurs de base */
+  --bg: #eaeae8;
+  --fg: #2b281d;
+  --muted: #8a8881;
+  --card-bg: #fdfdfc;
+  --border: #d7d7d4;
+  --input-bg: #fdfdfc;
+  --accent: #a9930c;
+  --accent-fg: #312d1b;
+  --link: #87750a;
+
+  /* Barres et boutons */
+  --bar-bg: rgba(0, 0, 0, .35);
+  --bar-fg: #f5f1e7;
+  --toolbar-bg: linear-gradient(#f5f4f3, #e2e1df);
+  --btn-bg: linear-gradient(#fdfdfc, #e8e8e6);
+  --btn-hover: #e8e8e6;
+  --btn-fg: #2b281d;
+  --btn-bd: rgba(0, 0, 0, .25);
+  --new-bg: #faf1ba;
+  --new-fg: #2c2b27;
+  --new-bd: rgba(0, 0, 0, .25);
+
+  /* Menus déroulants */
+  --menu-bg: #fdfdfc;
+  --menu-fg: #2b281d;
+  --menu-hover-bg: #b6a330;
+  --menu-hover-fg: #3e3a22;
+
+  /* Panneau des dossiers */
+  --folders-fg: #f5f1e7;
+  --folders-disabled: #c1b89f;
+  --folders-sel: rgba(245, 241, 231, .3);
+  --folders-sep: #bbb196;
+  --badge-bg: #bbb196;
+  --badge-fg: #514322;
+
+  /* Liste des messages */
+  --list-bg: #fdfdfc;
+  --row-bg: #f9f9f8;
+  --row-hover: #f4f3f1;
+  --row-bd: #e0e0de;
+  --row-fg: #2b281d;
+  --sender: #2b281d;
+  --date: #888680;
+  --unread-bg: #fcf8de;
+  --unread-bar: #ffa200;
+  --subunread-bg: #fcf8de;
+  --subunread-bar: #fec459;
+  --sel-bg: #f5e266;
+  --sel-bar: #f5e266;
+  --focus-ring: #000000;
+  --focus-tint: rgba(206, 45, 39, .08);
+  --star: #73716a;
+  --star-on: #ffa200;
+
+  /* Volet de lecture */
+  --read-bg: #fefefe;
+  --read-fg: #2b281d;
+
+  /* Bandeaux d'information */
+  --bar-gray: #eeeeec;
+  --bar-line: #e0dfdd;
+  --danger-bg: #fef1f1;
+  --danger-fg: #b22a37;
+  --info-bg: #f1f8fe;
+  --info-fg: #224e6d;
+  --warn-bg: #fef9f1;
+  --warn-fg: #8a5c00;
+}
+

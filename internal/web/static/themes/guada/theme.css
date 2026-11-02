@@ -1,0 +1,93 @@
+/* Thème « guada ». Les 65 variables et ce qu'elles peignent : docs/themes.md. */
+:root {
+  color-scheme: dark;
+
+  /* Fond d'écran */
+  /* Voile de lisibilité (voir docs/themes.md) : ce fond est clair là où se posent les noms de
+     dossiers. Le voile tient sa force sur toute la largeur du panneau, puis s'efface au-delà. */
+  --wall: linear-gradient(90deg, rgba(0, 0, 0, 0.30) 0 13%, rgba(0, 0, 0, 0) 30%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0 5%, rgba(0, 0, 0, 0) 20%),
+    url("/themes/guada/background.svg") left top / cover no-repeat,
+    linear-gradient(160deg, #188992 0%, #005896 100%);
+
+  /* Page de connexion */
+  --login-bg: rgba(0, 0, 0, .5);
+  --login-fg: #eeeeee;
+  --login-border: none;
+  --login-radius: .5rem;
+  --login-shadow: 0 2px 10px rgba(0, 0, 0, .5);
+  --login-title: #dddddd;
+  --login-title-shadow: none;
+  --login-link: #dddddd;
+
+  /* Couleurs de base */
+  --bg: #e8e9e9;
+  --fg: #1a2324;
+  --muted: #808586;
+  --card-bg: #fcfdfd;
+  --border: #d3d6d6;
+  --input-bg: #fcfdfd;
+  --accent: #005896;
+  --accent-fg: #e1e8ed;
+  --link: #005896;
+
+  /* Barres et boutons */
+  --bar-bg: rgba(0, 0, 0, .35);
+  --bar-fg: #e3eced;
+  --toolbar-bg: linear-gradient(#f3f4f4, #dfe1e1);
+  --btn-bg: linear-gradient(#fcfdfd, #e5e7e7);
+  --btn-hover: #e5e7e7;
+  --btn-fg: #1a2324;
+  --btn-bd: rgba(0, 0, 0, .25);
+  --new-bg: #005896;
+  --new-fg: #e1e8ed;
+  --new-bd: rgba(0, 0, 0, .25);
+
+  /* Menus déroulants */
+  --menu-bg: #fcfdfd;
+  --menu-fg: #1a2324;
+  --menu-hover-bg: #2671a5;
+  --menu-hover-fg: #e9eef2;
+
+  /* Panneau des dossiers */
+  --folders-fg: #e3eced;
+  --folders-disabled: #a0b7bd;
+  --folders-sel: rgba(227, 236, 237, .3);
+  --folders-sep: #98b0b7;
+  --badge-bg: #98b0b7;
+  --badge-fg: #2e4447;
+
+  /* Liste des messages */
+  --list-bg: #fcfdfd;
+  --row-bg: #f8f9f9;
+  --row-hover: #f1f4f4;
+  --row-bd: #dddfdf;
+  --row-fg: #1a2324;
+  --sender: #1a2324;
+  --date: #7e8384;
+  --unread-bg: #fcf8de;
+  --unread-bar: #ffa200;
+  --subunread-bg: #fcf8de;
+  --subunread-bar: #fec459;
+  --sel-bg: #e1f0fe;
+  --sel-bar: #3a90f2;
+  --focus-ring: #3a90f2;
+  --focus-tint: rgba(206, 45, 39, .08);
+  --star: #686e6f;
+  --star-on: #ffa200;
+
+  /* Volet de lecture */
+  --read-bg: #fefefe;
+  --read-fg: #1a2324;
+
+  /* Bandeaux d'information */
+  --bar-gray: #eceeee;
+  --bar-line: #dcdedf;
+  --danger-bg: #fef1f1;
+  --danger-fg: #b22a37;
+  --info-bg: #f1f8fe;
+  --info-fg: #224e6d;
+  --warn-bg: #fef9f1;
+  --warn-fg: #8a5c00;
+}
+

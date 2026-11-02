@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"math"
@@ -12,11 +13,17 @@ import (
 // endroits exprès ; sur une photo quelconque, rien ne garantit que les noms de dossiers restent lisibles —
 // ils disparaissent dès que la photo est claire à gauche.
 //
-// voiler assombrit donc une bande à gauche et une bande en haut, par un dégradé qui s'efface vers
-// l'intérieur. Les proportions reprennent celles des fonds livrés : 520 et 190 pixels sur 1920 × 1080.
+// voiler assombrit donc une bande à gauche et une bande en haut. Le voile tient sa force sur toute la zone
+// où le texte se pose, puis s'efface au-delà : s'il commençait à décroître dès le bord, les derniers noms de
+// dossiers — ceux qui touchent le bord droit du panneau — ne recevraient presque rien.
+//
+// Les zones de texte sont celles de l'interface : --folders-w vaut 17,643 rem et --bar-h 3,571 rem, soit
+// 248 et 50 pixels à 14 px. L'effacement court jusqu'à 30 % et 20 % de l'image.
 const (
-	partGauche = 520.0 / 1920 // largeur de la bande gauche, en fraction de la largeur
-	partHaute  = 190.0 / 1080 // hauteur de la bande haute, en fraction de la hauteur
+	partGauche = 248.0 / 1920 // largeur du panneau des dossiers, en fraction de la largeur
+	partHaute  = 50.0 / 1080  // hauteur de la barre du haut, en fraction de la hauteur
+	finGauche  = 0.30         // le voile gauche est nul au-delà de cette fraction de la largeur
+	finHaute   = 0.20         // le voile haut est nul au-delà de cette fraction de la hauteur
 )
 
 // BandesLuminance rend, pour la bande gauche et pour la bande haute, la luminance du 90e centile — et non
@@ -65,21 +72,28 @@ func luminanceZone(img image.Image, z image.Rectangle) float64 {
 func Voiler(src image.Image, force float64) image.Image {
 	b := src.Bounds()
 	out := image.NewRGBA(b)
-	largeur := math.Max(1, float64(b.Dx())*partGauche)
-	hauteur := math.Max(1, float64(b.Dy())*partHaute)
+	plateauX := math.Max(1, float64(b.Dx())*partGauche)
+	plateauY := math.Max(1, float64(b.Dy())*partHaute)
+	finX := math.Max(plateauX+1, float64(b.Dx())*finGauche)
+	finY := math.Max(plateauY+1, float64(b.Dy())*finHaute)
+
+	// Plein régime sur la zone de texte, puis décroissance en cosinus plutôt que linéaire : la transition
+	// est invisible à l'œil, là où une rampe droite laisse voir l'arête au point où elle s'arrête.
+	part := func(d, plateau, fin float64) float64 {
+		switch {
+		case d <= plateau:
+			return 1
+		case d >= fin:
+			return 0
+		default:
+			return (math.Cos((d-plateau)/(fin-plateau)*math.Pi) + 1) / 2
+		}
+	}
 
 	for y := b.Min.Y; y < b.Max.Y; y++ {
-		// Décroissance en cosinus plutôt que linéaire : la transition est invisible à l'œil, là où une
-		// rampe droite laisse voir l'arête au point où elle s'arrête.
-		fy := 0.0
-		if d := float64(y - b.Min.Y); d < hauteur {
-			fy = (math.Cos(d/hauteur*math.Pi) + 1) / 2
-		}
+		fy := part(float64(y-b.Min.Y), plateauY, finY)
 		for x := b.Min.X; x < b.Max.X; x++ {
-			fx := 0.0
-			if d := float64(x - b.Min.X); d < largeur {
-				fx = (math.Cos(d/largeur*math.Pi) + 1) / 2
-			}
+			fx := part(float64(x-b.Min.X), plateauX, finX)
 			// Les deux bandes se recouvrent dans le coin : on prend la plus forte, pas leur somme, sinon
 			// le coin vire au noir franc.
 			f := math.Max(fx, fy) * force
@@ -115,4 +129,21 @@ func ForceDuVoile(bande float64, texte Couleur, vise float64) float64 {
 		}
 	}
 	return plafond
+}
+
+// VoileCSS rend les couches de dégradé qui assombrissent la bande gauche et la bande haute **dans la pile
+// `--wall`**, sans toucher au fichier d'image.
+//
+// C'est la seule voie pour un SVG : le rasteriser pour y peindre un voile le dénaturerait, et rien dans Go ne
+// le dessine. Les deux couches passent devant l'image parce qu'elles sont écrites avant elle dans la pile.
+// Chaque couche tient sur une ligne : dropMissingWallpaper travaille ligne par ligne, et une couche coupée en
+// deux lui échapperait.
+func VoileCSS(force float64) string {
+	if force <= 0 {
+		return ""
+	}
+	return fmt.Sprintf(
+		"linear-gradient(90deg, rgba(0, 0, 0, %.2f) 0 %.0f%%, rgba(0, 0, 0, 0) %.0f%%),\n    "+
+			"linear-gradient(180deg, rgba(0, 0, 0, %.2f) 0 %.0f%%, rgba(0, 0, 0, 0) %.0f%%),\n    ",
+		force, partGauche*100, finGauche*100, force, partHaute*100, finHaute*100)
 }
