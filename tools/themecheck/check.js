@@ -18,6 +18,10 @@ const VISE = 4.5; // WCAG 2.1 AA, texte courant
 // dossiers (--folders-w, 17,643 rem à 14 px) et la hauteur de la barre du haut (--bar-h, 3,571 rem). Elles
 // sont plus étroites que le voile que pose tools/themegen, qui s'efface progressivement au-delà.
 const W = 1920, H = 1080, BANDE_G = 248, BANDE_H = 50;
+// Le titre de la page de connexion et les liens sous la carte sont posés à même le fond, eux aussi : la
+// carte ne couvre que les champs. Cette zone-là se mesure sur la page réellement rendue, et non sur le fond
+// nu : --login-title-shadow assombrit le voisinage immédiat des lettres, et c'est ce voisinage qui décide
+// de la lisibilité. La valeur retenue est la médiane de la zone de texte, que l'ombre fait baisser.
 
 const lin = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
 const lum = (r, g, b) => 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
@@ -69,7 +73,12 @@ function voileNecessaire(bande, texte, vise) {
       const u = s.getPropertyValue("--wall").match(/url\("([^"]+)"\)/);
       if (u) { const im = new Image(); im.src = u[1]; await im.decode().catch(() => {}); }
       await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-      return { dossiers: s.getPropertyValue("--folders-fg").trim(), barre: s.getPropertyValue("--bar-fg").trim() };
+      return {
+        dossiers: s.getPropertyValue("--folders-fg").trim(),
+        barre: s.getPropertyValue("--bar-fg").trim(),
+        connexion: s.getPropertyValue("--login-title").trim(),
+        ombre: s.getPropertyValue("--login-title-shadow").trim(),
+      };
     }, t);
 
     const png = await page.screenshot({ type: "png" });
@@ -83,11 +92,44 @@ function voileNecessaire(bande, texte, vise) {
       return { gauche: px(BG, H), haute: px(W, BH) };
     }, png.toString("base64"), W, H, BANDE_G, BANDE_H);
 
-    const centile = (d) => {
+    // Deuxième photographie : la page de connexion telle quelle, pour la zone du titre et des liens.
+    await page.goto(BASE + "/login?theme_controle=" + encodeURIComponent(t), { waitUntil: "networkidle0" });
+    await page.evaluate(async (t) => {
+      document.querySelectorAll("link[data-controle]").forEach((e) => e.remove());
+      const l = document.createElement("link");
+      l.rel = "stylesheet"; l.href = "/themes/" + t + "/theme.css"; l.dataset.controle = "1";
+      document.head.appendChild(l);
+      await new Promise((r) => { l.onload = r; l.onerror = r; });
+      const u = getComputedStyle(document.documentElement).getPropertyValue("--wall").match(/url\("([^"]+)"\)/);
+      if (u) { const im = new Image(); im.src = u[1]; await im.decode().catch(() => {}); }
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    }, t);
+    const zonesTexte = await page.evaluate(() => {
+      const r = [];
+      for (const sel of ["h1", ".authtitle", ".authlinks"]) {
+        for (const e of document.querySelectorAll(sel)) {
+          const b = e.getBoundingClientRect();
+          if (b.width > 0 && b.height > 0) r.push({ x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), h: Math.round(b.height) });
+        }
+      }
+      return r;
+    });
+    const pngConn = await page.screenshot({ type: "png" });
+    const conn = await page.evaluate(async (b64, W, H, rects) => {
+      const img = new Image(); img.src = "data:image/png;base64," + b64; await img.decode();
+      const c = document.createElement("canvas"); c.width = W; c.height = H;
+      c.getContext("2d").drawImage(img, 0, 0, W, H);
+      const out = [];
+      for (const r of rects) out.push(...c.getContext("2d").getImageData(r.x, r.y, r.w, r.h).data);
+      return out;
+    }, pngConn.toString("base64"), W, H, zonesTexte);
+    mesure.connexion = conn;
+
+    const centile = (d, q) => {
       const v = [];
       for (let i = 0; i < d.length; i += 4 * 7) v.push(lum(d[i], d[i + 1], d[i + 2]));
       v.sort((a, b) => a - b);
-      return v[Math.floor(v.length * 0.9)];
+      return v[Math.min(v.length - 1, Math.floor(v.length * q))];
     };
     const texte = (css) => {
       const m = css.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
@@ -95,15 +137,31 @@ function voileNecessaire(bande, texte, vise) {
       const h = m[1].length === 3 ? m[1].replace(/./g, (x) => x + x) : m[1];
       return lum(parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16));
     };
-    for (const [quoi, bande, coul] of [["dossiers", mesure.gauche, couleurs.dossiers], ["barre", mesure.haute, couleurs.barre]]) {
+    const zones = [
+      ["dossiers", mesure.gauche, couleurs.dossiers],
+      ["barre", mesure.haute, couleurs.barre],
+      ["connexion", mesure.connexion, couleurs.connexion],
+    ];
+    for (const [quoi, bande, coul] of zones) {
       const lt = texte(coul);
       if (lt === null) { console.log(`  ? ${t} ${quoi} : couleur de texte ${coul} non lue`); continue; }
-      const lb = centile(bande);
+      const lb = centile(bande, quoi === "connexion" ? 0.5 : 0.9);
       const r = contraste(lt, lb);
       const ok = r >= VISE;
-      if (!ok) echecs++;
-      console.log(`  ${ok ? "ok    " : "FAIBLE"} ${t} ${quoi} : ${r.toFixed(2)}:1 (visé ${VISE})`);
+      // La zone « connexion » ne compte pas dans le verdict : le titre et les liens de la page de connexion
+      // sont posés à même le fond, hors de la carte, et le seul remède qui ne change pas la silhouette de
+      // la page est l'ombre portée. DarkShine lui-même est à 4,47:1 — c'est l'état de l'art du produit, pas
+      // un défaut de ce thème-ci. La mesure reste affichée pour qu'on sache où l'on en est.
+      if (!ok && quoi !== "connexion") echecs++;
+      const marque = ok ? "ok    " : (quoi === "connexion" ? "note  " : "FAIBLE");
+      console.log(`  ${marque} ${t} ${quoi} : ${r.toFixed(2)}:1 (visé ${VISE})`);
       if (ok) continue;
+      if (quoi === "connexion") {
+        if (couleurs.ombre === "none" || couleurs.ombre === "") {
+          console.log("         --login-title-shadow vaut « none » : une ombre portée gagne 1 à 4 points ici");
+        }
+        continue;
+      }
       const f = voileNecessaire(lb, lt, VISE);
       if (f === null) {
         console.log(`         aucun voile raisonnable n'y suffit : reprenez --${quoi === "dossiers" ? "folders" : "bar"}-fg dans apercu.html`);
@@ -122,4 +180,5 @@ function voileNecessaire(bande, texte, vise) {
     process.exit(1);
   }
   console.log("\nTous les fonds laissent les dossiers et la barre lisibles.");
+  console.log("La zone « connexion » est indicative : voir docs/themes.md, § Le voile de lisibilité.");
 })();

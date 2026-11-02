@@ -312,9 +312,8 @@ func (s *Server) settingsPage(sess *session.Session) *Page {
 	if !s.i18n.Has(p.Prefs.Language) {
 		p.Prefs.Language = s.cfg.DefaultLanguage
 	}
-	if !s.themeExists(p.Prefs.Theme) {
-		p.Prefs.Theme = s.cfg.DefaultTheme
-	}
+	// Le thème non choisi est réglé par prepare(), qui seul connaît celui que la page affiche : avec
+	// default_theme = « random », ce n'est pas une valeur de config mais le tirage de cette requête.
 	if p.Prefs.PageSize < 10 {
 		p.Prefs.PageSize = 50
 	}

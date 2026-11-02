@@ -13,6 +13,7 @@ import (
 	"html/template"
 	"io/fs"
 	"log/slog"
+	"math/rand/v2"
 	"net"
 	"net/http"
 	"net/url"
@@ -96,7 +97,14 @@ func New(cfg config.Config, st *store.Store, log *slog.Logger) (*Server, error) 
 		}
 		s.pages[name] = t
 	}
-	if !s.themeExists(cfg.DefaultTheme) {
+	if cfg.DefaultTheme == ThemeAleatoire {
+		// « random » est un mot réservé : un dossier de thème qui porterait ce nom ne serait plus
+		// atteignable, et le réglage deviendrait ambigu. Mieux vaut le dire au démarrage.
+		if s.themeExists(ThemeAleatoire) {
+			return nil, fmt.Errorf("default_theme %q : ce nom est réservé au tirage au sort, "+
+				"mais un thème porte ce nom ; renommez le dossier", ThemeAleatoire)
+		}
+	} else if !s.themeExists(cfg.DefaultTheme) {
 		return nil, fmt.Errorf("default_theme %q : thème introuvable", cfg.DefaultTheme)
 	}
 	return s, nil
@@ -833,6 +841,10 @@ func (s *Server) setLang(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, next, http.StatusSeeOther)
 }
 
+// ThemeAleatoire est la valeur de default_theme qui fait tirer un thème au sort à chaque page, tant que
+// l'utilisateur n'en a pas choisi un. C'est un mot réservé : aucun thème ne peut porter ce nom.
+const ThemeAleatoire = "random"
+
 func (s *Server) theme(sess *session.Session) string {
 	if sess != nil {
 		sess.Mu.Lock()
@@ -842,7 +854,23 @@ func (s *Server) theme(sess *session.Session) string {
 			return t
 		}
 	}
+	if s.cfg.DefaultTheme == ThemeAleatoire {
+		return s.themeAuHasard()
+	}
 	return s.cfg.DefaultTheme
+}
+
+// themeAuHasard tire un thème parmi ceux qui existent. Le tirage vaut pour la page entière : theme() n'est
+// appelée qu'une fois par requête, sans quoi la feuille de style et l'attribut data-theme ne diraient pas
+// la même chose.
+func (s *Server) themeAuHasard() string {
+	noms := s.themeNames()
+	if len(noms) == 0 {
+		// Ne peut arriver qu'avec un binaire dont les thèmes embarqués ont disparu ; mieux vaut une page
+		// sans thème qu'une adresse qui renverrait 404.
+		return ""
+	}
+	return noms[rand.IntN(len(noms))]
 }
 
 // userLoc donne le fuseau horaire d'affichage des dates : celui de l'utilisateur, à défaut celui de config.json, à défaut
@@ -870,6 +898,11 @@ func (s *Server) prepare(r *http.Request, sess *session.Session, p *Page) {
 	p.bundle = s.i18n
 	p.Lang = s.lang(r, sess)
 	p.Theme = s.theme(sess)
+	// Le formulaire des réglages doit cocher ce que la page montre : sans choix enregistré, et avec
+	// default_theme = « random », le thème affiché est celui du tirage, et non une valeur de config.
+	if !s.themeExists(p.Prefs.Theme) {
+		p.Prefs.Theme = p.Theme
+	}
 	p.AllowRegistration = s.cfg.AllowRegistration
 	if sess == nil {
 		p.Langs = s.langChoices(p.Lang)

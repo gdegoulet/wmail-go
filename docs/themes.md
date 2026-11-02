@@ -30,7 +30,10 @@ Contraintes :
   Sans elle, c'est le nom du dossier qui s'affiche — acceptable pour un thème personnel.
 
 Le thème par défaut, celui de la page de connexion et des comptes qui n'ont rien choisi, est
-`default_theme` dans `config.json`. Attention : `config.Load` part des valeurs par défaut du code **puis**
+`default_theme` dans `config.json`. La valeur **`random`** y tire un thème au sort à chaque page, parmi ceux
+qui existent — embarqués et posés dans `<data_dir>/themes/`. Le tirage vaut pour la page entière, et cesse
+dès que l'utilisateur choisit un thème dans ses réglages. C'est un mot réservé : si un dossier de thème
+porte ce nom, le serveur refuse de démarrer plutôt que de rendre le réglage ambigu. Attention : `config.Load` part des valeurs par défaut du code **puis**
 le fichier monté les écrase. Changer la valeur par défaut dans `internal/config/config.go` ne touche donc
 que les instances neuves.
 
@@ -88,6 +91,21 @@ ceux qui touchent le bord droit du panneau.
 `make theme-check` mesure ces deux zones dans Chromium, fond réellement peint, et donne la ligne à poser
 quand le contraste tombe sous 4,5:1. C'est le seul contrôle de thème qui demande un navigateur ; il exige
 `make up`.
+
+### Le titre de la page de connexion
+
+Troisième zone, mesurée elle aussi, mais **indicative** : le titre, le sous-titre et les liens de la page de
+connexion sont posés à même le fond, hors de la carte — seule la carte a `--login-bg`. Sur une image claire
+au centre, ils passent sous le seuil.
+
+Le remède retenu est `--login-title-shadow`, une ombre portée qui détache les lettres sans assombrir l'image
+autour, et qui ne se voit pas sur un fond sombre. `tools/themegen` la pose sur tout thème déduit d'une image.
+Elle gagne 1 à 4 points de contraste, ce qui ne suffit pas partout.
+
+Ce qui reste n'est pas corrigé, et c'est un choix : couvrir le centre de l'image reviendrait à cacher ce
+qu'on est venu montrer, et poser un fond derrière le bloc entier changerait la silhouette de la page, que le
+projet reprend de RainLoop. `rainloop` lui-même est à 4,47:1 — son image est sombre au centre, c'est tout ce
+qui le sauve. `make theme-check` affiche donc cette zone en « note » et ne la compte pas dans son verdict.
 
 ---
 

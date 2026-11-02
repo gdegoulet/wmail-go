@@ -1,13 +1,18 @@
 package web
 
 import (
+	"io"
 	"io/fs"
+	"log/slog"
 	"os"
+	"path/filepath"
 	"regexp"
 	"slices"
 	"sort"
 	"strings"
 	"testing"
+
+	"github.com/gdegoulet/wmail-go/internal/config"
 )
 
 // Variables CSS qui ne relèvent pas du thème et n'ont donc pas à y figurer : des dimensions, réglées par
@@ -148,5 +153,51 @@ func TestChaqueThemeAUnLibelleEtUneVignette(t *testing.T) {
 					[]string{"fr.json", "en.json"}[i])
 			}
 		}
+	}
+}
+
+// default_theme = « random » fait tirer un thème au sort à chaque page, tant que l'utilisateur n'en a pas
+// choisi un : c'est ce que voit le visiteur sur la page de connexion.
+func TestThemeAleatoireSurLaPageDeConnexion(t *testing.T) {
+	e := newEnv(t, func(c *config.Config) { c.DefaultTheme = ThemeAleatoire })
+	connus := map[string]bool{}
+	for _, n := range e.srv.themeNames() {
+		connus[n] = true
+	}
+	vus := map[string]bool{}
+	for i := 0; i < 60; i++ {
+		_, body := e.do(e.client(), "GET", "/login", nil, nil)
+		m := regexp.MustCompile(`<link rel="stylesheet" href="/themes/([a-z0-9_-]+)/theme\.css">`).FindStringSubmatch(body)
+		if m == nil {
+			t.Fatalf("aucune feuille de thème dans la page de connexion")
+		}
+		if !connus[m[1]] {
+			t.Fatalf("thème tiré %q : inconnu", m[1])
+		}
+		// La feuille et l'attribut doivent désigner le même thème : deux appels au tirage dans la même
+		// page donneraient une page peinte par l'un et annoncée comme l'autre.
+		if !strings.Contains(body, `data-theme="`+m[1]+`"`) {
+			t.Fatalf("thème %q dans la feuille, autre valeur dans data-theme", m[1])
+		}
+		vus[m[1]] = true
+	}
+	// 60 tirages parmi au moins deux thèmes : tomber 60 fois sur le même vaut une chance sur 2^59.
+	if len(vus) < 2 && len(connus) > 1 {
+		t.Errorf("60 pages de connexion, un seul thème tiré : %v", vus)
+	}
+}
+
+// Un thème nommé « random » rendrait le réglage ambigu : le serveur doit refuser de démarrer.
+func TestThemeNommeRandomRefuseAuDemarrage(t *testing.T) {
+	e := newEnv(t, func(c *config.Config) { c.DefaultTheme = ThemeAleatoire })
+	dir := filepath.Join(e.cfg.DataDir, "themes", ThemeAleatoire)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "theme.css"), []byte(":root{--bg:#000}"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := New(e.cfg, e.srv.store, slog.New(slog.NewTextHandler(io.Discard, nil))); err == nil {
+		t.Error("un thème nommé « random » doit être refusé au démarrage")
 	}
 }

@@ -806,6 +806,13 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
             une vignette par thème rappelant sa teinte, un libellé en français dans la liste
   réponse :
 
+[I-25] Thème tiré au sort sur la page de connexion
+  tester  : mettre "default_theme": "random" dans config.json, redémarrer, recharger /login dix fois ;
+            puis se connecter avec un compte qui a choisi un thème
+  attendu : un thème différent à chaque chargement, image et couleurs cohérentes entre elles ;
+            le compte qui a choisi un thème garde le sien, sans tirage
+  réponse :
+
 [I-24] Fond d'écran de la page de connexion
   tester  : se déconnecter, regarder la page de connexion, puis choisir « DarkShine » une fois connecté
   attendu : l'image du thème s'affiche dans les deux cas ; elle disparaissait quand le thème citait une

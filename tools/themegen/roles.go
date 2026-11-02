@@ -131,7 +131,11 @@ func Construire(nom string, p Palette, panneauxSombres bool, fondURL string) *Th
 			libre("--login-radius", ".5rem", "arrondi de la carte"),
 			libre("--login-shadow", "0 2px 10px "+Couleur{0, 0, 0}.RGBA(.5), "ombre portée de la carte"),
 			coul("--login-title", Couleur{221, 221, 221}, "titre « Connexion »"),
-			libre("--login-title-shadow", "none", "ombre du titre"),
+			// Le titre et les liens de la page de connexion sont posés à même le fond d'écran, hors de la
+			// carte : sur une image claire ils disparaissent. L'ombre portée les détache sans assombrir
+			// l'image autour, et ne se voit pas sur un fond sombre. Elle est donc toujours posée.
+			libre("--login-title-shadow", "0 1px 2px rgba(0, 0, 0, 1), 0 0 6px rgba(0, 0, 0, .95),\n    "+
+				"0 0 14px rgba(0, 0, 0, .9), 0 0 26px rgba(0, 0, 0, .8)", "ombre du titre"),
 			coul("--login-link", Couleur{221, 221, 221}, "liens sous le formulaire"),
 		}},
 		{"Couleurs de base", []Variable{

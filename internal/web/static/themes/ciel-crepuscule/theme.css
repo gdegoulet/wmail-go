@@ -19,7 +19,10 @@
   --login-radius: .5rem;
   --login-shadow: 0 2px 10px rgba(0, 0, 0, .5);
   --login-title: #dddddd;
-  --login-title-shadow: none;
+  /* Le titre et les liens de la page de connexion sont posés à même le fond : une ombre portée les
+     détache sans assombrir l'image, là où un voile couvrirait ce qu'on est venu montrer. */
+  --login-title-shadow: 0 1px 2px rgba(0, 0, 0, 1), 0 0 6px rgba(0, 0, 0, .95),
+    0 0 14px rgba(0, 0, 0, .9), 0 0 26px rgba(0, 0, 0, .8);
   --login-link: #dddddd;
 
   /* Couleurs de base */
