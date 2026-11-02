@@ -455,8 +455,12 @@ func TestThemeCSS(t *testing.T) {
 	if !strings.Contains(body, "#abcdef") {
 		t.Error("thème externe non servi")
 	}
-	if names := e.srv.themeNames(); strings.Join(names, ",") != "ciel-crepuscule,custom,dark,light,mer-de-nuages-crepuscule,rainloop" {
-		t.Errorf("thèmes %v", names)
+	// Attendu calculé, et non écrit à la main : un thème copié dans static/themes/ ne doit pas faire
+	// échouer ce test, seulement les contrôles qui portent vraiment sur lui (libellé, variables, vignette).
+	attendu := append(themesEmbarques(t), "custom")
+	slices.Sort(attendu)
+	if names := e.srv.themeNames(); !slices.Equal(names, attendu) {
+		t.Errorf("thèmes %v, attendu %v", names, attendu)
 	}
 }
 
@@ -589,18 +593,32 @@ func TestSafeNext(t *testing.T) {
 // d'après la feuille qui l'utilise (/static/app.css), pas d'après le fichier du thème. Un thème qui copie
 // un autre thème doit aussi avoir corrigé les chemins, sans quoi il afficherait le fond de l'original.
 func TestThemeImageURLsAreAbsolute(t *testing.T) {
-	for _, theme := range []string{"rainloop", "ciel-crepuscule", "mer-de-nuages-crepuscule"} {
+	// Tous les thèmes embarqués, et non une liste écrite à la main : un thème produit par
+	// tools/themegen puis copié ici doit être contrôlé sans qu'on ait pensé à l'inscrire.
+	re := regexp.MustCompile(`url\("([^"]*)"\)`)
+	for _, theme := range themesEmbarques(t) {
 		css, err := staticFS.ReadFile("static/themes/" + theme + "/theme.css")
 		if err != nil {
 			t.Fatal(err)
 		}
-		for _, want := range []string{`url("/themes/` + theme + `/background.jpg")`, `url("/themes/` + theme + `/background.svg")`} {
-			if !strings.Contains(string(css), want) {
-				t.Errorf("%s absent du thème %s", want, theme)
+		trouve := 0
+		for _, m := range re.FindAllStringSubmatch(string(css), -1) {
+			trouve++
+			prefixe := "/themes/" + theme + "/"
+			if !strings.HasPrefix(m[1], prefixe) {
+				t.Errorf("thème %s : %q n'est pas sous %s ; une URL relative serait résolue depuis /static/",
+					theme, m[1], prefixe)
+				continue
+			}
+			// La cible doit exister ici ou pouvoir être posée dans data/themes/ : seuls les noms
+			// background.<ext> sont servis par /themes/<nom>/<fichier>.
+			fichier := strings.TrimPrefix(m[1], prefixe)
+			if !strings.HasPrefix(fichier, "background.") {
+				t.Errorf("thème %s : %q ne sera pas servi, seul background.<ext> l'est", theme, fichier)
 			}
 		}
-		if strings.Contains(string(css), `url("background.`) {
-			t.Errorf("URL relative dans le thème %s : elle serait résolue depuis /static/", theme)
+		if trouve == 0 && theme != "light" && theme != "dark" {
+			t.Errorf("thème %s : aucune image de fond", theme)
 		}
 	}
 }
@@ -634,10 +652,10 @@ func TestThemesCopiesDeDarkShine(t *testing.T) {
 // Le fond livré doit être un SVG autonome : pas de script, pas de requête vers l'extérieur. Il est servi par
 // /themes/<nom>/background.svg et chargé comme image de fond, mais la règle vaut aussi pour ce qu'il embarque.
 func TestFondsLivresSansScriptNiAppelExterne(t *testing.T) {
-	for _, theme := range []string{"rainloop", "ciel-crepuscule", "mer-de-nuages-crepuscule"} {
+	for _, theme := range themesEmbarques(t) {
 		svg, err := staticFS.ReadFile("static/themes/" + theme + "/background.svg")
 		if err != nil {
-			t.Fatal(err)
+			continue // ce thème ne livre pas de SVG
 		}
 		corps := string(svg)
 		for _, interdit := range []string{"<script", "javascript:", "<foreignObject", "<image", "xlink:href", "<use"} {
@@ -667,11 +685,16 @@ func TestThemeDropsMissingWallpaper(t *testing.T) {
 	e := newEnv(t, nil)
 	c, _ := e.loggedIn("alice")
 	_, css := e.do(c, "GET", "/themes/rainloop/theme.css", nil, nil)
-	if strings.Contains(css, "background.jpg") {
+	if strings.Contains(css, `url("/themes/rainloop/background.jpg")`) {
 		t.Error("la couche background.jpg doit disparaître quand le fichier n'existe pas")
 	}
 	if !strings.Contains(css, "background.svg") {
 		t.Error("l'image livrée doit rester référencée")
+	}
+	// Le retrait de la première couche emportait « --wall: » avec elle : la déclaration devenait invalide
+	// et le fond d'écran disparaissait partout, page de connexion comprise.
+	if !strings.Contains(css, `--wall: url("/themes/rainloop/background.svg")`) {
+		t.Errorf("déclaration --wall cassée par le retrait de la couche absente :\n%s", extraitWall(css))
 	}
 	dir := filepath.Join(e.cfg.DataDir, "themes", "rainloop")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
@@ -684,4 +707,17 @@ func TestThemeDropsMissingWallpaper(t *testing.T) {
 	if !strings.Contains(css, "background.jpg") {
 		t.Error("l'image personnelle doit être référencée dès qu'elle existe")
 	}
+}
+
+// extraitWall rend la déclaration --wall d'une feuille, pour que l'échec d'un test la montre.
+func extraitWall(css string) string {
+	i := strings.Index(css, "--wall")
+	if i < 0 {
+		return "(aucune déclaration --wall)"
+	}
+	j := strings.Index(css[i:], ";")
+	if j < 0 {
+		j = len(css) - i - 1
+	}
+	return css[i : i+j+1]
 }

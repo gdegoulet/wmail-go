@@ -477,33 +477,103 @@ var themeFileRe = regexp.MustCompile(`^(theme\.css|background\.(jpe?g|png|webp|s
 // themeFile sert theme.css (dossier externe d'abord, puis thème embarqué) et l'image de fond background.* du dossier externe
 // <data_dir>/themes/<nom>/ : chacun peut y poser sa propre image sans recompiler.
 //
-// dropMissingWallpaper retire du thème les couches d'image que personne n'a posées : sans cela le navigateur
-// demanderait un fichier absent et noterait une erreur 404 dans sa console. Une couche est gardée dès que
+// dropMissingWallpaper retire de --wall les couches d'image que personne n'a posées : sans cela le navigateur
+// demanderait un fichier absent et noterait une erreur 404 dans sa console.
+//
+// Le découpage se fait couche par couche, et non ligne par ligne : --wall tient sur plusieurs lignes, et sa
+// première couche est l'image personnelle, facultative. Retirer cette ligne-là emportait « --wall: » avec
+// elle et laissait des couches orphelines — déclaration invalide, donc plus aucun fond d'écran, sur la page
+// de connexion comme ailleurs.
+func dropMissingWallpaper(css []byte, dataDir, theme string) []byte {
+	s := string(css)
+	i := strings.Index(s, "--wall:")
+	if i < 0 {
+		return css
+	}
+	j := strings.Index(s[i:], ";")
+	if j < 0 {
+		return css
+	}
+	j += i
+
+	var gardees []string
+	couches := couchesDeFond(s[i+len("--wall:") : j])
+	for _, c := range couches {
+		if couchePerdue(c, dataDir, theme) {
+			continue
+		}
+		gardees = append(gardees, c)
+	}
+	if len(gardees) == len(couches) {
+		return css
+	}
+	if len(gardees) == 0 {
+		// Plus une seule couche : la déclaration entière s'en va, et app.css retombe sur var(--bg).
+		// « --wall: ; » ne serait pas une valeur valide.
+		return []byte(s[:i] + s[j+1:])
+	}
+	return []byte(s[:i] + "--wall: " + strings.Join(gardees, ",\n    ") + s[j:])
+}
+
+// couchesDeFond découpe la valeur de --wall en couches : les virgules qui séparent les couches sont celles
+// de profondeur zéro, et non celles de rgba(…) ou de linear-gradient(…). Les commentaires sont retirés
+// d'abord : ils contiennent des virgules, et n'ont aucun sens une fois la valeur recomposée.
+func couchesDeFond(val string) []string {
+	var sansCommentaires strings.Builder
+	for reste := val; reste != ""; {
+		i := strings.Index(reste, "/*")
+		if i < 0 {
+			sansCommentaires.WriteString(reste)
+			break
+		}
+		sansCommentaires.WriteString(reste[:i])
+		j := strings.Index(reste[i:], "*/")
+		if j < 0 {
+			break
+		}
+		reste = reste[i+j+2:]
+	}
+
+	var couches []string
+	profondeur, debut := 0, 0
+	v := sansCommentaires.String()
+	for k, r := range v {
+		switch r {
+		case '(':
+			profondeur++
+		case ')':
+			profondeur--
+		case ',':
+			if profondeur == 0 {
+				couches = append(couches, strings.TrimSpace(v[debut:k]))
+				debut = k + 1
+			}
+		}
+	}
+	if c := strings.TrimSpace(v[debut:]); c != "" {
+		couches = append(couches, c)
+	}
+	return couches
+}
+
+// couchePerdue dit si cette couche cite une image que personne n'a posée. Une couche est gardée dès que
 // l'image existe **quelque part** — dans data/themes/<thème>/, posée par l'utilisateur, ou dans le thème
 // embarqué. Ne regarder que le volume reviendrait à effacer le fond d'un thème livré avec son image, ce qui
 // est précisément ce que produit tools/themegen à partir d'une photo.
-func dropMissingWallpaper(css []byte, dataDir, theme string) []byte {
-	var keep []string
-	for _, line := range strings.Split(string(css), "\n") {
-		drop := false
-		for _, ext := range []string{"jpg", "jpeg", "png", "webp"} {
-			ref := "/themes/" + theme + "/background." + ext
-			if !strings.Contains(line, ref) {
-				continue
-			}
-			if _, err := os.Stat(filepath.Join(dataDir, "themes", theme, "background."+ext)); err == nil {
-				continue
-			}
-			if _, err := fs.Stat(staticFS, "static/themes/"+theme+"/background."+ext); err == nil {
-				continue
-			}
-			drop = true
+func couchePerdue(couche, dataDir, theme string) bool {
+	for _, ext := range []string{"jpg", "jpeg", "png", "webp"} {
+		if !strings.Contains(couche, "/themes/"+theme+"/background."+ext) {
+			continue
 		}
-		if !drop {
-			keep = append(keep, line)
+		if _, err := os.Stat(filepath.Join(dataDir, "themes", theme, "background."+ext)); err == nil {
+			return false
 		}
+		if _, err := fs.Stat(staticFS, "static/themes/"+theme+"/background."+ext); err == nil {
+			return false
+		}
+		return true
 	}
-	return []byte(strings.Join(keep, "\n"))
+	return false
 }
 
 func (s *Server) themeFile(w http.ResponseWriter, r *http.Request) {
