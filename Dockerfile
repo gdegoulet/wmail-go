@@ -1,7 +1,11 @@
 # wmail-go – image de développement, de compilation et d'exécution.
 # Fonctionne avec Docker et Podman (noms d'images complets).
 
-ARG GO_VERSION=1.26
+# Correctif épinglé, et non l'étiquette mouvante « 1.26 » : l'image doit dire avec quoi elle a été
+# compilée, et deux constructions à des dates différentes doivent donner le même binaire. En contrepartie,
+# un correctif du compilateur ou de la bibliothèque standard se prend à la main, ici — tools/maintenance/
+# maj-dependances.sh ne regarde que les modules Go. « make vuln » et la CI hebdomadaire le signalent.
+ARG GO_VERSION=1.26.11
 
 # --- dev : outillage Go, pour compiler et tester (aucun Go sur l'hôte) ---
 FROM docker.io/library/golang:${GO_VERSION}-alpine AS dev
