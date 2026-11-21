@@ -105,9 +105,24 @@ type AttachmentView struct {
 	PreviewURL, PreviewKind string // aperçu dans le navigateur : « image » ou « text » ; vide : téléchargement seulement
 }
 
+// apercuAdresses rend les trois premières adresses, suivies d'une ellipse s'il y en a d'autres. L'en-tête
+// du message n'a qu'une ligne par champ ; la liste complète est dans le bloc « i » (div.infobar).
+func apercuAdresses(addrs []mailview.Address) string {
+	var out []string
+	for i, a := range addrs {
+		if i == 3 {
+			out = append(out, "…")
+			break
+		}
+		out = append(out, a.String())
+	}
+	return strings.Join(out, ", ")
+}
+
 // MessageView regroupe l'affichage d'un message.
 type MessageView struct {
 	SenderName, SenderEmail, ToShort string
+	CcShort, BccShort                string // copies, sous le destinataire ; vides quand le message n'en a pas
 	ZipURL                           string
 	FolderLabel                      string
 	JustRead                         bool
@@ -1040,15 +1055,7 @@ func (s *Server) buildMessageView(sess *session.Session, acc userdata.MailAccoun
 		(mv.SenderEmail == "" || !ownEmails(acc)[strings.ToLower(mv.SenderEmail)]) {
 		mv.ReadReceipt = m.ReadReceiptTo[0].Email
 	}
-	var to []string
-	for i, a := range m.To {
-		if i == 3 {
-			to = append(to, "…")
-			break
-		}
-		to = append(to, a.String())
-	}
-	mv.ToShort = strings.Join(to, ", ")
+	mv.ToShort, mv.CcShort, mv.BccShort = apercuAdresses(m.To), apercuAdresses(m.Cc), apercuAdresses(m.Bcc)
 	body := url.Values{"folder": {folder}, "uid": {uidStr}}
 	if viewText {
 		body.Set("view", "text")

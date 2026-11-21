@@ -63,8 +63,12 @@ func main() {
 	now := time.Now()
 	var all []string
 	all = append(all,
+		// Le seul message en copie du jeu de démonstration : l'en-tête du lecteur doit montrer Cc et Cci
+		// sous le destinataire.
 		msg("Bruno Martin <bruno@exemple.fr>", *to, "Compte rendu de la réunion", now.Add(-2*time.Hour),
-			"Content-Type: text/plain; charset=UTF-8\r\n",
+			"Cc: Sophie Lemaire <sophie@exemple.fr>, Karim Benali <karim@exemple.fr>\r\n"+
+				"Bcc: Direction <direction@exemple.fr>\r\n"+
+				"Content-Type: text/plain; charset=UTF-8\r\n",
 			"Bonjour,\r\n\r\nVoici le compte rendu : voir https://exemple.fr/cr-2026.\r\n\r\n> Peux-tu relire avant demain ?\r\n> Merci d'avance.\r\n\r\nCordialement,\r\nBruno"),
 		msg("Boutique <promo@boutique.example>", *to, "Offre spéciale : -30 % aujourd'hui", now.Add(-5*time.Hour),
 			"Content-Type: text/html; charset=UTF-8\r\n",

@@ -254,7 +254,7 @@ func appendMsg(t testing.TB, u *imapmemserver.User, raw []byte, date time.Time, 
 // Seed dépose InboxCount messages dans INBOX :
 //  1. « Facture octobre » (Alice, favori, avec une pièce jointe PDF, « montant 100 »)
 //  2. « Re: Facture octobre » (Bob, lu, « ok merci »)
-//  3. « Réunion lundi » (Carol, HTML avec image distante et script)
+//  3. « Réunion lundi » (Carol, HTML avec image distante et script, Cc et Cci)
 //     4 à 30. « Filler NN » (Zed)
 func Seed(t testing.TB, u *imapmemserver.User) {
 	t.Helper()
@@ -267,7 +267,9 @@ func Seed(t testing.TB, u *imapmemserver.User) {
 	d1 := d0.Add(24 * time.Hour)
 	appendMsg(t, u, Message("Bob <bob@y.fr>", "test@localhost", "Re: Facture octobre", d1, "ok merci"), d1, imap.FlagSeen)
 	d2 := d0.Add(48 * time.Hour)
-	html := fmt.Sprintf("From: Carol <carol@z.fr>\r\nTo: test@localhost\r\nSubject: Réunion lundi\r\nDate: %s\r\nMessage-ID: <m3@test>\r\nMIME-Version: 1.0\r\n"+
+	// Ce message porte aussi un Cc et un Cci : l'en-tête du lecteur doit les montrer sous le destinataire.
+	html := fmt.Sprintf("From: Carol <carol@z.fr>\r\nTo: test@localhost\r\nCc: Dan <dan@z.fr>, Erin <erin@z.fr>\r\n"+
+		"Bcc: Frank <frank@z.fr>\r\nSubject: Réunion lundi\r\nDate: %s\r\nMessage-ID: <m3@test>\r\nMIME-Version: 1.0\r\n"+
 		"Content-Type: text/html; charset=UTF-8\r\n\r\n<p>Bonjour <b>Carol</b></p><img src=\"https://tracker.example/p.gif?id=7\"><script>alert(1)</script>\r\n", d2.Format(time.RFC1123Z))
 	appendMsg(t, u, []byte(html), d2)
 	// Sujet et expéditeur piégés : l'interface doit tout échapper.

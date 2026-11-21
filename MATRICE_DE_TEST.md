@@ -806,6 +806,12 @@ ou un dossier de test. Je ne touche jamais à vos vraies boîtes.
             une vignette par thème rappelant sa teinte, un libellé en français dans la liste
   réponse :
 
+[C-30] Copies dans l'en-tête du lecteur
+  tester  : ouvrir un message reçu en copie (make mail-seed dépose « Compte rendu de la réunion »)
+  attendu : sous « À : », une ligne « Cc : » avec les adresses en copie, et « Cci : » s'il y en a ;
+            aucune ligne quand le message n'a pas de copie ; au-delà de trois adresses, « … »
+  réponse :
+
 [I-25] Thème tiré au sort sur la page de connexion
   tester  : mettre "default_theme": "random" dans config.json, redémarrer, recharger /login dix fois ;
             puis se connecter avec un compte qui a choisi un thème

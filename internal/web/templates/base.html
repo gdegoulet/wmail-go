@@ -290,6 +290,8 @@
 <div class="mh-who">
 <div class="from"><a class="sender" href="/compose?to={{urlquery .SenderEmail}}&amp;back={{urlquery .Back}}" title="{{.SenderEmail}}">{{.SenderName}}</a> <span class="date">({{.Date}})</span>{{if .DKIM}} <span class="dkim dkim-{{.DKIM}}" title="{{$.T (printf "mail.dkim.%s" .DKIM)}}">{{if eq .DKIM "pass"}}✔{{else}}⚠{{end}}</span>{{end}}</div>
 {{if .ToShort}}<p class="to">{{$.T "mail.to_label"}} {{.ToShort}}</p>{{end}}
+{{if .CcShort}}<p class="to cc">{{$.T "mail.cc_label"}} {{.CcShort}}</p>{{end}}
+{{if .BccShort}}<p class="to cc">{{$.T "mail.bcc_label"}} {{.BccShort}}</p>{{end}}
 </div>
 <span class="replygroup">
 {{if .IsDraft}}<a class="reply" href="{{.ComposeURL "draft"}}" title="{{$.T "mail.edit_draft"}}">{{template "icon" "doc"}}</a>{{else}}<a class="reply" href="{{.ComposeURL "reply"}}" title="{{$.T "mail.reply"}}" aria-label="{{$.T "mail.reply"}}">{{template "icon" "reply"}}</a>

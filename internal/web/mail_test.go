@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/gdegoulet/wmail-go/internal/mailconn/mailtest"
+	"github.com/gdegoulet/wmail-go/internal/mailview"
 )
 
 // mailEnv ouvre une session avec un compte mail relié au serveur IMAP de test (30 messages dans INBOX).
@@ -1637,5 +1638,50 @@ func TestQuotaBarClassDoesNotClash(t *testing.T) {
 	}
 	if !strings.Contains(string(tpl), `<progress class="qbar"`) {
 		t.Error(`la barre de quota doit utiliser class="qbar"`)
+	}
+}
+
+// L'en-tête du lecteur montre le destinataire, puis les copies : un message mis en copie ne se distinguait
+// pas d'un message adressé en direct sans ouvrir le bloc « i ».
+func TestEnTeteMontreLesCopies(t *testing.T) {
+	e, c, _ := mailEnv(t, true)
+	_, page := e.do(c, "GET", "/", nil, nil)
+	link := linkTo(t, page, "Réunion lundi")
+	_, frag := e.do(c, "GET", "/mail/pane"+strings.TrimPrefix(link, "/"), nil, nil)
+	for _, want := range []string{
+		`<p class="to">À : test@localhost</p>`,
+		`<p class="to cc">Cc : Dan &lt;dan@z.fr&gt;, Erin &lt;erin@z.fr&gt;</p>`,
+		`<p class="to cc">Cci : Frank &lt;frank@z.fr&gt;</p>`,
+	} {
+		if !strings.Contains(frag, want) {
+			t.Errorf("%s absent de l'en-tête", want)
+		}
+	}
+	// Les copies vides ne laissent pas de ligne vide derrière elles.
+	link = linkTo(t, page, "Filler 04")
+	_, sans := e.do(c, "GET", "/mail/pane"+strings.TrimPrefix(link, "/"), nil, nil)
+	if strings.Contains(sans, `class="to cc"`) {
+		t.Error("ligne de copie affichée sur un message qui n'en a pas")
+	}
+}
+
+// apercuAdresses s'arrête à trois adresses : l'en-tête n'a qu'une ligne par champ, et la liste complète est
+// dans le bloc « i ».
+func TestApercuAdressesSArreteATrois(t *testing.T) {
+	a := func(n string) mailview.Address { return mailview.Address{Name: n, Email: n + "@z.fr"} }
+	cas := []struct {
+		in   []mailview.Address
+		want string
+	}{
+		{nil, ""},
+		{[]mailview.Address{{Email: "seul@z.fr"}}, "seul@z.fr"},
+		{[]mailview.Address{a("un"), a("deux")}, "un <un@z.fr>, deux <deux@z.fr>"},
+		{[]mailview.Address{a("un"), a("deux"), a("trois")}, "un <un@z.fr>, deux <deux@z.fr>, trois <trois@z.fr>"},
+		{[]mailview.Address{a("un"), a("deux"), a("trois"), a("quatre")}, "un <un@z.fr>, deux <deux@z.fr>, trois <trois@z.fr>, …"},
+	}
+	for _, c := range cas {
+		if got := apercuAdresses(c.in); got != c.want {
+			t.Errorf("apercuAdresses(%d adresses) = %q, attendu %q", len(c.in), got, c.want)
+		}
 	}
 }

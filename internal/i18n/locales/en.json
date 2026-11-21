@@ -224,6 +224,8 @@
   "mail.next_msg": "Next message",
   "mail.reply_soon": "Reply: coming soon.",
   "mail.to_label": "To:",
+  "mail.cc_label": "Cc:",
+  "mail.bcc_label": "Bcc:",
   "mail.att.zip": "Download all (.zip)",
   "mail.att.pick": "Select this attachment",
   "mail.att.source": "View this part's source",

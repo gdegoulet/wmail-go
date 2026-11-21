@@ -18,6 +18,8 @@ Format inspiré de « Keep a Changelog » ; les dates sont celles du dépôt.
   crépuscule », « Shamrock », « Coquillage », « Méduse », « Méduse 2 », « Guada », « Automne », « Citron », clair, sombre), français et anglais, fuseau horaire par utilisateur,
   dispositions 3 volets / aperçu en bas / liste seule, réglages enregistrés à la volée.
 - `default_theme: "random"` : la page de connexion tire un thème au sort à chaque chargement.
+- En-tête du lecteur : les copies (Cc) et copies cachées (Cci) s'affichent sous le destinataire, trois
+  adresses au plus, la liste entière restant dans le bloc « i ».
 - Déploiement derrière nginx avec terminaison TLS, sauvegarde et restauration du volume de données.
 - Publication de l'image sur un registre (`make image-publish`) : étiquettes « AAAAMMJJ-commit » et « latest »,
   version injectée dans le binaire et dans les étiquettes OCI, contrôles avant publication.
